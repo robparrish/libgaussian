@@ -3,6 +3,7 @@ set(LIBGAUSSIAN_HEADERS
     core/basisset.h
     core/am.h
     mints/constants.h
+    mints/fjt.h
     mints/int2c.h
     mints/int4c.h
     mints/osrecur.h
@@ -13,6 +14,7 @@ set(LIBGAUSSIAN_SOURCES
     core/basisset.cc
     core/am.cc
     mints/constants.cc
+    mints/fjt.cc
     mints/int2c.cc
     mints/overlap2c.cc
     mints/dipole2c.cc
@@ -27,7 +29,7 @@ set(LIBGAUSSIAN_SOURCES
 # build static libray
 add_library(gaussian STATIC ${LIBGAUSSIAN_SOURCES} ${LIBGAUSSIAN_HEADERS})
 
-target_link_libraries(gaussian ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+target_link_libraries(gaussian ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${LIBINT}/lib/libint.a)
 
 install(TARGETS gaussian ARCHIVE DESTINATION lib)
 

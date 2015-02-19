@@ -110,6 +110,12 @@ def parse_input():
             default=None,
             help="""The Python interpreter (development version) to use.  CMake will detect one automatically, if omitted.""")
 
+    group = parser.add_argument_group('LibInt')
+    group.add_argument('--libint',
+                       action='store',
+                       default=None,
+                       help="""Path to your libint installation.""")
+
     group = parser.add_argument_group('Parallelization')
     group.add_argument('--mpi',
             action='store_true',
@@ -300,6 +306,9 @@ def gen_cmake_command(args):
 
     if args.boost_libdir:
         command += ' -DBOOST_LIBRARYDIR={0}'.format(args.boost_libdir)
+
+    if args.libint:
+        command += ' -DLIBINT={0}'.format(args.libint)
 
     if args.python:
         command += ' -DPYTHON_INTERPRETER={0}'.format(args.python)

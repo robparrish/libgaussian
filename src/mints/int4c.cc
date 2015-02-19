@@ -17,6 +17,17 @@ Int4C::Int4C(
     buffer1_ = nullptr;
     buffer2_ = nullptr;
     am_info_ = SAngularMomentum::build(max_am());
+
+    int max_nprim = std::max(
+            std::max(
+                    basis1_->max_am(),
+                    basis2_->max_am()),
+            std::max(
+                    basis3_->max_am(),
+                    basis4_->max_am()));
+
+    init_libint_base();
+    init_libint(&libint_, max_am(), max_nprim);
 }
 Int4C::Int4C()
 {
@@ -27,8 +38,9 @@ Int4C::~Int4C()
 {
     if (buffer1_ != nullptr) delete[] buffer1_;
     if (buffer2_ != nullptr) delete[] buffer2_;
+    free_libint(&libint_);
 }
-int Int4C::max_am() const 
+int Int4C::max_am() const
 {
     return std::max(
             std::max(
@@ -38,20 +50,20 @@ int Int4C::max_am() const
             basis3_->max_am(),
             basis4_->max_am()));
 }
-int Int4C::total_am() const 
+int Int4C::total_am() const
 {
-    return 
-        basis1_->max_am() + 
+    return
+        basis1_->max_am() +
         basis2_->max_am() +
         basis3_->max_am() +
         basis4_->max_am();
 }
-size_t Int4C::chunk_size() const 
+size_t Int4C::chunk_size() const
 {
-    return 
-        basis1_->max_ncartesian() * 
-        basis2_->max_ncartesian() * 
-        basis3_->max_ncartesian() * 
+    return
+        basis1_->max_ncartesian() *
+        basis2_->max_ncartesian() *
+        basis3_->max_ncartesian() *
         basis4_->max_ncartesian();
 }
 void Int4C::compute_shell(
