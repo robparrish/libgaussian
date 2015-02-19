@@ -8,7 +8,7 @@ OverlapInt2C::OverlapInt2C(
     const std::shared_ptr<SBasisSet>& basis2,
     int deriv) :
     Int2C(basis1,basis2,deriv),
-    recursion_(basis1->max_am()+1, basis2->max_am()+1)
+    recursion_(basis1->max_am()+deriv, basis2->max_am()+deriv)
 {
     size_t size;
     if (deriv_ == 0) {

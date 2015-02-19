@@ -271,6 +271,8 @@ public:
 
 protected:
 
+    ObaraSaikaTwoCenterRecursion recursion_;
+
 };
 
 /**!
