@@ -169,6 +169,11 @@ public:
     const SAtom& atom(size_t A) const { return atoms_[A]; }
     /// The array of atoms which comprise this molecule
     const std::vector<SAtom>& atoms() const { return atoms_; }       
+
+    /// Print the molecule in au or angstrom
+    void print(
+        FILE* fh = stdout,
+        bool angstrom = false) const;
     
     // => Methods <= //
 

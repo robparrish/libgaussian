@@ -63,6 +63,8 @@ int main(int argc, char* argv[])
     std::shared_ptr<SMolecule> mol = get_h2o();
     std::shared_ptr<SBasisSet> bas = get_h2o_sto3g();
 
+    mol->print(stdout,true);
+
     printf("Overlap Ints:\n\n");
     OverlapInt2C Sints(bas,bas);
     double* Sbuffer = Sints.buffer();
@@ -75,7 +77,6 @@ int main(int argc, char* argv[])
             int nQ = bas->shell(Q).nfunction();
             for (int p = 0, index = 0; p < nP; p++) {
                 for (int q = 0; q < nQ; q++, index++) {
-                    //printf("%3d %3d %24.16E\n", p + oP, q + oQ, 0.0);
                     printf("%3d %3d %24.16E\n", p + oP, q + oQ, Sbuffer[index]);
                 }
             }
@@ -88,15 +89,67 @@ int main(int argc, char* argv[])
     double* Tbuffer = Tints.buffer();
     for (int P = 0; P < bas->nshell(); P++) {
         for (int Q = 0; Q < bas->nshell(); Q++) {
-            //Tints.compute_pair(P,Q);
+            Tints.compute_pair(P,Q);
             int oP = bas->shell(P).function_index();
             int oQ = bas->shell(Q).function_index();
             int nP = bas->shell(P).nfunction();
             int nQ = bas->shell(Q).nfunction();
             for (int p = 0, index = 0; p < nP; p++) {
                 for (int q = 0; q < nQ; q++, index++) {
-                    printf("%3d %3d %24.16E\n", p + oP, q + oQ, 0.0);
-                    //printf("%3d %3d %24.16E\n", p + oP, q + oQ, Tbuffer[index]);
+                    printf("%3d %3d %24.16E\n", p + oP, q + oQ, Tbuffer[index]);
+                }
+            }
+        }
+    }
+    printf("\n");
+
+    printf("Dipole Ints:\n\n");
+    DipoleInt2C Xints(bas,bas);
+    size_t Xchunk = Xints.chunk_size();
+    double* Xbuffer = Xints.buffer();
+    printf("X:\n\n");
+    for (int P = 0; P < bas->nshell(); P++) {
+        for (int Q = 0; Q < bas->nshell(); Q++) {
+            Xints.compute_pair(P,Q);
+            int oP = bas->shell(P).function_index();
+            int oQ = bas->shell(Q).function_index();
+            int nP = bas->shell(P).nfunction();
+            int nQ = bas->shell(Q).nfunction();
+            for (int p = 0, index = 0; p < nP; p++) {
+                for (int q = 0; q < nQ; q++, index++) {
+                    printf("%3d %3d %24.16E\n", p + oP, q + oQ, Xbuffer[index + 0L * Xchunk]);
+                }
+            }
+        }
+    }
+
+    printf("Y:\n\n");
+    for (int P = 0; P < bas->nshell(); P++) {
+        for (int Q = 0; Q < bas->nshell(); Q++) {
+            Xints.compute_pair(P,Q);
+            int oP = bas->shell(P).function_index();
+            int oQ = bas->shell(Q).function_index();
+            int nP = bas->shell(P).nfunction();
+            int nQ = bas->shell(Q).nfunction();
+            for (int p = 0, index = 0; p < nP; p++) {
+                for (int q = 0; q < nQ; q++, index++) {
+                    printf("%3d %3d %24.16E\n", p + oP, q + oQ, Xbuffer[index + 1L * Xchunk]);
+                }
+            }
+        }
+    }
+
+    printf("Z:\n\n");
+    for (int P = 0; P < bas->nshell(); P++) {
+        for (int Q = 0; Q < bas->nshell(); Q++) {
+            Xints.compute_pair(P,Q);
+            int oP = bas->shell(P).function_index();
+            int oQ = bas->shell(Q).function_index();
+            int nP = bas->shell(P).nfunction();
+            int nQ = bas->shell(Q).nfunction();
+            for (int p = 0, index = 0; p < nP; p++) {
+                for (int q = 0; q < nQ; q++, index++) {
+                    printf("%3d %3d %24.16E\n", p + oP, q + oQ, Xbuffer[index + 2L * Xchunk]);
                 }
             }
         }
