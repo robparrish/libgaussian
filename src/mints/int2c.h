@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <core/basisset.h>
+#include "osrecur.h"
 
 namespace libgaussian {
 
@@ -170,6 +171,8 @@ public:
 
 
 protected:
+
+    ObaraSaikaTwoCenterRecursion recursion_;
 
 };
 
