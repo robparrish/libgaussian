@@ -1,0 +1,21 @@
+=> Library Structure <=
+
+Core Libraries (C++):
+libcore - molecule, basis set, angular momentum
+
+Ring1 Libraries (C++):
+libmints - molecular integrals and schwarz sieve
+libgrid - grid specification and collocation
+libfunctional - local density functional specification and computation
+
+Ring2 Libraries (C++/Tensor):
+libob - S,X,Q,T,V, etc matrices, gradients and hessians
+libdf - DF ERI tensors, gradients, etc
+libjk - J/K matrices, gradients, and hessians
+libvxc - Vxc matrices, gradients, and hessians
+
+Rules:
+(1) No inner ring libraries are allowed to refer to outer ring libraries
+(2) Each library should do one major class of operations
+(3) The computer model should be followed - build an object, tweak it, then ask
+    it for results 

@@ -1,0 +1,9 @@
+.idea
+
+# Qt Creator project files
+*.config
+*.creator
+*.creator.user
+*.files
+*.includes
+
