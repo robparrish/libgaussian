@@ -2,14 +2,17 @@ set(LIBGAUSSIAN_HEADERS
     core/molecule.h
     core/basisset.h
     core/am.h
+    mints/constants.h
     mints/int2c.h
     mints/int4c.h
+    mints/osrecur.h
 )
 
 set(LIBGAUSSIAN_SOURCES
     core/molecule.cc
     core/basisset.cc
     core/am.cc
+    mints/constants.cc
     mints/int2c.cc
     mints/overlap2c.cc
     mints/dipole2c.cc
@@ -18,6 +21,7 @@ set(LIBGAUSSIAN_SOURCES
     mints/potential2c.cc
     mints/int4c.cc
     mints/potential4c.cc
+    mints/osrecur.cc
 )
 
 # build static libray

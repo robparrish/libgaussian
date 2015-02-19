@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <core/basisset.h>
+#include "osrecur.h"
 
 namespace libgaussian {
 
@@ -171,6 +172,8 @@ public:
 
 protected:
 
+    ObaraSaikaTwoCenterRecursion recursion_;
+
 };
 
 /**!
@@ -267,6 +270,8 @@ public:
         const SGaussianShell& sh2) override;
 
 protected:
+
+    ObaraSaikaTwoCenterRecursion recursion_;
 
 };
 
