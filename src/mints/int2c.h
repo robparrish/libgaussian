@@ -101,7 +101,7 @@ public:
     // => Low-Level Computers <= //
 
     /// Compute the integrals (throws if not implemented)
-    void compute_shell(
+    void compute_pair(
         size_t shell1,
         size_t shell2);
     /// Compute the integral derivatives (throws if not implemented)

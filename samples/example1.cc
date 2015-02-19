@@ -4,6 +4,7 @@
 #include <core/am.h>
 #include <core/basisset.h>
 #include <core/molecule.h>
+#include <mints/int2c.h>
 
 using namespace libgaussian;
 
@@ -61,6 +62,46 @@ int main(int argc, char* argv[])
 {
     std::shared_ptr<SMolecule> mol = get_h2o();
     std::shared_ptr<SBasisSet> bas = get_h2o_sto3g();
+
+    printf("Overlap Ints:\n\n");
+    OverlapInt2C Sints(bas,bas);
+    double* Sbuffer = Sints.buffer();
+    for (int P = 0; P < bas->nshell(); P++) {
+        for (int Q = 0; Q < bas->nshell(); Q++) {
+            Sints.compute_pair(P,Q);
+            int oP = bas->shell(P).function_index();
+            int oQ = bas->shell(Q).function_index();
+            int nP = bas->shell(P).nfunction();
+            int nQ = bas->shell(Q).nfunction();
+            for (int p = 0, index = 0; p < nP; p++) {
+                for (int q = 0; q < nQ; q++, index++) {
+                    //printf("%3d %3d %24.16E\n", p + oP, q + oQ, 0.0);
+                    printf("%3d %3d %24.16E\n", p + oP, q + oQ, Sbuffer[index]);
+                }
+            }
+        }
+    }
+    printf("\n");
+
+    printf("Kinetic Ints:\n\n");
+    KineticInt2C Tints(bas,bas);
+    double* Tbuffer = Tints.buffer();
+    for (int P = 0; P < bas->nshell(); P++) {
+        for (int Q = 0; Q < bas->nshell(); Q++) {
+            //Tints.compute_pair(P,Q);
+            int oP = bas->shell(P).function_index();
+            int oQ = bas->shell(Q).function_index();
+            int nP = bas->shell(P).nfunction();
+            int nQ = bas->shell(Q).nfunction();
+            for (int p = 0, index = 0; p < nP; p++) {
+                for (int q = 0; q < nQ; q++, index++) {
+                    printf("%3d %3d %24.16E\n", p + oP, q + oQ, 0.0);
+                    //printf("%3d %3d %24.16E\n", p + oP, q + oQ, Tbuffer[index]);
+                }
+            }
+        }
+    }
+    printf("\n");
 
     return EXIT_SUCCESS;
 }

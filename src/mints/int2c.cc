@@ -39,7 +39,7 @@ size_t Int2C::chunk_size() const
 {
     return basis1_->max_ncartesian() * basis2_->max_ncartesian();
 }
-void Int2C::compute_shell(
+void Int2C::compute_pair(
     size_t shell1,
     size_t shell2)
 {
