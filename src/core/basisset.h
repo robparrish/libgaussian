@@ -21,9 +21,9 @@ namespace libgaussian {
  * and primitive Gaussian exponents, respectively. AM_v (\vec r_1A) provides
  * the application of angular momentum to produce the v-th function with in the
  * shell, and depends on whether the shell is spherical or cartesian in nature.
- * See am.h for details on these two schemes. 
+ * See am.h for details on these two schemes.
  *
- * => Notes on Contraction Coefficients <= 
+ * => Notes on Contraction Coefficients <=
  *
  * Note that the spherical and radial parts are direct-product separable. In
  * particular, there is no v-dependent normalization coefficient applied to the
@@ -41,7 +41,7 @@ namespace libgaussian {
  * P   1   1.00
  *       0.7270000              1.0000000
  *           (e_K)                  (w_K)
- *  
+ *
  * Looking at the first shell (1s), we see that the shell is S (L = 0), has 3
  * primitive contractions (nprimitive = 3), and is to be normalized to 1.0 (the
  * 1.00 in the line "S 3 1.00"). The user has also provided the primitive
@@ -68,9 +68,9 @@ namespace libgaussian {
  * N <- \sqrt{V} N
  *
  * This code works only in terms of c_K - it is up to the user to specify c_K
- * as desired to express the underlying G94 file (or other source). 
+ * as desired to express the underlying G94 file (or other source).
  *
- * => Other Notes <= 
+ * => Other Notes <=
  *
  * In this library's convention a basis set may have mixed spherical and
  * cartesian angular momentum - this decision is made on a shell-by-shell
@@ -101,7 +101,7 @@ public:
         size_t atom_index,
         size_t shell_index,
         size_t function_index,
-        size_t cartesian_index) : 
+        size_t cartesian_index) :
         x_(x),
         y_(y),
         z_(z),
@@ -119,24 +119,24 @@ public:
     SGaussianShell() {}
 
     // => Accessors <= //
-    
+
     /// X position of shell (atomic center)
     double x() const { return x_; }
     /// Y position of shell (atomic center)
     double y() const { return y_; }
     /// Z position of shell (atomic center)
     double z() const { return z_; }
-    
+
     /// Is this shell spherical or cartesian?
-    bool is_spherical() const { return is_spherical_; } 
+    bool is_spherical() const { return is_spherical_; }
 
     /// Angular momentum of this shell
-    int am() const { return am_; }   
+    int am() const { return am_; }
     /// Number of functions in this shell (depends on is_spherical)
     size_t nfunction() const { return (is_spherical_ ? 2L*am_ + 1L : (am_ + 1L) * (am_ + 2L) / 2L); }
     /// Number of cartesian functions in this shell (before any spherical transformations)
-    size_t ncartesian() const { return am_ * (am_ + 1L) / 2L; }
-    
+    size_t ncartesian() const { return (am_ + 1L) * (am_ + 2L) / 2L; }
+
     /// Number of primitive Gaussians in this shell
     size_t nprimitive() const { return es_.size(); }
     /// The ind-th primitive contraction coefficient
@@ -147,7 +147,7 @@ public:
     const std::vector<double>& cs() const { return cs_; }
     /// The list of primitive Gaussian exponents
     const std::vector<double>& es() const { return es_; }
- 
+
     /// Index of the atom this shell is centered on within all atoms in this basis set
     size_t atom_index() const { return atom_index_; }
     /// Index of this shell within its containing basis set
@@ -178,7 +178,7 @@ private:
     bool is_spherical_;
     int am_;
     std::vector<double> cs_;
-    std::vector<double> es_; 
+    std::vector<double> es_;
 
     size_t atom_index_;
     size_t shell_index_;
@@ -191,7 +191,7 @@ private:
  * SGaussianShells, plus some utility functions.
  *
  * - Rob Parrish, 16 February, 2015
- **/ 
+ **/
 class SBasisSet {
 
 public:
@@ -224,7 +224,7 @@ public:
     /// The ind-th shell
     const SGaussianShell& shell(size_t ind) const { return shells_[ind]; }
     /// The complete list of shells
-    const std::vector<SGaussianShell>& shells() const { return shells_; } 
+    const std::vector<SGaussianShell>& shells() const { return shells_; }
     /// The mapping from atom index and shell index within that atom to absolute shell index
     const std::vector<std::vector<size_t>>& atoms_to_shell_inds() const { return atoms_to_shell_inds_; }
     /// The SAngularMomentum objects op to max_am() for this basis set
@@ -241,22 +241,22 @@ public:
     /// Total number of primitives in this basis set
     size_t nprimitive() const { return nprimitive_; }
 
-    /// Does this molecule have any shells with spherical harmonics? 
+    /// Does this molecule have any shells with spherical harmonics?
     bool has_spherical() const;
-    
+
     /// Maximum angular momentum across all shells
     int max_am() const;
     /// Maximum basis functions per shell across all shells
     size_t max_nfunction() const;
     /// Maximum cartesian functions per shell across all shells
-    size_t max_ncartesian() const; 
+    size_t max_ncartesian() const;
     /// Maximum number of primitives across all shells
     size_t max_nprimitive() const;
 
 private:
 
     std::string name_;
-    std::vector<SGaussianShell> shells_; 
+    std::vector<SGaussianShell> shells_;
     std::vector<std::vector<size_t>> atoms_to_shell_inds_;
     std::vector<SAngularMomentum> am_info_;
 
