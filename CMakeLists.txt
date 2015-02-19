@@ -32,6 +32,8 @@ option(ENABLE_OMP           "Enable OpenMP parallelization" ON)
 option(ENABLE_PYTHON        "Enable Python interface" OFF)
 option(ENABLE_CXX11_SUPPORT "Enable C++11 compiler support" ON)
 
+option(LIBINT               "Location of libint installation" "")
+
 # include cmake modules as needed
 include(ConfigVersion)
 include(ConfigArchitecture)
@@ -70,6 +72,7 @@ endif()
 # tensor-specific includes and libraries
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(
+    ${LIBINT}/include
     ${PROJECT_BINARY_DIR}/include
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/src

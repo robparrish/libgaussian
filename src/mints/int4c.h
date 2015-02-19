@@ -5,6 +5,10 @@
 #include <memory>
 #include <core/basisset.h>
 
+#include "fjt.h"
+
+#include <libint/libint.h>
+
 namespace libgaussian {
 
 /**!
@@ -137,6 +141,8 @@ protected:
     /// Internal CO->SO transformation information
     std::vector<SAngularMomentum> am_info_;
 
+    Libint_t libint_;
+
 };
 
 /**!
@@ -170,6 +176,7 @@ public:
         double a = 1.0,
         double b = 0.0,
         double w = 0.0);
+    virtual ~PotentialInt4C();
 
     double a() const { return a_; }
     double b() const { return b_; }
@@ -196,6 +203,8 @@ protected:
     double a_;
     double b_;
     double w_;
+
+    Fjt *fjt_;
 
 };
 
