@@ -47,7 +47,7 @@ std::shared_ptr<SBasisSet> get_h2o_sto3g()
         {
             SGaussianShell(O1.x(),O1.y(),O1.z(),false,0,O1s_c,O1s_e),
             SGaussianShell(O1.x(),O1.y(),O1.z(),false,0,O2s_c,O2s_e),
-            SGaussianShell(O1.x(),O1.y(),O1.z(),false,1,O2p_c,O2p_e)
+            SGaussianShell(O1.x(),O1.y(),O1.z(),true,1,O2p_c,O2p_e)
         },
         {
             SGaussianShell(H2.x(),H2.y(),H2.z(),false,0,H1s_c,H1s_e)

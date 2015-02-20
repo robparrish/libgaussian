@@ -69,7 +69,7 @@ if(LDFLAGS)
    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LDFLAGS}")
 endif()
 
-# tensor-specific includes and libraries
+# libgaussian-specific includes and libraries
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(
     ${LIBINT}/include

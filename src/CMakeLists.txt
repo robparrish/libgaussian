@@ -13,6 +13,7 @@ set(LIBGAUSSIAN_SOURCES
     core/molecule.cc
     core/basisset.cc
     core/am.cc
+    core/python.cc
     mints/constants.cc
     mints/fjt.cc
     mints/int2c.cc
