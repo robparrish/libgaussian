@@ -450,7 +450,11 @@ void PotentialInt4C::compute_shell(
     }
 
     // Transform the integrals into pure angular momentum
-//  pure_transform(sh1, sh2, sh3, sh4, 1);
+    bool t1 = s1->is_spherical();
+    bool t2 = s2->is_spherical();
+    bool t3 = s3->is_spherical();
+    bool t4 = s4->is_spherical();
+    if (is_spherical_) apply_spherical(am1,am2,am3,am4,t1,t2,t3,t4,buffer2_,buffer1_);
 
     // Permute integrals back, if needed
     if (p12_ || p34_ || p13p24_) {

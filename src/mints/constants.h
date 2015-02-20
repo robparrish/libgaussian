@@ -15,6 +15,10 @@ constexpr int ncartesian(int am)
 {
     return (am >= 0) ? ((((am) + 2) * ((am) + 1)) >> 1) : 0;
 }
+constexpr int nspherical(int am)
+{
+    return (am >= 0) ? (2 * am + 1) : 0;
+}
 
 }
 

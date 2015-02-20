@@ -79,7 +79,7 @@ public:
     double* buffer() const { return buffer1_; }
 
     /// Should this object apply spherical transformations if present in the basis sets (defaults to true)
-    bool spherical() const { return spherical_; }
+    bool is_spherical() const { return is_spherical_; }
 
     /// x center in au where properties are centered (defaults to 0.0)
     double x() const { return x_; }
@@ -97,7 +97,7 @@ public:
 
     // => Setters <= //
 
-    void set_spherical(bool spherical) { spherical_ = spherical; }
+    void set_is_spherical(bool is_spherical) { is_spherical_ = is_spherical; }
     void set_x(double x) { x_ = x; }
     void set_y(double y) { y_ = y; }
     void set_z(double z) { z_ = z; }
@@ -137,16 +137,41 @@ protected:
     int deriv_;
     /// Buffer for integrals, target (subclass allocates, super destroys)
     double* buffer1_;
-    /// Buffer for CO->SO transformations (subclass allocates, super destroys)
+    /// Buffer for CO->SO transformations, etc (subclass allocates, super destroys)
     double* buffer2_;
 
-    double spherical_;
+    bool is_spherical_;
     /// Internal CO->SO transformation information
     std::vector<SAngularMomentum> am_info_;
 
     double x_;
     double y_;
     double z_;
+
+    /**!
+     * Helper to apply spherical transformations to the cartesian integrals
+     *
+     * This should be called separately for each chunk
+     *
+     * Does not check is_spherical, the calling code is responsible for this
+     *
+     * Uses buffer2 for scratch space
+     *
+     * @param L1 angular momentum of shell1
+     * @param L2 angular momentum of shell2
+     * @param S1 perform transform for shell1
+     * @param S2 perform transform for shell2
+     * @param target pointer to start of chunk
+     * @param scratch pointer (at least chunk size)
+     * @result target is updated with the transformed integrals
+     **/
+    void apply_spherical(
+        int L1,
+        int L2,
+        bool S1,
+        bool S2,
+        double* target,
+        double* scratch);
 
 };
 

@@ -81,7 +81,7 @@ public:
     double* buffer() const { return buffer1_; }
 
     /// Should this object apply spherical transformations if present in the basis sets (defaults to true)
-    bool spherical() const { return spherical_; }
+    bool is_spherical() const { return is_spherical_; }
 
 
     /// Single maximum angular momentum present across the basis sets
@@ -93,7 +93,7 @@ public:
 
     // => Setters <= //
 
-    void set_spherical(bool spherical) { spherical_ = spherical; }
+    void set_is_spherical(bool is_spherical) { is_spherical_ = is_spherical; }
 
     // => Low-Level Computers <= //
 
@@ -147,9 +147,42 @@ protected:
     /// Buffer for CO->SO transformations (subclass allocates, super destroys)
     double* buffer2_;
 
-    double spherical_;
+    bool is_spherical_;
     /// Internal CO->SO transformation information
     std::vector<SAngularMomentum> am_info_;
+
+    /**!
+     * Helper to apply spherical transformations to the cartesian integrals
+     *
+     * This should be called separately for each chunk
+     *
+     * Does not check is_spherical, the calling code is responsible for this
+     *
+     * Uses buffer2 for scratch space
+     *
+     * @param L1 angular momentum of shell1
+     * @param L2 angular momentum of shell2
+     * @param L3 angular momentum of shell3
+     * @param L4 angular momentum of shell4
+     * @param S1 perform transform for shell1
+     * @param S2 perform transform for shell2
+     * @param S3 perform transform for shell3
+     * @param S4 perform transform for shell4
+     * @param target pointer in buffer1 to start of chunk
+     * @param scratch pointer (at least chunk size)
+     * @result target is updated with the transformed integrals
+     **/
+    void apply_spherical(
+        int L1,
+        int L2,
+        int L3,
+        int L4,
+        bool S1,
+        bool S2,
+        bool S3,
+        bool S4,
+        double* target,
+        double* scratch);
 
     Libint_t libint_;
 

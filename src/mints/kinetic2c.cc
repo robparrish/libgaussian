@@ -116,6 +116,10 @@ void KineticInt2C::compute_shell(
             }
         }
     }
+
+    bool s1 = sh1.is_spherical();
+    bool s2 = sh2.is_spherical();
+    if (is_spherical_) apply_spherical(am1, am2, s1, s2, buffer1_, buffer2_);
 }
 
 void KineticInt2C::compute_shell1(
