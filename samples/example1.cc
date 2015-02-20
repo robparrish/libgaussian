@@ -5,6 +5,7 @@
 #include <core/basisset.h>
 #include <core/molecule.h>
 #include <mints/int2c.h>
+#include <mints/int4c.h>
 
 using namespace libgaussian;
 
@@ -155,6 +156,33 @@ int main(int argc, char* argv[])
         }
     }
     printf("\n");
+
+    printf("Electron Repulsion Ints:\n\n");
+    PotentialInt4C Iints(bas,bas,bas,bas);
+    double* Ibuffer = Iints.buffer();
+    for (int P = 0; P < bas->nshell(); P++) {
+    for (int Q = 0; Q < bas->nshell(); Q++) {
+    for (int R = 0; R < bas->nshell(); R++) {
+    for (int S = 0; S < bas->nshell(); S++) {
+        Iints.compute_quartet(P,Q,R,S);
+        int oP = bas->shell(P).function_index();
+        int oQ = bas->shell(Q).function_index();
+        int oR = bas->shell(R).function_index();
+        int oS = bas->shell(S).function_index();
+        int nP = bas->shell(P).nfunction();
+        int nQ = bas->shell(Q).nfunction();
+        int nR = bas->shell(R).nfunction();
+        int nS = bas->shell(S).nfunction();
+        int index = 0;
+        for (int p = 0; p < nP; p++) {
+        for (int q = 0; q < nQ; q++) {
+        for (int r = 0; r < nR; r++) {
+        for (int s = 0; s < nS; s++) {
+            printf("%3d %3d %3d %3d %24.16E\n", p + oP, q + oQ, r + oR, s + oS, Ibuffer[index++]);
+        }}}}
+    }}}}
+    printf("\n");
+
 
     return EXIT_SUCCESS;
 }

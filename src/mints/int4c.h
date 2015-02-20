@@ -90,7 +90,7 @@ public:
     // => Low-Level Computers <= //
 
     /// Compute the integrals (throws if not implemented)
-    void compute_shell(
+    void compute_quartet(
         size_t shell1,
         size_t shell2,
         size_t shell3,

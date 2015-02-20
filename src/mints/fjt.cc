@@ -1,6 +1,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <algorithm>
+#include <string.h>
 #include "fjt.h"
 #include "constants.h"
 

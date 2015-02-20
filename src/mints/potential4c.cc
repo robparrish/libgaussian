@@ -1,4 +1,5 @@
 #include <math.h>
+#include <string.h>
 #include "int4c.h"
 #include "constants.h"
 #include "fjt.h"
@@ -209,7 +210,7 @@ PotentialInt4C::PotentialInt4C(
     buffer1_ = new double[size];
     buffer2_ = new double[size];
 
-    fjt_ = new Taylor_Fjt(basis1->max_am()+basis2->max_am()+basis3->max_am()+basis4->max_am(), 1.0e-15);
+    fjt_ = new FJT(basis1->max_am()+basis2->max_am()+basis3->max_am()+basis4->max_am());
 }
 PotentialInt4C::~PotentialInt4C()
 {
