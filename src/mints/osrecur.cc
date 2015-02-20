@@ -974,11 +974,13 @@ ObaraSaikaTwoCenterVIRecursion::ObaraSaikaTwoCenterVIRecursion(int max_am1, int 
     size_ += 1;
     size_ = (size_ - 1) * size_ * (size_ + 1) + 1;
     vi_ = init_box(size_, size_, max_am1_ + max_am2_ + 1);
+    F_ = new double[max_am1_ + max_am2_ + 2];
 }
 
 ObaraSaikaTwoCenterVIRecursion::~ObaraSaikaTwoCenterVIRecursion()
 {
     free_box(vi_, size_, size_);
+    delete[] F_;
 }
 
 #define EPS 1.0e-17
@@ -993,7 +995,6 @@ void ObaraSaikaTwoCenterVIRecursion::calculate_f(double *F, int n, double t)
     double term1;
     static double K = 1.0 / M_2_SQRTPI;
     double et;
-
 
     if (t > 20.0) {
         t2 = 2 * t;
@@ -1042,17 +1043,16 @@ void ObaraSaikaTwoCenterVIRecursion::compute(double PA[3], double PB[3], double 
     double tmp = sqrt(zeta) * M_2_SQRTPI;
     // U from A21
     double u = zeta * (PC[0] * PC[0] + PC[1] * PC[1] + PC[2] * PC[2]);
-    double *F = new double[mmax + 1];
 
     // Form Fm(U) from A20
-    calculate_f(F, mmax, u);
+    calculate_f(F_, mmax, u);
 
     // Think we're having problems with values being left over.
     //zero_box(vi_, size_, size_, mmax + 1);
 
     // Perform recursion in m for (a|A(0)|s) using A20
     for (m = 0; m <= mmax; ++m) {
-        vi_[0][0][m] = tmp * F[m];
+        vi_[0][0][m] = tmp * F_[m];
     }
 
     // Perform recursion in b with a=0
@@ -1169,9 +1169,6 @@ void ObaraSaikaTwoCenterVIRecursion::compute(double PA[3], double PB[3], double 
             }
         }
     }
-
-    delete[] F;
-
 }
 
 void ObaraSaikaTwoCenterVIRecursion::compute_erf(double PA[3], double PB[3], double PC[3], double zeta, int am1,

@@ -80,6 +80,7 @@ protected:
     int size_;
 
     double ***vi_;
+    double *F_;
 
     // Forms Fm(U) from A20 (OS 1986)
     void calculate_f(double *F, int n, double t);
