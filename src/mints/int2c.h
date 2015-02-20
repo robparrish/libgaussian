@@ -347,6 +347,8 @@ protected:
     std::vector<double> zs_;
     std::vector<double> Zs_;
 
+    ObaraSaikaTwoCenterVIRecursion* recursion_;
+
 };
 
 
