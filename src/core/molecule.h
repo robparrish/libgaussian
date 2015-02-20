@@ -17,9 +17,9 @@ namespace libgaussian {
  *  - N the integral atomic number (or 0 for dummy)
  *
  * To specify coordinates, the usual fields are:
- *  - x the x coordinate in au 
- *  - y the y coordinate in au 
- *  - z the z coordinate in au 
+ *  - x the x coordinate in au
+ *  - y the y coordinate in au
+ *  - z the z coordinate in au
  *
  * To specify the nuclear, alpha electronic, and beta electronic charges, three
  * fields are used:
@@ -35,7 +35,7 @@ namespace libgaussian {
  * The Ya and Yb fields are intended to provide for the ability to the user to
  * specify the quasiclassical atomic charge and its spin polarization, e.g.,
  * for producing a better superposition of atomic density (SAD) guess.
- * 
+ *
  * The index field is a back-reference to the atom's position in its parent
  * molecule, and is used in placing data pertaining to the molecule's atom in
  * various arrays.
@@ -47,7 +47,7 @@ class SAtom {
 public:
 
     // => Constructors <= //
-    
+
     /// Verbatim constructor, fills fields below
     SAtom(
         const std::string& label,
@@ -57,7 +57,7 @@ public:
         double y,
         double z,
         double Z,
-        double Ya,  
+        double Ya,
         double Yb,
         size_t index = 0L) :
         label_(label),
@@ -67,11 +67,11 @@ public:
         y_(y),
         z_(z),
         Z_(Z),
-        Ya_(Ya),  
+        Ya_(Ya),
         Yb_(Yb),
         index_(index)
         {}
-   
+
     /// Default constructor, no initialization
     SAtom() {}
 
@@ -90,10 +90,10 @@ public:
     /// z coordinate in au
     double z() const { return z_; }
     /// Nuclear charge in au (might be not equal to N)
-    double Z() const { return Yb_; }
-    /// Alpha electronic charge in au 
+    double Z() const { return Z_; }
+    /// Alpha electronic charge in au
     double Ya() const { return Ya_; }
-    /// Beta electronic charge in au 
+    /// Beta electronic charge in au
     double Yb() const { return Yb_; }
     /// Total electronic charge in au
     double Y() const { return Ya_ + Yb_; }
@@ -101,7 +101,7 @@ public:
     double Q() const { return Z_ - Ya_ - Yb_; }
     /// Total spin charge in au
     double S() const { return Ya_ - Yb_; }
-    /// Index of this atom within its containing molecule 
+    /// Index of this atom within its containing molecule
     size_t index() const { return index_; }
 
     // => Setters <= //
@@ -119,7 +119,7 @@ public:
     // => Methods <= //
 
     /// Return the distance to SAtom other in au
-    double distance(const SAtom& other) const; 
+    double distance(const SAtom& other) const;
 
 private:
     std::string label_;
@@ -131,7 +131,7 @@ private:
     double Z_;
     double Ya_;
     double Yb_;
-    size_t index_;   
+    size_t index_;
 
 };
 
@@ -141,7 +141,7 @@ private:
  * from reorienting your molecule halfway through the computation!
  *
  * - Rob Parrish, 15 February, 2015
- **/ 
+ **/
 class SMolecule {
 
 public:
@@ -168,13 +168,13 @@ public:
     /// Return the A-th atom in this molecule
     const SAtom& atom(size_t A) const { return atoms_[A]; }
     /// The array of atoms which comprise this molecule
-    const std::vector<SAtom>& atoms() const { return atoms_; }       
+    const std::vector<SAtom>& atoms() const { return atoms_; }
 
     /// Print the molecule in au or angstrom
     void print(
         FILE* fh = stdout,
         bool angstrom = false) const;
-    
+
     // => Methods <= //
 
     /// Return the nuclear repulsion energy in au for this molecule
@@ -192,10 +192,10 @@ public:
         double a = 1.0,
         double b = 0.0,
         double w = 0.0) const;
-     
+
 private:
     std::string name_;
-    std::vector<SAtom> atoms_; 
+    std::vector<SAtom> atoms_;
 
 };
 
