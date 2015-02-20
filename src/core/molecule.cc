@@ -21,6 +21,30 @@ SMolecule::SMolecule(
         atoms_[A].set_index(A);
     }
 }
+void SMolecule::print(
+    FILE* fh,
+    bool angstrom) const
+{
+    double constexpr bohr2ang = 0.52917720859;
+    double factor = (angstrom ? bohr2ang : 1.0);
+
+    fprintf(fh,"  Molecule: %s\n\n", name_.c_str());
+    
+    fprintf(fh,"    Natom = %zu\n\n", natom());
+
+    fprintf(fh,"    Center                X                  Y                   Z       \n");
+    fprintf(fh,"    ------------   -----------------  -----------------  -----------------\n");
+    for (size_t A = 0; A < natom(); A++) {
+        const SAtom& atom = atoms_[A];
+        fprintf(fh,"    %-12s  %17.12f  %17.12f  %17.12f\n", 
+            atom.label().c_str(),
+            factor*atom.x(),
+            factor*atom.y(),
+            factor*atom.z());
+    }   
+    fprintf(fh,"    Printed in %s\n", (angstrom ? "Angstrom" : "Bohr"));
+    fprintf(fh, "\n");
+}
 double SMolecule::nuclear_repulsion_energy(
     bool use_nuclear,
     double a,

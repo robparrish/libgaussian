@@ -98,10 +98,10 @@ public:
         int am,
         const std::vector<double>& cs,
         const std::vector<double>& es,
-        size_t atom_index,
-        size_t shell_index,
-        size_t function_index,
-        size_t cartesian_index) :
+        size_t atom_index = 0L,
+        size_t shell_index = 0L,
+        size_t function_index = 0L,
+        size_t cartesian_index = 0L) : 
         x_(x),
         y_(y),
         z_(z),

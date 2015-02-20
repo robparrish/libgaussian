@@ -28,10 +28,10 @@ SBasisSet::SBasisSet(
             shells_[shell_ind].set_shell_index(shell_ind); 
             shells_[shell_ind].set_function_index(function_ind); 
             shells_[shell_ind].set_cartesian_index(cartesian_ind); 
-            shell_ind++;
-            function_ind += shells_[shell_ind].nfunction();
+            function_ind  += shells_[shell_ind].nfunction();
             cartesian_ind += shells_[shell_ind].ncartesian();
             primitive_ind += shells_[shell_ind].nprimitive();
+            shell_ind++;
         }
     }
     nfunction_ = function_ind;
@@ -49,11 +49,7 @@ std::shared_ptr<SBasisSet> SBasisSet::zero_basis()
         false,
         0,
         {1.0},
-        {0.0},
-        0,
-        0,
-        0,
-        0);
+        {0.0});
 
     std::vector<std::vector<SGaussianShell> > shells = {{zero}};
 

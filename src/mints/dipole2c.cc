@@ -1,4 +1,5 @@
 #include <math.h>
+#include <string.h>
 #include "int2c.h"
 #include "constants.h"
 
@@ -37,8 +38,10 @@ void DipoleInt2C::compute_shell(
     B[1] = sh2.y();
     B[2] = sh2.z();
 
-    int ydisp = constants::ncartesian(am1) * constants::ncartesian(am2);
-    int zdisp = ydisp + constants::ncartesian(am1) * constants::ncartesian(am2);
+    size_t chunk = chunk_size();
+
+    size_t ydisp = 1L * chunk;
+    size_t zdisp = 2L * chunk;
 
     // compute intermediates
     double AB2 = 0.0;
@@ -46,7 +49,10 @@ void DipoleInt2C::compute_shell(
     AB2 += (A[1] - B[1]) * (A[1] - B[1]);
     AB2 += (A[2] - B[2]) * (A[2] - B[2]);
 
-    memset(buffer1_, 0, 3 * constants::ncartesian(am1) * constants::ncartesian(am2) * sizeof(double));
+    size_t ncart2 = constants::ncartesian(am1) * constants::ncartesian(am2);
+    memset(buffer1_ + 0L * chunk, '\0', sizeof(double) * ncart2);
+    memset(buffer1_ + 1L * chunk, '\0', sizeof(double) * ncart2);
+    memset(buffer1_ + 2L * chunk, '\0', sizeof(double) * ncart2);
 
     double **x = recursion_.x();
     double **y = recursion_.y();

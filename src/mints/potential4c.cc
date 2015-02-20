@@ -1,4 +1,5 @@
 #include <math.h>
+#include <string.h>
 #include "int4c.h"
 #include "constants.h"
 #include "fjt.h"
@@ -140,10 +141,6 @@ void permute_target(double *s, double *t,
                     const SGaussianShell *s4,
                     bool p12, bool p34, bool p13p24)
 {
-#ifdef MINTS_TIMER
-    timer_on("Permute target");
-#endif
-
     int nbf1, nbf2, nbf3, nbf4;
 
     nbf1 = s1->nfunction();
@@ -176,9 +173,6 @@ void permute_target(double *s, double *t,
             }
         }
     }
-#ifdef MINTS_TIMER
-    timer_off("Permute target");
-#endif
 }
 
 }
@@ -209,7 +203,7 @@ PotentialInt4C::PotentialInt4C(
     buffer1_ = new double[size];
     buffer2_ = new double[size];
 
-    fjt_ = new Taylor_Fjt(basis1->max_am()+basis2->max_am()+basis3->max_am()+basis4->max_am(), 1.0e-15);
+    fjt_ = new FJT(basis1->max_am()+basis2->max_am()+basis3->max_am()+basis4->max_am());
 }
 PotentialInt4C::~PotentialInt4C()
 {
@@ -222,16 +216,6 @@ void PotentialInt4C::compute_shell(
         const SGaussianShell &sh3,
         const SGaussianShell &sh4)
 {
-#ifdef MINTS_TIMER
-    timer_on("ERI::compute_shell");
-#endif
-    // Need to ensure the ordering asked by the user is valid for libint
-    // compute_quartet does NOT check this. SEGFAULTS should occur if order
-    // is not guaranteed.
-#ifdef MINTS_TIMER
-    timer_on("reorder");
-#endif
-
     bool p13p24_ = false, p12_ = false, p34_ = false;
 
     int oam1 = sh1.am();
@@ -240,9 +224,10 @@ void PotentialInt4C::compute_shell(
     int oam4 = sh4.am();
 
     int n1 = sh1.ncartesian();
-    int n2 = sh1.ncartesian();
-    int n3 = sh1.ncartesian();
-    int n4 = sh1.ncartesian();
+    int n2 = sh2.ncartesian();
+    int n3 = sh3.ncartesian();
+    int n4 = sh4.ncartesian();
+    size_t size = n1 * n2 * n3 * n4;
 
     const SGaussianShell *s1, *s2, *s3, *s4, *temp;
 
@@ -280,14 +265,7 @@ void PotentialInt4C::compute_shell(
         p13p24_ = true;
     }
 
-#ifdef MINTS_TIMER
-    timer_off("reorder");
-#endif
-
     // s1, s2, s3, s4 contain the shells to do in libint order
-#ifdef MINTS_TIMER
-    timer_on("setup");
-#endif
 
     int am1 = s1->am();
     int am2 = s2->am();
@@ -329,14 +307,6 @@ void PotentialInt4C::compute_shell(
     libint_.CD[0] = C[0] - D[0];
     libint_.CD[1] = C[1] - D[1];
     libint_.CD[2] = C[2] - D[2];
-
-#ifdef MINTS_TIMER
-    timer_off("setup");
-#endif
-
-#ifdef MINTS_TIMER
-    timer_on("Primitive setup");
-#endif
 
     // Prepare all the data needed by libint
     size_t nprim = 0;
@@ -461,20 +431,8 @@ void PotentialInt4C::compute_shell(
             }
         }
     }
-#ifdef MINTS_TIMER
-    timer_off("Primitive setup");
-#endif
 
     // How many are there?
-    size_t size = constants::ncartesian(am1) *
-            constants::ncartesian(am2) *
-            constants::ncartesian(am3) *
-            constants::ncartesian(am4);
-
-#ifdef MINTS_TIMER
-    timer_on("libint overhead");
-#endif
-
     // Compute the integral
     if (am) {
         double *target_ints;
@@ -489,40 +447,19 @@ void PotentialInt4C::compute_shell(
         for (size_t i = 0; i < nprim; ++i)
             temp += (double) libint_.PrimQuartet[i].F[0];
         buffer2_[0] = temp;
-//        outfile->Printf( "s-functions = %8.5f\n", temp);
     }
-
-#ifdef MINTS_TIMER
-    timer_off("libint overhead");
-#endif
 
     // Transform the integrals into pure angular momentum
 //  pure_transform(sh1, sh2, sh3, sh4, 1);
 
     // Permute integrals back, if needed
     if (p12_ || p34_ || p13p24_) {
-#ifdef MINTS_TIMER
-        	timer_on("permute_target");
-#endif
         permute_target(buffer2_, buffer1_, s1, s2, s3, s4, p12_, p34_, p13p24_);
-#ifdef MINTS_TIMER
-        	timer_off("permute_target");
-#endif
     }
     else {
-#ifdef MINTS_TIMER
-        	timer_on("memcpy - no resort");
-#endif
         // copy the integrals to the target_
-        memcpy(buffer1_, buffer2_, n1 * n2 * n3 * n4 * sizeof(double));
-#ifdef MINTS_TIMER
-        	timer_off("memcpy - no resort");
-#endif
+        memcpy(buffer1_, buffer2_, size * sizeof(double));
     }
-
-#ifdef MINTS_TIMER
-    timer_off("ERI::compute_shell");
-#endif
 }
 
 void PotentialInt4C::compute_shell1(

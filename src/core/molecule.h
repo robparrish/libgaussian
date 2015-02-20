@@ -59,7 +59,7 @@ public:
         double Z,
         double Ya,  
         double Yb,
-        size_t index) :
+        size_t index = 0L) :
         label_(label),
         symbol_(symbol),
         N_(N),
@@ -166,9 +166,14 @@ public:
     /// Number of atoms in this molecule
     size_t natom() const { return atoms_.size(); }
     /// Return the A-th atom in this molecule
-    const SAtom& atom(int A) const { return atoms_[A]; }
+    const SAtom& atom(size_t A) const { return atoms_[A]; }
     /// The array of atoms which comprise this molecule
     const std::vector<SAtom>& atoms() const { return atoms_; }       
+
+    /// Print the molecule in au or angstrom
+    void print(
+        FILE* fh = stdout,
+        bool angstrom = false) const;
     
     // => Methods <= //
 
