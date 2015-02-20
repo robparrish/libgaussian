@@ -32,7 +32,7 @@ PotentialInt2C::PotentialInt2C(
 }
 PotentialInt2C::~PotentialInt2C()
 {
-    if (recursion_ != nullptr) delete[] recursion_; 
+    if (recursion_ != nullptr) delete recursion_;
 }
 void PotentialInt2C::set_nuclear_potential(
     const std::shared_ptr<SMolecule>& mol,
@@ -116,7 +116,7 @@ void PotentialInt2C::compute_shell(
                 double PC[3];
 
                 double Z = Zs_[atom];
-
+                
                 PC[0] = P[0] - xs_[atom];
                 PC[1] = P[1] - ys_[atom];
                 PC[2] = P[2] - zs_[atom];
