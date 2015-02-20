@@ -157,6 +157,26 @@ int main(int argc, char* argv[])
     }
     printf("\n");
 
+    printf("Potential Ints:\n\n");
+    PotentialInt2C Vints(bas,bas);
+    Vints.set_nuclear_potential(mol);
+    double* Vbuffer = Vints.buffer();
+    for (int P = 0; P < bas->nshell(); P++) {
+        for (int Q = 0; Q < bas->nshell(); Q++) {
+            Vints.compute_pair(P,Q);
+            int oP = bas->shell(P).function_index();
+            int oQ = bas->shell(Q).function_index();
+            int nP = bas->shell(P).nfunction();
+            int nQ = bas->shell(Q).nfunction();
+            for (int p = 0, index = 0; p < nP; p++) {
+                for (int q = 0; q < nQ; q++, index++) {
+                    printf("%3d %3d %24.16E\n", p + oP, q + oQ, Vbuffer[index]);
+                }
+            }
+        }
+    }
+    printf("\n");
+
     printf("Electron Repulsion Ints:\n\n");
     PotentialInt4C Iints(bas,bas,bas,bas);
     double* Ibuffer = Iints.buffer();

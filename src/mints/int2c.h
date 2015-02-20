@@ -303,6 +303,8 @@ public:
         double b = 0.0,
         double w = 0.0);
 
+    ~PotentialInt2C();
+
     double a() const { return a_; }
     double b() const { return b_; }
     double w() const { return w_; }

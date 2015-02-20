@@ -1,4 +1,5 @@
 #include <math.h>
+#include <string.h>
 #include <core/molecule.h>
 #include "int2c.h"
 
@@ -16,6 +17,8 @@ PotentialInt2C::PotentialInt2C(
     b_(b),
     w_(w)
 {
+    recursion_ = nullptr;
+
     size_t size;
     if (deriv_ == 0) {
         size = 1L * chunk_size();
@@ -26,6 +29,10 @@ PotentialInt2C::PotentialInt2C(
     }
     buffer1_ = new double[size];
     buffer2_ = new double[size];
+}
+PotentialInt2C::~PotentialInt2C()
+{
+    if (recursion_ != nullptr) delete[] recursion_; 
 }
 void PotentialInt2C::set_nuclear_potential(
     const std::shared_ptr<SMolecule>& mol,
