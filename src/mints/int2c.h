@@ -78,6 +78,9 @@ public:
     /// Buffer of output integrals or integral derivatives (you do not own this)
     double* buffer() const { return buffer1_; }
 
+    /// Should this object apply spherical transformations if present in the basis sets (defaults to true)
+    bool spherical() const { return spherical_; }
+
     /// x center in au where properties are centered (defaults to 0.0)
     double x() const { return x_; }
     /// y center in au where properties are centered (defaults to 0.0)
@@ -94,6 +97,7 @@ public:
 
     // => Setters <= //
 
+    void set_spherical(bool spherical) { spherical_ = spherical; }
     void set_x(double x) { x_ = x; }
     void set_y(double y) { y_ = y; }
     void set_z(double z) { z_ = z; }
@@ -135,6 +139,8 @@ protected:
     double* buffer1_;
     /// Buffer for CO->SO transformations (subclass allocates, super destroys)
     double* buffer2_;
+
+    double spherical_;
     /// Internal CO->SO transformation information
     std::vector<SAngularMomentum> am_info_;
 

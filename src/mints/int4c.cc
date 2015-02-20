@@ -16,6 +16,7 @@ Int4C::Int4C(
 {
     buffer1_ = nullptr;
     buffer2_ = nullptr;
+    spherical_ = true;
     am_info_ = SAngularMomentum::build(max_am());
 
     size_t nprim4 = 

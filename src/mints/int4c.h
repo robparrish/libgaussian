@@ -80,12 +80,20 @@ public:
     /// Buffer of output integrals or integral derivatives (you do not own this)
     double* buffer() const { return buffer1_; }
 
+    /// Should this object apply spherical transformations if present in the basis sets (defaults to true)
+    bool spherical() const { return spherical_; }
+
+
     /// Single maximum angular momentum present across the basis sets
     int max_am() const;
     /// Total maximum angular momentum across the basis sets
     int total_am() const;
     /// Return the chunk size (max_ncart1 x max_ncart2 x max_ncart3 x max_ncart4)
     size_t chunk_size() const;
+
+    // => Setters <= //
+
+    void set_spherical(bool spherical) { spherical_ = spherical; }
 
     // => Low-Level Computers <= //
 
@@ -138,6 +146,8 @@ protected:
     double* buffer1_;
     /// Buffer for CO->SO transformations (subclass allocates, super destroys)
     double* buffer2_;
+
+    double spherical_;
     /// Internal CO->SO transformation information
     std::vector<SAngularMomentum> am_info_;
 

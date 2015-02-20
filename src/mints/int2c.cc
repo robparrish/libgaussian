@@ -12,10 +12,11 @@ Int2C::Int2C(
 {
     buffer1_ = nullptr;
     buffer2_ = nullptr;
+    spherical_ = true;
+    am_info_ = SAngularMomentum::build(max_am());
     x_ = 0.0;
     y_ = 0.0;
     z_ = 0.0;
-    am_info_ = SAngularMomentum::build(max_am());
 }
 Int2C::Int2C()
 {
