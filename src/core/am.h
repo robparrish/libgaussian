@@ -19,6 +19,10 @@ namespace libgaussian {
  *     am_info[L] = SAngularMomentum(L);
  *  }
  *
+ * alternatively, there is a static helper method to do this,
+ *
+ *  std::vector<SAngularMomentum> am_info = SAngularMomentum::build(4);
+ *
  * Now the user may ask the SAngularMomentum for am = L for information on how
  * to build the cartesian or spherical angular momentum for the given shell.
  * Note: these objects are cheap to build, use wherever needed. 
