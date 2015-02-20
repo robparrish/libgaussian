@@ -174,6 +174,7 @@ int main(int argc, char* argv[])
         int nR = bas->shell(R).nfunction();
         int nS = bas->shell(S).nfunction();
         int index = 0;
+        //printf("Quartet %3d %3d %3d %3d\n", P, Q, R, S);
         for (int p = 0; p < nP; p++) {
         for (int q = 0; q < nQ; q++) {
         for (int r = 0; r < nR; r++) {
