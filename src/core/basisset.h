@@ -170,6 +170,21 @@ public:
     void set_shell_index(size_t shell_index) { shell_index_ = shell_index; }
     void set_function_index(size_t function_index) { function_index_ = function_index; }
     void set_cartesian_index(size_t cartesian_index) { cartesian_index_ = cartesian_index; }
+    
+    // => Equivalence (Needed for Python) <= //
+
+    bool operator==(const SGaussianShell& other) const {
+        return (
+            x_ == other.x_ &&
+            y_ == other.y_ &&
+            z_ == other.z_ &&
+            is_spherical_ == other.is_spherical_ &&
+            am_ == other.am_ &&
+            cs_ == other.cs_ &&
+            es_ == other.es_); }
+    bool operator!=(const SGaussianShell& other) const {
+        return !((*this)==other);
+    }
 
 private:
     double x_;
@@ -215,7 +230,7 @@ public:
     SBasisSet() {}
 
     /// Build a null SBasisSet (for use in DF)
-    std::shared_ptr<SBasisSet> zero_basis();
+    static std::shared_ptr<SBasisSet> zero_basis();
 
     // => Accessors <= //
 

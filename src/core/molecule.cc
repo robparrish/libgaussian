@@ -63,7 +63,7 @@ double SMolecule::nuclear_repulsion_energy(
     }
     return E;
 }
-double SMolecule::nuclear_repulsion_energy(
+double SMolecule::nuclear_repulsion_energy_other(
     const std::shared_ptr<SMolecule>& other,
     bool use_nuclear_this,
     bool use_nuclear_other,

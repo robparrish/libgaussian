@@ -173,6 +173,15 @@ public:
     /// Coefficients of cartesian functions in transformation, length ncoef()
     const std::vector<double>& cartesian_coefs() const { return cartesian_coefs_; }
 
+    // => Equivalency (Needed for Python) <= //
+
+    bool operator==(const SAngularMomentum& other) {
+        return am_ == other.am_;
+    }
+    bool operator!=(const SAngularMomentum& other) {
+        return am_ != other.am_;
+    }
+
 private:
 
     int am_;

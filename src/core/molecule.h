@@ -112,6 +112,7 @@ public:
     void set_x(double x) { x_ = x; }
     void set_y(double y) { y_ = y; }
     void set_z(double z) { z_ = z; }
+    void set_Z(double Z) { Z_ = Z; }
     void set_Ya(double Ya) { Ya_ = Ya; }
     void set_Yb(double Yb) { Yb_ = Yb; }
     void set_index(size_t index) { index_ = index; }
@@ -120,6 +121,23 @@ public:
 
     /// Return the distance to SAtom other in au
     double distance(const SAtom& other) const;
+
+    // => Equivalence (Needed for Python) <= //
+
+    bool operator==(const SAtom& other) const {
+        return (
+            label_ == other.label_ &&
+            symbol_ == other.symbol_ &&
+            N_ == other.N_ &&
+            x_ == other.x_ &&
+            y_ == other.y_ &&
+            z_ == other.z_ &&
+            Z_ == other.Z_ &&
+            Ya_ == other.Ya_ &&
+            Yb_ == other.Yb_); }
+    bool operator!=(const SAtom& other) const {
+        return !((*this)==other);
+    }
 
 private:
     std::string label_;
@@ -179,13 +197,13 @@ public:
 
     /// Return the nuclear repulsion energy in au for this molecule
     double nuclear_repulsion_energy(
-        bool use_nuclear,
+        bool use_nuclear = true,
         double a = 1.0,
         double b = 0.0,
         double w = 0.0) const;
 
     /// Return the nuclear repulsion energy in au between this and other molecule
-    double nuclear_repulsion_energy(
+    double nuclear_repulsion_energy_other(
         const std::shared_ptr<SMolecule>& other,
         bool use_nuclear_this = true,
         bool use_nuclear_other = true,
