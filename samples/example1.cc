@@ -25,7 +25,7 @@ std::shared_ptr<SMolecule> get_h2o()
         SAtom("H3","H",1,H3r[0],H3r[1],H3r[2],1.0,0.5,0.5)};
     return std::shared_ptr<SMolecule>(new SMolecule(name,atoms));
 }
-std::shared_ptr<SBasisSet> get_h2o_sto3g()
+std::shared_ptr<SBasisSet> get_h2o_sto3g(bool spherical)
 {
     std::vector<double> O1s_c = { 4.2519432829437198E+00,  4.1122937184311832E+00,  1.2816225325813408E+00};
     std::vector<double> O1s_e = { 1.3070931999999999E+02,  2.3808861000000000E+01,  6.4436083000000002E+00};
@@ -48,15 +48,15 @@ std::shared_ptr<SBasisSet> get_h2o_sto3g()
     std::string name = "STO-3G";
     std::vector<std::vector<SGaussianShell>> shells = {
         {
-            SGaussianShell(O1.x(),O1.y(),O1.z(),false,0,O1s_c,O1s_e),
-            SGaussianShell(O1.x(),O1.y(),O1.z(),false,0,O2s_c,O2s_e),
-            SGaussianShell(O1.x(),O1.y(),O1.z(),false,1,O2p_c,O2p_e)
+            SGaussianShell(O1.x(),O1.y(),O1.z(),spherical,0,O1s_c,O1s_e),
+            SGaussianShell(O1.x(),O1.y(),O1.z(),spherical,0,O2s_c,O2s_e),
+            SGaussianShell(O1.x(),O1.y(),O1.z(),spherical,1,O2p_c,O2p_e)
         },
         {
-            SGaussianShell(H2.x(),H2.y(),H2.z(),false,0,H1s_c,H1s_e)
+            SGaussianShell(H2.x(),H2.y(),H2.z(),spherical,0,H1s_c,H1s_e)
         },
         {
-            SGaussianShell(H3.x(),H3.y(),H3.z(),false,0,H1s_c,H1s_e)
+            SGaussianShell(H3.x(),H3.y(),H3.z(),spherical,0,H1s_c,H1s_e)
         },
         };
 
@@ -65,11 +65,11 @@ std::shared_ptr<SBasisSet> get_h2o_sto3g()
 int main(int argc, char* argv[])
 {
     std::shared_ptr<SMolecule> mol = get_h2o();
-    std::shared_ptr<SBasisSet> bas = get_h2o_sto3g();
+    std::shared_ptr<SBasisSet> bas = get_h2o_sto3g(false);
     size_t nbf  = bas->nfunction();
     size_t nocc = 5;
 
-    mol->print(stdout,true);
+    mol->print();
 
     OverlapInt2C Sints(bas,bas);
     double* Sbuffer = Sints.buffer();
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
             }
         }
     }
-    S.print();
+    //S.print();
 
     KineticInt2C Tints(bas,bas);
     double* Tbuffer = Tints.buffer();
@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
             }
         }
     }
-    T.print();
+    //T.print();
 
     DipoleInt2C Xints(bas,bas);
     size_t Xchunk = Xints.chunk_size();
@@ -139,9 +139,9 @@ int main(int argc, char* argv[])
             }
         }
     }
-    Xs[0].print();
-    Xs[1].print();
-    Xs[2].print();
+    //Xs[0].print();
+    //Xs[1].print();
+    //Xs[2].print();
 
     PotentialInt2C Vints(bas,bas);
     Vints.set_nuclear_potential(mol);
@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
             }
         }
     }
-    V.print();
+    //V.print();
 
     PotentialInt4C Iints(bas,bas,bas,bas);
     double* Ibuffer = Iints.buffer();
@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
             Ip[(p + oP) * nbf * nbf * nbf + (q + oQ) * nbf * nbf + (r + oR) * nbf + (s + oS)] = Ibuffer[index++];
         }}}}
     }}}}
-    I.print();
+    //I.print();
 
     // Hartree-Fock
     Tensor X = S.power(-0.5);
@@ -203,6 +203,7 @@ int main(int argc, char* argv[])
     H() = T();
     H() += V();
 
+    F() = H();
     Ft("ij") = X("pi") * H("pq") * X("qj");
     auto Feig = Ft.syev(kAscending); 
     C("pi") = X("pj") * Feig["eigenvectors"]("ij");
@@ -211,8 +212,10 @@ int main(int argc, char* argv[])
 
     bool converged = false;
     double Enuc = mol->nuclear_repulsion_energy();
-    double Eelec = 0.0, Eold = 0.0;
+    double Eelec = D("pq") * (H("pq") + F("pq"));
+    double Eold = 0.0;
     int iter = 1;
+    printf("  @RHF iter %5d: %20.14lf\n", iter++, Enuc + Eelec);
     do {
 
         F("pq") = H("pq");
