@@ -30,7 +30,7 @@ set(LIBGAUSSIAN_SOURCES
 # build static libray
 add_library(gaussian STATIC ${LIBGAUSSIAN_SOURCES} ${LIBGAUSSIAN_HEADERS})
 
-target_link_libraries(gaussian ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${LIBINT}/lib/libint.a)
+target_link_libraries(gaussian  ${LIBINT}/lib/libint.a ${LIBTENSOR}/lib/libtensor.a)
 
 install(TARGETS gaussian ARCHIVE DESTINATION lib)
 

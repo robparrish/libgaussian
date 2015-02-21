@@ -110,12 +110,6 @@ def parse_input():
             default=None,
             help="""The Python interpreter (development version) to use.  CMake will detect one automatically, if omitted.""")
 
-    group = parser.add_argument_group('LibInt')
-    group.add_argument('--libint',
-                       action='store',
-                       default=None,
-                       help="""Path to your libint installation.""")
-
     group = parser.add_argument_group('Parallelization')
     group.add_argument('--mpi',
             action='store_true',
@@ -129,12 +123,69 @@ def parse_input():
             action='store_true',
             default=True,
             help='enable OpenMP [default: %(default)s]')
+    group.add_argument('--cyclops',
+            action='store',
+            default=None,
+            help="""Path to the location of Cyclops. This location should have include and lib in it.""")
+    group.add_argument('--elemental',
+            action='store',
+            default=None,
+            help="""Path to the location of Elemental. This location should have include and libEl.a in it.""")
 
+    group = parser.add_argument_group('LibInt')
+    group.add_argument('--libint',
+            action='store',
+            default=None,
+            help="""Path to the location of LibInt. This location should have include and lib in it.""")
+
+    group = parser.add_argument_group('LibTensor')
+    group.add_argument('--libtensor',
+            action='store',
+            default=None,
+            help="""Path to the location of LibTensor. This location should have include and lib in it.""")
+
+    group = parser.add_argument_group('Math libraries')
+    group.add_argument('--mkl',
+            nargs='?',
+            action='store',
+            choices=('sequential', 'parallel', 'cluster'),
+            default='none',
+            help='pass -mkl=STRING flag to the compiler and linker [default: None]')
+    group.add_argument('--blas',
+            action='store',
+            default='auto',
+            help='specify BLAS library; possible choices are "auto", "builtin", "none", or full path [default: %(default)s]',
+            metavar='[{auto,builtin,none,/full/path/lib.a}]')
+    group.add_argument('--lapack',
+            action='store',
+            default='auto',
+            help='specify LAPACK library; possible choices are "auto", "builtin", "none", or full path [default: %(default)s]',
+            metavar='[{auto,builtin,none,/full/path/lib.a}]')
     group.add_argument('--explicit-libs',
             action='store',
             default=None,
             help='explicit linker specification for extra libraries; passed directly to the linker',
             metavar='STRING')
+    group.add_argument('--accelerate',
+            action='store_true',
+            default=False,
+            help='build using Mac OS X Accelerate Framework [default: %(default)s]')
+    group.add_argument('--cray',
+            action='store_true',
+            default=False,
+            help='use cray wrappers for BLAS/LAPACK and MPI which disables math detection and builtin math implementation [default: %(default)s]')
+    group.add_argument('--csr',
+            action='store_true',
+            default=False,
+            help='build using MKL compressed sparse row [default: %(default)s]')
+    group.add_argument('--scalapack',
+            action='store_true',
+            default=False,
+            help='build using SCALAPACK [default: %(default)s]')
+    group.add_argument('--scalasca',
+            action='store_true',
+            default=False,
+            help='build using SCALASCA profiler mode [default: %(default)s]')
 
     # Advanced options
     group = parser.add_argument_group('Advanced options')
@@ -275,6 +326,15 @@ def translate_cmake(s):
 
 def gen_cmake_command(args):
 
+    # do some checks
+    if args.cyclops and not args.mpi:
+        print("Error: cyclops requested but MPI was not.")
+        sys.exit(1)
+
+    if args.cyclops and not args.elemental:
+        print("Error: cyclops feature requires elemental.");
+        sys.exit(1)
+
     # create cmake command from flags
 
     command = ''
@@ -292,9 +352,63 @@ def gen_cmake_command(args):
     command += ' -DENABLE_SGI_MPT=%s'        % translate_cmake(args.sgi_mpt)
     command += ' -DENABLE_OMP=%s'            % translate_cmake(args.omp)
     command += ' -DENABLE_VECTORIZATION=%s'  % translate_cmake(args.vectorization)
+    command += ' -DENABLE_CYCLOPS=%s'        % translate_cmake(args.cyclops)
+    command += ' -DENABLE_ELEMENTAL=%s'      % translate_cmake(args.elemental)
+    #command += ' -DENABLE_CSR=%s'            % translate_cmake(args.csr)
+    command += ' -DENABLE_SCALAPACK=%s'      % translate_cmake(args.scalapack)
+    #command += ' -DENABLE_SCALASCA=%s'       % translate_cmake(args.scalasca)
     command += ' -DENABLE_UNIT_TESTS=%s'     % translate_cmake(args.unit_tests)
     command += ' -DENABLE_STATIC_LINKING=%s' % translate_cmake(args.static)
     command += ' -DENABLE_CXX11_SUPPORT=%s'  % translate_cmake(args.cxx11)
+
+    if args.blas == 'builtin':
+        command += ' -DENABLE_BUILTIN_BLAS=ON'
+        command += ' -DENABLE_AUTO_BLAS=OFF'
+    elif args.blas == 'auto':
+        if (args.mkl != 'none') and not args.cray:
+            command += ' -DENABLE_AUTO_BLAS=ON'
+    elif args.blas == 'none':
+        command += ' -DENABLE_AUTO_BLAS=OFF'
+    else:
+        if not os.path.isfile(args.blas):
+            print('--blas=%s does not exist' % args.blas)
+            sys.exit(1)
+        command += ' -DEXPLICIT_BLAS_LIB=%s' % args.blas
+        command += ' -DENABLE_AUTO_BLAS=OFF'
+
+    if args.lapack == 'builtin':
+        command += ' -DENABLE_BUILTIN_LAPACK=ON'
+        command += ' -DENABLE_AUTO_LAPACK=OFF'
+    elif args.lapack == 'auto':
+        if (args.mkl != 'none') and not args.cray:
+            command += ' -DENABLE_AUTO_LAPACK=ON'
+    elif args.lapack == 'none':
+        command += ' -DENABLE_AUTO_LAPACK=OFF'
+    else:
+        if not os.path.isfile(args.lapack):
+            print('--lapack=%s does not exist' % args.lapack)
+            sys.exit(1)
+        command += ' -DEXPLICIT_LAPACK_LIB=%s' % args.lapack
+        command += ' -DENABLE_AUTO_LAPACK=OFF'
+
+    if args.accelerate:
+        command += ' -DENABLE_ACCELERATE=ON'
+        command += ' -DENABLE_AUTO_BLAS=OFF'
+        command += ' -DENABLE_AUTO_LAPACK=OFF'
+
+    if args.cray:
+        command += ' -DENABLE_CRAY_WRAPPERS=ON'
+        command += ' -DENABLE_AUTO_BLAS=OFF'
+        command += ' -DENABLE_AUTO_LAPACK=OFF'
+
+    if args.mkl != 'none':
+        if args.mkl == None:
+            print('you have to choose between --mkl=[{sequential,parallel,cluster}]')
+            sys.exit(1)
+        command += ' -DMKL_FLAG="-mkl=%s"' % args.mkl
+        command += ' -DMKL_FLAG_SET=ON'
+        command += ' -DENABLE_AUTO_BLAS=OFF'
+        command += ' -DENABLE_AUTO_LAPACK=OFF'
 
     if args.explicit_libs:
         # remove leading and trailing whitespace
@@ -307,11 +421,19 @@ def gen_cmake_command(args):
     if args.boost_libdir:
         command += ' -DBOOST_LIBRARYDIR={0}'.format(args.boost_libdir)
 
+    if args.python:
+        command += ' -DPYTHON_INTERPRETER={0}'.format(args.python)
+
+    if args.cyclops:
+        command += ' -DCYCLOPS={0}'.format(args.cyclops)
+    if args.elemental:
+        command += ' -DELEMENTAL={0}'.format(args.elemental)
+
     if args.libint:
         command += ' -DLIBINT={0}'.format(args.libint)
 
-    if args.python:
-        command += ' -DPYTHON_INTERPRETER={0}'.format(args.python)
+    if args.libtensor:
+        command += ' -DLIBTENSOR={0}'.format(args.libtensor)
 
     if args.extra_cc_flags:
         command += ' -DEXTRA_C_FLAGS="%s"' % args.extra_cc_flags

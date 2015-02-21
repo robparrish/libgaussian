@@ -28,11 +28,19 @@ list(APPEND CMAKE_MODULE_PATH
 
 # Options
 option(ENABLE_MPI           "Enable MPI parallelization"  OFF)
+option(ENABLE_CYCLOPS       "Enable Cyclops usage" OFF)
 option(ENABLE_OMP           "Enable OpenMP parallelization" ON)
+option(ENABLE_AUTO_BLAS     "Enable CMake to autodetect BLAS" ON)
+option(ENABLE_AUTO_LAPACK   "Enable CMake to autodetect LAPACK" ON)
+option(ENABLE_ACCELERATE    "Enable use of Mac OS X Accelerate Framework" OFF)
 option(ENABLE_PYTHON        "Enable Python interface" OFF)
 option(ENABLE_CXX11_SUPPORT "Enable C++11 compiler support" ON)
 
+option(CYCLOPS              "Location of the Cyclops build directory" "")
+option(ELEMENTAL            "Location of the Elemental build directory" "")
+
 option(LIBINT               "Location of libint installation" "")
+option(LIBTENSOR            "Location of libtensor installation" "")
 
 # include cmake modules as needed
 include(ConfigVersion)
@@ -40,10 +48,20 @@ include(ConfigArchitecture)
 include(ConfigCompilerFlags)
 include(ConfigOMP)
 
+# Math: find BLAS and LAPACK
+set(BLAS_LANG   "CXX")
+set(BLAS_FOUND FALSE)
+set(LAPACK_LANG "CXX")
+set(LAPACK_FOUND FALSE)
+set(MKL_COMPILER_BINDINGS "${CMAKE_CXX_COMPILER_ID}")
+include(ConfigMath)
+
 include(ConfigMPI)
 include(ConfigExplicitLibs)
 include(ConfigSafeGuards)
 include(GenericMacros)
+
+init_FCMangle()
 
 find_package(Threads REQUIRED)
 link_libraries("${CMAKE_THREAD_LIBS_INIT}")
@@ -73,10 +91,20 @@ endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(
     ${LIBINT}/include
+    ${LIBTENSOR}/include
     ${PROJECT_BINARY_DIR}/include
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/src
 )
+
+if(ENABLE_CYCLOPS AND CYCLOPS)
+    include_directories(${CYCLOPS}/include)
+    add_definitions(-DHAVE_CYCLOPS)
+endif()
+if (ENABLE_ELEMENTAL AND ELEMENTAL)
+    include_directories(${ELEMENTAL}/include)
+    add_definitions(-DHAVE_ELEMENTAL)
+endif()
 
 # recursively add source directories
 add_subdirectory(src)

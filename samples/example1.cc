@@ -1,12 +1,14 @@
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
+#include <tensor/tensor.h>
 #include <core/am.h>
 #include <core/basisset.h>
 #include <core/molecule.h>
 #include <mints/int2c.h>
 #include <mints/int4c.h>
 
+using namespace tensor;
 using namespace libgaussian;
 
 std::shared_ptr<SMolecule> get_h2o()
@@ -47,7 +49,7 @@ std::shared_ptr<SBasisSet> get_h2o_sto3g()
         {
             SGaussianShell(O1.x(),O1.y(),O1.z(),false,0,O1s_c,O1s_e),
             SGaussianShell(O1.x(),O1.y(),O1.z(),false,0,O2s_c,O2s_e),
-            SGaussianShell(O1.x(),O1.y(),O1.z(),true,1,O2p_c,O2p_e)
+            SGaussianShell(O1.x(),O1.y(),O1.z(),false,1,O2p_c,O2p_e)
         },
         {
             SGaussianShell(H2.x(),H2.y(),H2.z(),false,0,H1s_c,H1s_e)
@@ -66,9 +68,10 @@ int main(int argc, char* argv[])
 
     mol->print(stdout,true);
 
-    printf("Overlap Ints:\n\n");
     OverlapInt2C Sints(bas,bas);
     double* Sbuffer = Sints.buffer();
+    Tensor S = Tensor::build(kCore, "S", {bas->nfunction(), bas->nfunction()});
+    double* Sp = S.data().data();
     for (int P = 0; P < bas->nshell(); P++) {
         for (int Q = 0; Q < bas->nshell(); Q++) {
             Sints.compute_pair(P,Q);
@@ -78,16 +81,17 @@ int main(int argc, char* argv[])
             int nQ = bas->shell(Q).nfunction();
             for (int p = 0, index = 0; p < nP; p++) {
                 for (int q = 0; q < nQ; q++, index++) {
-                    printf("%3d %3d %24.16E\n", p + oP, q + oQ, Sbuffer[index]);
+                    Sp[(p + oP) * bas->nfunction() + (q + oQ)] = Sbuffer[index];
                 }
             }
         }
     }
-    printf("\n");
+    S.print();
 
-    printf("Kinetic Ints:\n\n");
     KineticInt2C Tints(bas,bas);
     double* Tbuffer = Tints.buffer();
+    Tensor T = Tensor::build(kCore, "T", {bas->nfunction(), bas->nfunction()});
+    double* Tp = T.data().data();
     for (int P = 0; P < bas->nshell(); P++) {
         for (int Q = 0; Q < bas->nshell(); Q++) {
             Tints.compute_pair(P,Q);
@@ -97,18 +101,25 @@ int main(int argc, char* argv[])
             int nQ = bas->shell(Q).nfunction();
             for (int p = 0, index = 0; p < nP; p++) {
                 for (int q = 0; q < nQ; q++, index++) {
-                    printf("%3d %3d %24.16E\n", p + oP, q + oQ, Tbuffer[index]);
+                    Tp[(p + oP) * bas->nfunction() + (q + oQ)] = Tbuffer[index];
                 }
             }
         }
     }
-    printf("\n");
+    T.print();
 
-    printf("Dipole Ints:\n\n");
     DipoleInt2C Xints(bas,bas);
     size_t Xchunk = Xints.chunk_size();
     double* Xbuffer = Xints.buffer();
-    printf("X:\n\n");
+    double* Ybuffer = Xbuffer + Xints.chunk_size();
+    double* Zbuffer = Ybuffer + Xints.chunk_size();
+    std::vector<Tensor> Xs(3);
+    Xs[0] = Tensor::build(kCore, "X", {bas->nfunction(), bas->nfunction()});
+    Xs[1] = Tensor::build(kCore, "Y", {bas->nfunction(), bas->nfunction()});
+    Xs[2] = Tensor::build(kCore, "Z", {bas->nfunction(), bas->nfunction()});
+    double* Xp = Xs[0].data().data();
+    double* Yp = Xs[1].data().data();
+    double* Zp = Xs[2].data().data();
     for (int P = 0; P < bas->nshell(); P++) {
         for (int Q = 0; Q < bas->nshell(); Q++) {
             Xints.compute_pair(P,Q);
@@ -118,49 +129,22 @@ int main(int argc, char* argv[])
             int nQ = bas->shell(Q).nfunction();
             for (int p = 0, index = 0; p < nP; p++) {
                 for (int q = 0; q < nQ; q++, index++) {
-                    printf("%3d %3d %24.16E\n", p + oP, q + oQ, Xbuffer[index + 0L * Xchunk]);
+                    Xp[(p + oP) * bas->nfunction() + (q + oQ)] = Xbuffer[index];
+                    Yp[(p + oP) * bas->nfunction() + (q + oQ)] = Ybuffer[index];
+                    Zp[(p + oP) * bas->nfunction() + (q + oQ)] = Zbuffer[index];
                 }
             }
         }
     }
+    Xs[0].print();
+    Xs[1].print();
+    Xs[2].print();
 
-    printf("Y:\n\n");
-    for (int P = 0; P < bas->nshell(); P++) {
-        for (int Q = 0; Q < bas->nshell(); Q++) {
-            Xints.compute_pair(P,Q);
-            int oP = bas->shell(P).function_index();
-            int oQ = bas->shell(Q).function_index();
-            int nP = bas->shell(P).nfunction();
-            int nQ = bas->shell(Q).nfunction();
-            for (int p = 0, index = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++, index++) {
-                    printf("%3d %3d %24.16E\n", p + oP, q + oQ, Xbuffer[index + 1L * Xchunk]);
-                }
-            }
-        }
-    }
-
-    printf("Z:\n\n");
-    for (int P = 0; P < bas->nshell(); P++) {
-        for (int Q = 0; Q < bas->nshell(); Q++) {
-            Xints.compute_pair(P,Q);
-            int oP = bas->shell(P).function_index();
-            int oQ = bas->shell(Q).function_index();
-            int nP = bas->shell(P).nfunction();
-            int nQ = bas->shell(Q).nfunction();
-            for (int p = 0, index = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++, index++) {
-                    printf("%3d %3d %24.16E\n", p + oP, q + oQ, Xbuffer[index + 2L * Xchunk]);
-                }
-            }
-        }
-    }
-    printf("\n");
-
-    printf("Potential Ints:\n\n");
     PotentialInt2C Vints(bas,bas);
     Vints.set_nuclear_potential(mol);
     double* Vbuffer = Vints.buffer();
+    Tensor V = Tensor::build(kCore, "V", {bas->nfunction(), bas->nfunction()});
+    double* Vp = V.data().data();
     for (int P = 0; P < bas->nshell(); P++) {
         for (int Q = 0; Q < bas->nshell(); Q++) {
             Vints.compute_pair(P,Q);
@@ -170,16 +154,18 @@ int main(int argc, char* argv[])
             int nQ = bas->shell(Q).nfunction();
             for (int p = 0, index = 0; p < nP; p++) {
                 for (int q = 0; q < nQ; q++, index++) {
-                    printf("%3d %3d %24.16E\n", p + oP, q + oQ, Vbuffer[index]);
+                    Vp[(p + oP) * bas->nfunction() + (q + oQ)] = Vbuffer[index];
                 }
             }
         }
     }
-    printf("\n");
+    V.print();
 
-    printf("Electron Repulsion Ints:\n\n");
     PotentialInt4C Iints(bas,bas,bas,bas);
     double* Ibuffer = Iints.buffer();
+    size_t nbf = bas->nfunction();
+    Tensor I = Tensor::build(kCore, "I", {nbf,nbf,nbf,nbf});
+    double* Ip = I.data().data();
     for (int P = 0; P < bas->nshell(); P++) {
     for (int Q = 0; Q < bas->nshell(); Q++) {
     for (int R = 0; R < bas->nshell(); R++) {
@@ -194,16 +180,14 @@ int main(int argc, char* argv[])
         int nR = bas->shell(R).nfunction();
         int nS = bas->shell(S).nfunction();
         int index = 0;
-        //printf("Quartet %3d %3d %3d %3d\n", P, Q, R, S);
         for (int p = 0; p < nP; p++) {
         for (int q = 0; q < nQ; q++) {
         for (int r = 0; r < nR; r++) {
         for (int s = 0; s < nS; s++) {
-            printf("%3d %3d %3d %3d %24.16E\n", p + oP, q + oQ, r + oR, s + oS, Ibuffer[index++]);
+            Ip[(p + oP) * nbf * nbf * nbf + (q + oQ) * nbf * nbf + (r + oR) * nbf + (s + oS)] = Ibuffer[index++];
         }}}}
     }}}}
-    printf("\n");
-
+    I.print();
 
     return EXIT_SUCCESS;
 }
