@@ -94,5 +94,16 @@ size_t SBasisSet::max_nprimitive() const
     }
     return val;
 }
+void SBasisSet::print(FILE* fh) const
+{
+    fprintf(fh,"  SBasisSet: %s\n", name_.c_str());
+    fprintf(fh,"    Natom      = %5zu\n", natom());
+    fprintf(fh,"    Nshell     = %5zu\n", nshell());
+    fprintf(fh,"    Nfunction  = %5zu\n", nfunction());
+    fprintf(fh,"    Ncartesian = %5zu\n", ncartesian());
+    fprintf(fh,"    Spherical? = %5s\n", has_spherical() ? "Yes" : "No");
+    fprintf(fh,"    Max AM     = %5d\n", max_am());
+    fprintf(fh,"\n");
+}
 
 } // namespace libgaussian

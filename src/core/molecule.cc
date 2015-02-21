@@ -25,11 +25,11 @@ void SMolecule::print(
     FILE* fh,
     bool angstrom) const
 {
+    // PSI4's bohr2ang
     double constexpr bohr2ang = 0.52917720859;
     double factor = (angstrom ? bohr2ang : 1.0);
 
-    fprintf(fh,"  Molecule: %s\n\n", name_.c_str());
-    
+    fprintf(fh,"  SMolecule: %s\n", name_.c_str());
     fprintf(fh,"    Natom = %zu\n\n", natom());
 
     fprintf(fh,"    Center                X                  Y                   Z       \n");

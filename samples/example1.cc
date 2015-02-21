@@ -70,6 +70,7 @@ int main(int argc, char* argv[])
     size_t nocc = 5;
 
     mol->print();
+    bas->print();
 
     OverlapInt2C Sints(bas,bas);
     double* Sbuffer = Sints.buffer();

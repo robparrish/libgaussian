@@ -267,6 +267,10 @@ public:
     size_t max_ncartesian() const;
     /// Maximum number of primitives across all shells
     size_t max_nprimitive() const;
+    
+    /// Print the trace of this basis set
+    void print(
+        FILE* fh = stdout) const;
 
 private:
 

@@ -13,6 +13,8 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(smolecule_print_overloads, SMolecule::pri
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(smolecule_nuc_overloads, SMolecule::nuclear_repulsion_energy, 0, 4)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(smolecule_nuc_other_overloads, SMolecule::nuclear_repulsion_energy_other, 1, 5)
 
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(sbasisset_print_overloads, SBasisSet::print, 0, 1)
+
 BOOST_PYTHON_MODULE(libgaussian)
 {
     class_<std::vector<double>>("DoubleVec")
@@ -150,6 +152,14 @@ BOOST_PYTHON_MODULE(libgaussian)
         .def("set_cartesian_index", &SGaussianShell::set_cartesian_index)
         ;
 
+    class_<std::vector<SGaussianShell>>("SGaussianShellVec")
+        .def(vector_indexing_suite<std::vector<SGaussianShell>>())
+        ;
+
+    class_<std::vector<std::vector<SGaussianShell>>>("SGaussianShellVecVec")
+        .def(vector_indexing_suite<std::vector<std::vector<SGaussianShell>>>())
+        ;
+
     class_<SBasisSet, std::shared_ptr<SBasisSet>>("SBasisSet", init<
         const std::string&,
         const std::vector<std::vector<SGaussianShell>>&
@@ -172,6 +182,7 @@ BOOST_PYTHON_MODULE(libgaussian)
         .def("max_nfunction", &SBasisSet::max_nfunction)
         .def("max_ncartesian", &SBasisSet::max_ncartesian)
         .def("max_nprimitive", &SBasisSet::max_nprimitive)
+        .def("printf", &SBasisSet::print, sbasisset_print_overloads())
         ;
         
 }
