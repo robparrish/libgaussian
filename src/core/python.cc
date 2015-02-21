@@ -1,3 +1,4 @@
+#include <memory>
 #include <boost/python.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
@@ -14,7 +15,19 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(smolecule_nuc_other_overloads, SMolecule:
 
 BOOST_PYTHON_MODULE(libgaussian)
 {
-    class_<SAtom>("SAtom", init<
+    class_<std::vector<double>>("DoubleVec")
+        .def(vector_indexing_suite<std::vector<double>>())
+        ;
+
+    class_<std::vector<int>>("IntVec")
+        .def(vector_indexing_suite<std::vector<int>>())
+        ;
+
+    class_<std::vector<size_t>>("SizetVec")
+        .def(vector_indexing_suite<std::vector<size_t>>())
+        ;
+
+    class_<SAtom, std::shared_ptr<SAtom>>("SAtom", init<
         const std::string&,
         const std::string&,
         int,
@@ -27,8 +40,8 @@ BOOST_PYTHON_MODULE(libgaussian)
         optional<
         size_t
         >>())
-        .def("label", &SAtom::label,   return_value_policy<reference_existing_object>())
-        .def("symbol", &SAtom::symbol, return_value_policy<reference_existing_object>())
+        .def("label", &SAtom::label,   return_value_policy<copy_const_reference>())
+        .def("symbol", &SAtom::symbol, return_value_policy<copy_const_reference>())
         .def("N", &SAtom::N)
         .def("x", &SAtom::x)
         .def("y", &SAtom::y)
@@ -56,20 +69,20 @@ BOOST_PYTHON_MODULE(libgaussian)
         .def(vector_indexing_suite<std::vector<SAtom>>())
         ;
 
-    class_<SMolecule>("SMolecule", init<
+    class_<SMolecule, std::shared_ptr<SMolecule>>("SMolecule", init<
         const std::string&,
         const std::vector<SAtom>&
         >())
-        .def("name", &SMolecule::name, return_value_policy<reference_existing_object>())
+        .def("name", &SMolecule::name, return_value_policy<copy_const_reference>())
         .def("natom", &SMolecule::natom)
         .def("atom", &SMolecule::atom, return_value_policy<reference_existing_object>())
         .def("atoms", &SMolecule::atoms, return_value_policy<reference_existing_object>())
-        .def("print", &SMolecule::print, smolecule_print_overloads())
+        .def("printf", &SMolecule::print, smolecule_print_overloads())
         .def("nuclear_repulsion_energy", &SMolecule::nuclear_repulsion_energy, smolecule_nuc_overloads())
         .def("nuclear_repulsion_energy_other", &SMolecule::nuclear_repulsion_energy_other, smolecule_nuc_other_overloads())
         ;
 
-    class_<SAngularMomentum>("SAngularMomentum", init<int>())
+    class_<SAngularMomentum, std::shared_ptr<SAngularMomentum>>("SAngularMomentum", init<int>())
         .def("build", &SAngularMomentum::build)
         .staticmethod("build")
         .def("am", &SAngularMomentum::am)
@@ -94,7 +107,7 @@ BOOST_PYTHON_MODULE(libgaussian)
         .def(vector_indexing_suite<std::vector<SAngularMomentum>>())
         ;
 
-    class_<SGaussianShell>("SGaussianShell", init<
+    class_<SGaussianShell, std::shared_ptr<SGaussianShell>>("SGaussianShell", init<
         double,
         double,
         double,
@@ -137,13 +150,13 @@ BOOST_PYTHON_MODULE(libgaussian)
         .def("set_cartesian_index", &SGaussianShell::set_cartesian_index)
         ;
 
-    class_<SBasisSet>("SBasisSet", init<
+    class_<SBasisSet, std::shared_ptr<SBasisSet>>("SBasisSet", init<
         const std::string&,
         const std::vector<std::vector<SGaussianShell>>&
         >())
         .def("zero_basis", &SBasisSet::zero_basis)
         .staticmethod("zero_basis")
-        .def("name", &SBasisSet::name, return_value_policy<reference_existing_object>())
+        .def("name", &SBasisSet::name, return_value_policy<copy_const_reference>())
         .def("shell", &SBasisSet::shell, return_value_policy<reference_existing_object>())
         .def("shells", &SBasisSet::shells, return_value_policy<reference_existing_object>())
         .def("atoms_to_shell_inds", &SBasisSet::atoms_to_shell_inds, return_value_policy<reference_existing_object>())
