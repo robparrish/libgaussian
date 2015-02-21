@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
+#include <math.h>
 #include <tensor/tensor.h>
 #include <core/am.h>
 #include <core/basisset.h>
@@ -65,12 +66,14 @@ int main(int argc, char* argv[])
 {
     std::shared_ptr<SMolecule> mol = get_h2o();
     std::shared_ptr<SBasisSet> bas = get_h2o_sto3g();
+    size_t nbf  = bas->nfunction();
+    size_t nocc = 5;
 
     mol->print(stdout,true);
 
     OverlapInt2C Sints(bas,bas);
     double* Sbuffer = Sints.buffer();
-    Tensor S = Tensor::build(kCore, "S", {bas->nfunction(), bas->nfunction()});
+    Tensor S = Tensor::build(kCore, "S", {nbf, nbf});
     double* Sp = S.data().data();
     for (int P = 0; P < bas->nshell(); P++) {
         for (int Q = 0; Q < bas->nshell(); Q++) {
@@ -81,7 +84,7 @@ int main(int argc, char* argv[])
             int nQ = bas->shell(Q).nfunction();
             for (int p = 0, index = 0; p < nP; p++) {
                 for (int q = 0; q < nQ; q++, index++) {
-                    Sp[(p + oP) * bas->nfunction() + (q + oQ)] = Sbuffer[index];
+                    Sp[(p + oP) * nbf + (q + oQ)] = Sbuffer[index];
                 }
             }
         }
@@ -90,7 +93,7 @@ int main(int argc, char* argv[])
 
     KineticInt2C Tints(bas,bas);
     double* Tbuffer = Tints.buffer();
-    Tensor T = Tensor::build(kCore, "T", {bas->nfunction(), bas->nfunction()});
+    Tensor T = Tensor::build(kCore, "T", {nbf, nbf});
     double* Tp = T.data().data();
     for (int P = 0; P < bas->nshell(); P++) {
         for (int Q = 0; Q < bas->nshell(); Q++) {
@@ -101,7 +104,7 @@ int main(int argc, char* argv[])
             int nQ = bas->shell(Q).nfunction();
             for (int p = 0, index = 0; p < nP; p++) {
                 for (int q = 0; q < nQ; q++, index++) {
-                    Tp[(p + oP) * bas->nfunction() + (q + oQ)] = Tbuffer[index];
+                    Tp[(p + oP) * nbf + (q + oQ)] = Tbuffer[index];
                 }
             }
         }
@@ -114,9 +117,9 @@ int main(int argc, char* argv[])
     double* Ybuffer = Xbuffer + Xints.chunk_size();
     double* Zbuffer = Ybuffer + Xints.chunk_size();
     std::vector<Tensor> Xs(3);
-    Xs[0] = Tensor::build(kCore, "X", {bas->nfunction(), bas->nfunction()});
-    Xs[1] = Tensor::build(kCore, "Y", {bas->nfunction(), bas->nfunction()});
-    Xs[2] = Tensor::build(kCore, "Z", {bas->nfunction(), bas->nfunction()});
+    Xs[0] = Tensor::build(kCore, "X", {nbf, nbf});
+    Xs[1] = Tensor::build(kCore, "Y", {nbf, nbf});
+    Xs[2] = Tensor::build(kCore, "Z", {nbf, nbf});
     double* Xp = Xs[0].data().data();
     double* Yp = Xs[1].data().data();
     double* Zp = Xs[2].data().data();
@@ -129,9 +132,9 @@ int main(int argc, char* argv[])
             int nQ = bas->shell(Q).nfunction();
             for (int p = 0, index = 0; p < nP; p++) {
                 for (int q = 0; q < nQ; q++, index++) {
-                    Xp[(p + oP) * bas->nfunction() + (q + oQ)] = Xbuffer[index];
-                    Yp[(p + oP) * bas->nfunction() + (q + oQ)] = Ybuffer[index];
-                    Zp[(p + oP) * bas->nfunction() + (q + oQ)] = Zbuffer[index];
+                    Xp[(p + oP) * nbf + (q + oQ)] = Xbuffer[index];
+                    Yp[(p + oP) * nbf + (q + oQ)] = Ybuffer[index];
+                    Zp[(p + oP) * nbf + (q + oQ)] = Zbuffer[index];
                 }
             }
         }
@@ -143,7 +146,7 @@ int main(int argc, char* argv[])
     PotentialInt2C Vints(bas,bas);
     Vints.set_nuclear_potential(mol);
     double* Vbuffer = Vints.buffer();
-    Tensor V = Tensor::build(kCore, "V", {bas->nfunction(), bas->nfunction()});
+    Tensor V = Tensor::build(kCore, "V", {nbf, nbf});
     double* Vp = V.data().data();
     for (int P = 0; P < bas->nshell(); P++) {
         for (int Q = 0; Q < bas->nshell(); Q++) {
@@ -154,7 +157,7 @@ int main(int argc, char* argv[])
             int nQ = bas->shell(Q).nfunction();
             for (int p = 0, index = 0; p < nP; p++) {
                 for (int q = 0; q < nQ; q++, index++) {
-                    Vp[(p + oP) * bas->nfunction() + (q + oQ)] = Vbuffer[index];
+                    Vp[(p + oP) * nbf + (q + oQ)] = Vbuffer[index];
                 }
             }
         }
@@ -163,7 +166,6 @@ int main(int argc, char* argv[])
 
     PotentialInt4C Iints(bas,bas,bas,bas);
     double* Ibuffer = Iints.buffer();
-    size_t nbf = bas->nfunction();
     Tensor I = Tensor::build(kCore, "I", {nbf,nbf,nbf,nbf});
     double* Ip = I.data().data();
     for (int P = 0; P < bas->nshell(); P++) {
@@ -188,6 +190,49 @@ int main(int argc, char* argv[])
         }}}}
     }}}}
     I.print();
+
+    // Hartree-Fock
+    Tensor X = S.power(-0.5);
+    Tensor H = Tensor::build(kCore, "H", {nbf,nbf});  
+    Tensor Ft = Tensor::build(kCore, "Ft", {nbf,nbf});  
+    Tensor C = Tensor::build(kCore, "C", {nbf,nbf});  
+    Tensor Cocc = Tensor::build(kCore, "Cocc", {nbf,nocc});
+    Tensor D = Tensor::build(kCore, "D", {nbf,nbf});  
+    Tensor F = Tensor::build(kCore, "F", {nbf,nbf}); 
+
+    H() = T();
+    H() += V();
+
+    Ft("ij") = X("pi") * H("pq") * X("qj");
+    auto Feig = Ft.syev(kAscending); 
+    C("pi") = X("pj") * Feig["eigenvectors"]("ij");
+    Cocc() = C({{0,nbf},{0,nocc}});
+    D("pq") = Cocc("pi") * Cocc("qi");
+
+    bool converged = false;
+    double Enuc = mol->nuclear_repulsion_energy();
+    double Eelec = 0.0, Eold = 0.0;
+    int iter = 1;
+    do {
+
+        F("pq") = H("pq");
+        F("pq") += D("rs") * (2.0 * I("pqrs") - I("prsq"));
+        Eelec = D("pq") * (H("pq") + F("pq"));
+
+        printf("  @RHF iter %5d: %20.14lf\n", iter++, Enuc + Eelec);
+
+        Ft("ij") = X("pi") * F("pq") * X("qj");
+        auto Feig = Ft.syev(kAscending); 
+        C("pi") = X("pj") * Feig["eigenvectors"]("ij");
+        Cocc() = C({{0,nbf},{0,nocc}});
+        D("pq") = Cocc("pi") * Cocc("qi");
+
+        if (fabs(Eelec - Eold) < 1.0e-8) converged = true;
+        Eold = Eelec;
+
+        if (iter > 15)
+            break;
+    } while (!converged);
 
     return EXIT_SUCCESS;
 }
