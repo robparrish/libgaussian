@@ -12,7 +12,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(smolecule_print_overloads, SMolecule::pri
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(smolecule_nuc_overloads, SMolecule::nuclear_repulsion_energy, 0, 4)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(smolecule_nuc_other_overloads, SMolecule::nuclear_repulsion_energy_other, 1, 5)
 
-BOOST_PYTHON_MODULE(core)
+BOOST_PYTHON_MODULE(libgaussian)
 {
     class_<SAtom>("SAtom", init<
         const std::string&,
