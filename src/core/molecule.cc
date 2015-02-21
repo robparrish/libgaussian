@@ -32,11 +32,11 @@ void SMolecule::print(
     fprintf(fh,"  SMolecule: %s\n", name_.c_str());
     fprintf(fh,"    Natom = %zu\n\n", natom());
 
-    fprintf(fh,"    Center                X                  Y                   Z       \n");
-    fprintf(fh,"    ------------   -----------------  -----------------  -----------------\n");
+    fprintf(fh,"    %-12s %18s %18s %18s\n", 
+        "Atom", "X", "Y", "Z");
     for (size_t A = 0; A < natom(); A++) {
         const SAtom& atom = atoms_[A];
-        fprintf(fh,"    %-12s  %17.12f  %17.12f  %17.12f\n", 
+        fprintf(fh,"    %-12s %18.12f %18.12f %18.12f\n", 
             atom.label().c_str(),
             factor*atom.x(),
             factor*atom.y(),

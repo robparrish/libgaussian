@@ -109,6 +109,9 @@ endif()
 # recursively add source directories
 add_subdirectory(src)
 
+#python wrappers
+add_subdirectory(python)
+
 # test suite
 #add_subdirectory(test)
 

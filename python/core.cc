@@ -2,9 +2,9 @@
 #include <boost/python.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include "am.h"
-#include "molecule.h"
-#include "basisset.h"
+#include <core/am.h>
+#include <core/molecule.h>
+#include <core/basisset.h>
 
 using namespace libgaussian;
 using namespace boost::python;
@@ -15,7 +15,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(smolecule_nuc_other_overloads, SMolecule:
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(sbasisset_print_overloads, SBasisSet::print, 0, 1)
 
-BOOST_PYTHON_MODULE(libgaussian)
+BOOST_PYTHON_MODULE(libpygaussian)
 {
     class_<std::vector<double>>("DoubleVec")
         .def(vector_indexing_suite<std::vector<double>>())

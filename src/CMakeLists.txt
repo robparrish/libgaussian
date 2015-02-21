@@ -13,7 +13,6 @@ set(LIBGAUSSIAN_SOURCES
     core/molecule.cc
     core/basisset.cc
     core/am.cc
-    core/python.cc
     mints/constants.cc
     mints/fjt.cc
     mints/int2c.cc
@@ -31,7 +30,7 @@ set(LIBGAUSSIAN_SOURCES
 #add_library(gaussian STATIC ${LIBGAUSSIAN_SOURCES} ${LIBGAUSSIAN_HEADERS})
 add_library(gaussian SHARED ${LIBGAUSSIAN_SOURCES} ${LIBGAUSSIAN_HEADERS})
 
-target_link_libraries(gaussian -lboost_python -lboost_system ${LIBINT}/lib/libint.so ${LIBTENSOR}/lib/libtensor.a)
+target_link_libraries(gaussian ${LIBINT}/lib/libint.so ${LIBTENSOR}/lib/libtensor.a)
 
 #install(TARGETS gaussian ARCHIVE DESTINATION lib)
 #install(TARGETS gaussian SHARED DESTINATION lib)
