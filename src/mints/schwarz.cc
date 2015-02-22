@@ -25,12 +25,12 @@ SchwarzSieve::SchwarzSieve(
 }
 void SchwarzSieve::build_integrals()
 {
-    bool symm = symmetric();
+    bool symm = is_symmetric();
     size_t nshell1 = basis1_->nshell();
     size_t nshell2 = basis2_->nshell();
 
     std::vector<std::pair<int,int> > shell_tasks;
-    if (symmetric()) {
+    if (symm) {
         shell_tasks.resize(nshell1 * (nshell1 + 1) / 2);
         for (size_t P = 0, index = 0; P < nshell1; P++) {
             for (size_t Q = 0; Q <= P; Q++) {
@@ -89,12 +89,12 @@ void SchwarzSieve::build_integrals()
 }
 void SchwarzSieve::build_sieve()
 {
-    bool symm = symmetric();
+    bool symm = is_symmetric();
     size_t nshell1 = basis1_->nshell();
     size_t nshell2 = basis2_->nshell();
 
     std::vector<std::pair<int,int> > shell_tasks;
-    if (symmetric()) {
+    if (symm) {
         shell_tasks.resize(nshell1 * (nshell1 + 1) / 2);
         for (size_t P = 0, index = 0; P < nshell1; P++) {
             for (size_t Q = 0; Q <= P; Q++) {
@@ -121,7 +121,7 @@ void SchwarzSieve::build_sieve()
 }
 void SchwarzSieve::print(FILE* fh) const
 {
-    bool symm = symmetric();
+    bool symm = is_symmetric();
     size_t nshell1 = basis1_->nshell();
     size_t nshell2 = basis2_->nshell();
 

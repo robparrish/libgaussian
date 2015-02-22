@@ -145,7 +145,7 @@ void export_mints()
         double,
         double
         >>())
-        .def("symmetric", &SchwarzSieve::symmetric)
+        .def("is_symmetric", &SchwarzSieve::is_symmetric)
         .def("basis1", &SchwarzSieve::basis1, return_value_policy<reference_existing_object>())
         .def("basis2", &SchwarzSieve::basis2, return_value_policy<reference_existing_object>())
         .def("cutoff", &SchwarzSieve::cutoff)

@@ -1,7 +1,6 @@
 #include <memory>
 #include <boost/python.hpp>
 #include <boost/python/overloads.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <core/am.h>
 #include <core/molecule.h>
 #include <core/basisset.h>
@@ -17,18 +16,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(sbasisset_print_overloads, SBasisSet::pri
 
 void export_core()
 {
-    class_<std::vector<double>>("DoubleVec")
-        .def(vector_indexing_suite<std::vector<double>>())
-        ;
-
-    class_<std::vector<int>>("IntVec")
-        .def(vector_indexing_suite<std::vector<int>>())
-        ;
-
-    class_<std::vector<size_t>>("SizetVec")
-        .def(vector_indexing_suite<std::vector<size_t>>())
-        ;
-
     class_<SAtom, std::shared_ptr<SAtom>>("SAtom", init<
         const std::string&,
         const std::string&,
@@ -67,10 +54,6 @@ void export_core()
         .def("distance", &SAtom::distance)
         ;
 
-    class_<std::vector<SAtom>>("SAtomVec")
-        .def(vector_indexing_suite<std::vector<SAtom>>())
-        ;
-
     class_<SMolecule, std::shared_ptr<SMolecule>>("SMolecule", init<
         const std::string&,
         const std::vector<SAtom>&
@@ -103,10 +86,6 @@ void export_core()
         .def("cartesian_ind", &SAngularMomentum::cartesian_ind)
         .def("spherical_ind", &SAngularMomentum::spherical_ind)
         .def("cartesian_coef", &SAngularMomentum::cartesian_coef)
-        ;
-
-    class_<std::vector<SAngularMomentum>>("SAngularMomentumVec")
-        .def(vector_indexing_suite<std::vector<SAngularMomentum>>())
         ;
 
     class_<SGaussianShell, std::shared_ptr<SGaussianShell>>("SGaussianShell", init<
@@ -150,14 +129,6 @@ void export_core()
         .def("set_shell_index", &SGaussianShell::set_shell_index)
         .def("set_function_index", &SGaussianShell::set_function_index)
         .def("set_cartesian_index", &SGaussianShell::set_cartesian_index)
-        ;
-
-    class_<std::vector<SGaussianShell>>("SGaussianShellVec")
-        .def(vector_indexing_suite<std::vector<SGaussianShell>>())
-        ;
-
-    class_<std::vector<std::vector<SGaussianShell>>>("SGaussianShellVecVec")
-        .def(vector_indexing_suite<std::vector<std::vector<SGaussianShell>>>())
         ;
 
     class_<SBasisSet, std::shared_ptr<SBasisSet>>("SBasisSet", init<

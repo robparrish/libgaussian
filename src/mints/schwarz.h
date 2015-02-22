@@ -32,7 +32,7 @@ public:
         double b = 0.0,
         double w = 0.0);
 
-    bool symmetric() const { return basis1_ == basis2_; }
+    bool is_symmetric() const { return basis1_ == basis2_; }
     const std::shared_ptr<SBasisSet>& basis1() const { return basis1_; }
     const std::shared_ptr<SBasisSet>& basis2() const { return basis2_; }
     double cutoff() const { return cutoff_; }
