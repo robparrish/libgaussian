@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
     double* Sp = S.data().data();
     for (int P = 0; P < bas->nshell(); P++) {
         for (int Q = 0; Q < bas->nshell(); Q++) {
-            Sints.compute_pair(P,Q);
+            Sints.compute_shell(P,Q);
             int oP = bas->shell(P).function_index();
             int oQ = bas->shell(Q).function_index();
             int nP = bas->shell(P).nfunction();
@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
     double* Tp = T.data().data();
     for (int P = 0; P < bas->nshell(); P++) {
         for (int Q = 0; Q < bas->nshell(); Q++) {
-            Tints.compute_pair(P,Q);
+            Tints.compute_shell(P,Q);
             int oP = bas->shell(P).function_index();
             int oQ = bas->shell(Q).function_index();
             int nP = bas->shell(P).nfunction();
@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
     double* Zp = Xs[2].data().data();
     for (int P = 0; P < bas->nshell(); P++) {
         for (int Q = 0; Q < bas->nshell(); Q++) {
-            Xints.compute_pair(P,Q);
+            Xints.compute_shell(P,Q);
             int oP = bas->shell(P).function_index();
             int oQ = bas->shell(Q).function_index();
             int nP = bas->shell(P).nfunction();
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     double* Vp = V.data().data();
     for (int P = 0; P < bas->nshell(); P++) {
         for (int Q = 0; Q < bas->nshell(); Q++) {
-            Vints.compute_pair(P,Q);
+            Vints.compute_shell(P,Q);
             int oP = bas->shell(P).function_index();
             int oQ = bas->shell(Q).function_index();
             int nP = bas->shell(P).nfunction();
@@ -173,7 +173,7 @@ int main(int argc, char* argv[])
     for (int Q = 0; Q < bas->nshell(); Q++) {
     for (int R = 0; R < bas->nshell(); R++) {
     for (int S = 0; S < bas->nshell(); S++) {
-        Iints.compute_quartet(P,Q,R,S);
+        Iints.compute_shell(P,Q,R,S);
         int oP = bas->shell(P).function_index();
         int oQ = bas->shell(Q).function_index();
         int oR = bas->shell(R).function_index();

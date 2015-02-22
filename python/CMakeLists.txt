@@ -2,7 +2,9 @@ set(LIBPYGAUSSIAN_HEADERS
 )
 
 set(LIBPYGAUSSIAN_SOURCES
-    core.cc
+    libpygaussian.cc
+    export_core.cc
+    export_mints.cc
 )
 
 add_library(pygaussian SHARED ${LIBPYGAUSSIAN_SOURCES} ${LIBPYGAUSSIAN_HEADERS})

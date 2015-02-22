@@ -27,8 +27,10 @@ PotentialInt2C::PotentialInt2C(
     } else {
         throw std::runtime_error("PotentialInt2C: deriv too high");
     }
-    buffer1_ = new double[size];
-    buffer2_ = new double[size];
+    data1_.resize(size);
+    data2_.resize(size);
+    buffer1_ = data1_.data();
+    buffer2_ = data2_.data();
 }
 PotentialInt2C::~PotentialInt2C()
 {
@@ -52,7 +54,7 @@ void PotentialInt2C::set_nuclear_potential(
             mol->atom(ind).Q());
     }
 }
-void PotentialInt2C::compute_shell(
+void PotentialInt2C::compute_pair(
     const SGaussianShell& sh1,
     const SGaussianShell& sh2)
 {
@@ -154,13 +156,13 @@ void PotentialInt2C::compute_shell(
     bool s2 = sh2.is_spherical();
     if (is_spherical_) apply_spherical(am1, am2, s1, s2, buffer1_, buffer2_);
 }
-void PotentialInt2C::compute_shell1(
+void PotentialInt2C::compute_pair1(
     const SGaussianShell& sh1,
     const SGaussianShell& sh2)
 {
     throw std::runtime_error("Not Implemented");
 }
-void PotentialInt2C::compute_shell2(
+void PotentialInt2C::compute_pair2(
     const SGaussianShell& sh1,
     const SGaussianShell& sh2)
 {

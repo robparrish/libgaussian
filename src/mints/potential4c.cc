@@ -200,8 +200,10 @@ PotentialInt4C::PotentialInt4C(
     } else {
         throw std::runtime_error("PotentialInt4C: deriv too high");
     }
-    buffer1_ = new double[size];
-    buffer2_ = new double[size];
+    data1_.resize(size);
+    data2_.resize(size);
+    buffer1_ = data1_.data();
+    buffer2_ = data2_.data();
 
     fjt_ = new FJT(basis1->max_am()+basis2->max_am()+basis3->max_am()+basis4->max_am());
 }
@@ -210,7 +212,7 @@ PotentialInt4C::~PotentialInt4C()
     delete fjt_;
     fjt_ = nullptr;
 }
-void PotentialInt4C::compute_shell(
+void PotentialInt4C::compute_quartet(
         const SGaussianShell &sh1,
         const SGaussianShell &sh2,
         const SGaussianShell &sh3,
@@ -466,7 +468,7 @@ void PotentialInt4C::compute_shell(
     }
 }
 
-void PotentialInt4C::compute_shell1(
+void PotentialInt4C::compute_quartet1(
         const SGaussianShell &sh1,
         const SGaussianShell &sh2,
         const SGaussianShell &sh3,
@@ -474,7 +476,7 @@ void PotentialInt4C::compute_shell1(
 {
     throw std::runtime_error("Not Implemented");
 }
-void PotentialInt4C::compute_shell2(
+void PotentialInt4C::compute_quartet2(
         const SGaussianShell &sh1,
         const SGaussianShell &sh2,
         const SGaussianShell &sh3,

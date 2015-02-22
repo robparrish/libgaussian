@@ -15,7 +15,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(smolecule_nuc_other_overloads, SMolecule:
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(sbasisset_print_overloads, SBasisSet::print, 0, 1)
 
-BOOST_PYTHON_MODULE(libpygaussian)
+void export_core()
 {
     class_<std::vector<double>>("DoubleVec")
         .def(vector_indexing_suite<std::vector<double>>())
@@ -184,5 +184,4 @@ BOOST_PYTHON_MODULE(libpygaussian)
         .def("max_nprimitive", &SBasisSet::max_nprimitive)
         .def("printf", &SBasisSet::print, sbasisset_print_overloads())
         ;
-        
 }

@@ -61,11 +61,11 @@ public:
         const std::shared_ptr<SBasisSet>& basis2,
         int deriv = 0);
 
-    /// Default constructor, no initialization (except nullptr buffers)
-    Int2C();
+    /// Default constructor, no initialization
+    Int2C() {}
 
-    /// Virtual destructor (deletes buffers if needed)
-    virtual ~Int2C();
+    /// Virtual destructor 
+    virtual ~Int2C() {}
 
     // => Accessors <= //
 
@@ -75,6 +75,9 @@ public:
     const std::shared_ptr<SBasisSet>& basis2() const { return basis2_; }
     /// Maximum derivative level enabled
     int deriv() const { return deriv_; }
+
+    /// Buffer of output integrals or integral derivatives
+    const std::vector<double>& data() const { return data1_; }
     /// Buffer of output integrals or integral derivatives (you do not own this)
     double* buffer() const { return buffer1_; }
 
@@ -105,7 +108,7 @@ public:
     // => Low-Level Computers <= //
 
     /// Compute the integrals (throws if not implemented)
-    void compute_pair(
+    void compute_shell(
         size_t shell1,
         size_t shell2);
     /// Compute the integral derivatives (throws if not implemented)
@@ -118,15 +121,15 @@ public:
         size_t shell2);
 
     /// Compute the integrals (throws if not implemented)
-    virtual void compute_shell(
+    virtual void compute_pair(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2);
     /// Compute the first derivatives (throws if not implemented)
-    virtual void compute_shell1(
+    virtual void compute_pair1(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2);
     /// Compute the  second derivatives (throws if not implemented)
-    virtual void compute_shell2(
+    virtual void compute_pair2(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2);
 
@@ -135,9 +138,10 @@ protected:
     std::shared_ptr<SBasisSet> basis1_;
     std::shared_ptr<SBasisSet> basis2_;
     int deriv_;
-    /// Buffer for integrals, target (subclass allocates, super destroys)
+
+    std::vector<double> data1_; 
+    std::vector<double> data2_; 
     double* buffer1_;
-    /// Buffer for CO->SO transformations, etc (subclass allocates, super destroys)
     double* buffer2_;
 
     bool is_spherical_;
@@ -190,13 +194,13 @@ public:
         const std::shared_ptr<SBasisSet>& basis2,
         int deriv = 0);
 
-    void compute_shell(
+    void compute_pair(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
-    void compute_shell1(
+    void compute_pair1(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
-    void compute_shell2(
+    void compute_pair2(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
 
@@ -226,13 +230,13 @@ public:
         const std::shared_ptr<SBasisSet>& basis2,
         int deriv = 0);
 
-    void compute_shell(
+    void compute_pair(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
-    void compute_shell1(
+    void compute_pair1(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
-    void compute_shell2(
+    void compute_pair2(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
 
@@ -261,13 +265,13 @@ public:
         const std::shared_ptr<SBasisSet>& basis2,
         int deriv = 0);
 
-    void compute_shell(
+    void compute_pair(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
-    void compute_shell1(
+    void compute_pair1(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
-    void compute_shell2(
+    void compute_pair2(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
 
@@ -292,13 +296,13 @@ public:
         const std::shared_ptr<SBasisSet>& basis2,
         int deriv = 0);
 
-    void compute_shell(
+    void compute_pair(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
-    void compute_shell1(
+    void compute_pair1(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
-    void compute_shell2(
+    void compute_pair2(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
 
@@ -359,13 +363,13 @@ public:
         const std::shared_ptr<SMolecule>& mol,
         bool use_nuclear = true);
 
-    void compute_shell(
+    void compute_pair(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
-    void compute_shell1(
+    void compute_pair1(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
-    void compute_shell2(
+    void compute_pair2(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
 

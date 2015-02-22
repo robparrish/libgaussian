@@ -18,10 +18,12 @@ DipoleInt2C::DipoleInt2C(
     } else {
         throw std::runtime_error("DipoleInt2C: deriv too high");
     }
-    buffer1_ = new double[size];
-    buffer2_ = new double[size];
+    data1_.resize(size);
+    data2_.resize(size);
+    buffer1_ = data1_.data();
+    buffer2_ = data2_.data();
 }
-void DipoleInt2C::compute_shell(
+void DipoleInt2C::compute_pair(
     const SGaussianShell& sh1,
     const SGaussianShell& sh2)
 {
@@ -126,13 +128,13 @@ void DipoleInt2C::compute_shell(
         apply_spherical(am1, am2, s1, s2, buffer1_ + zdisp, buffer2_);
     }
 }
-void DipoleInt2C::compute_shell1(
+void DipoleInt2C::compute_pair1(
     const SGaussianShell& sh1,
     const SGaussianShell& sh2)
 {
     throw std::runtime_error("Not Implemented");
 }
-void DipoleInt2C::compute_shell2(
+void DipoleInt2C::compute_pair2(
     const SGaussianShell& sh1,
     const SGaussianShell& sh2)
 {

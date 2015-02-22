@@ -58,10 +58,10 @@ public:
         const std::shared_ptr<SBasisSet>& basis4,
         int deriv = 0);
 
-    /// Default constructor, no initialization (except nullptr buffers)
+    /// Default constructor, no initialization
     Int4C();
 
-    /// Virtual destructor (deletes buffers if needed)
+    /// Virtual destructor
     virtual ~Int4C();
 
     // => Accessors <= //
@@ -77,6 +77,8 @@ public:
     /// Maximum derivative level enabled
     int deriv() const { return deriv_; }
 
+    /// Buffer of output integrals or integral derivatives
+    const std::vector<double>& data() const { return data1_; }
     /// Buffer of output integrals or integral derivatives (you do not own this)
     double* buffer() const { return buffer1_; }
 
@@ -98,7 +100,7 @@ public:
     // => Low-Level Computers <= //
 
     /// Compute the integrals (throws if not implemented)
-    void compute_quartet(
+    void compute_shell(
         size_t shell1,
         size_t shell2,
         size_t shell3,
@@ -117,19 +119,19 @@ public:
         size_t shell4);
 
     /// Compute the integrals (throws if not implemented)
-    virtual void compute_shell(
+    virtual void compute_quartet(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2,
         const SGaussianShell& sh3,
         const SGaussianShell& sh4);
     /// Compute the first derivatives (throws if not implemented)
-    virtual void compute_shell1(
+    virtual void compute_quartet1(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2,
         const SGaussianShell& sh3,
         const SGaussianShell& sh4);
     /// Compute the  second derivatives (throws if not implemented)
-    virtual void compute_shell2(
+    virtual void compute_quartet2(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2,
         const SGaussianShell& sh3,
@@ -142,14 +144,17 @@ protected:
     std::shared_ptr<SBasisSet> basis3_;
     std::shared_ptr<SBasisSet> basis4_;
     int deriv_;
-    /// Buffer for integrals, target (subclass allocates, super destroys)
+
+    std::vector<double> data1_; 
+    std::vector<double> data2_; 
     double* buffer1_;
-    /// Buffer for CO->SO transformations (subclass allocates, super destroys)
     double* buffer2_;
 
     bool is_spherical_;
     /// Internal CO->SO transformation information
     std::vector<SAngularMomentum> am_info_;
+
+    Libint_t libint_;
 
     /**!
      * Helper to apply spherical transformations to the cartesian integrals
@@ -183,8 +188,6 @@ protected:
         bool S4,
         double* target,
         double* scratch);
-
-    Libint_t libint_;
 
 };
 
@@ -225,17 +228,17 @@ public:
     double b() const { return b_; }
     double w() const { return w_; }
 
-    void compute_shell(
+    void compute_quartet(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2,
         const SGaussianShell& sh3,
         const SGaussianShell& sh4) override;
-    void compute_shell1(
+    void compute_quartet1(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2,
         const SGaussianShell& sh3,
         const SGaussianShell& sh4) override;
-    void compute_shell2(
+    void compute_quartet2(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2,
         const SGaussianShell& sh3,

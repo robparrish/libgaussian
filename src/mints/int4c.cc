@@ -16,8 +16,6 @@ Int4C::Int4C(
     basis4_(basis4),
     deriv_(deriv)
 {
-    buffer1_ = nullptr;
-    buffer2_ = nullptr;
     is_spherical_ = true;
     am_info_ = SAngularMomentum::build(max_am());
 
@@ -32,13 +30,10 @@ Int4C::Int4C(
 }
 Int4C::Int4C()
 {
-    buffer1_ = nullptr;
-    buffer2_ = nullptr;
+    // TODO: libint nullptr 
 }
 Int4C::~Int4C()
 {
-    if (buffer1_ != nullptr) delete[] buffer1_;
-    if (buffer2_ != nullptr) delete[] buffer2_;
     free_libint(&libint_);
 }
 int Int4C::max_am() const
@@ -67,65 +62,65 @@ size_t Int4C::chunk_size() const
         basis3_->max_ncartesian() *
         basis4_->max_ncartesian();
 }
-void Int4C::compute_quartet(
-    size_t shell1,
-    size_t shell2,
-    size_t shell3,
-    size_t shell4)
-{
-    compute_shell(
-        basis1_->shell(shell1),
-        basis2_->shell(shell2),
-        basis3_->shell(shell3),
-        basis4_->shell(shell4));
-}
-void Int4C::compute_shell1(
-    size_t shell1,
-    size_t shell2,
-    size_t shell3,
-    size_t shell4)
-{
-    compute_shell1(
-        basis1_->shell(shell1),
-        basis2_->shell(shell2),
-        basis3_->shell(shell3),
-        basis4_->shell(shell4));
-}
-void Int4C::compute_shell2(
-    size_t shell1,
-    size_t shell2,
-    size_t shell3,
-    size_t shell4)
-{
-    compute_shell2(
-        basis1_->shell(shell1),
-        basis2_->shell(shell2),
-        basis3_->shell(shell3),
-        basis4_->shell(shell4));
-}
 void Int4C::compute_shell(
-    const SGaussianShell& sh1,
-    const SGaussianShell& sh2,
-    const SGaussianShell& sh3,
-    const SGaussianShell& sh4)
+    size_t shell1,
+    size_t shell2,
+    size_t shell3,
+    size_t shell4)
 {
-    throw std::runtime_error("Int4C: compute_shell not implemented for this type");
+    compute_quartet(
+        basis1_->shell(shell1),
+        basis2_->shell(shell2),
+        basis3_->shell(shell3),
+        basis4_->shell(shell4));
 }
 void Int4C::compute_shell1(
-    const SGaussianShell& sh1,
-    const SGaussianShell& sh2,
-    const SGaussianShell& sh3,
-    const SGaussianShell& sh4)
+    size_t shell1,
+    size_t shell2,
+    size_t shell3,
+    size_t shell4)
 {
-    throw std::runtime_error("Int4C: compute_shell1 not implemented for this type");
+    compute_quartet1(
+        basis1_->shell(shell1),
+        basis2_->shell(shell2),
+        basis3_->shell(shell3),
+        basis4_->shell(shell4));
 }
 void Int4C::compute_shell2(
+    size_t shell1,
+    size_t shell2,
+    size_t shell3,
+    size_t shell4)
+{
+    compute_quartet2(
+        basis1_->shell(shell1),
+        basis2_->shell(shell2),
+        basis3_->shell(shell3),
+        basis4_->shell(shell4));
+}
+void Int4C::compute_quartet(
     const SGaussianShell& sh1,
     const SGaussianShell& sh2,
     const SGaussianShell& sh3,
     const SGaussianShell& sh4)
 {
-    throw std::runtime_error("Int4C: compute_shell2 not implemented for this type");
+    throw std::runtime_error("Int4C: compute_quartet not implemented for this type");
+}
+void Int4C::compute_quartet1(
+    const SGaussianShell& sh1,
+    const SGaussianShell& sh2,
+    const SGaussianShell& sh3,
+    const SGaussianShell& sh4)
+{
+    throw std::runtime_error("Int4C: compute_quartet1 not implemented for this type");
+}
+void Int4C::compute_quartet2(
+    const SGaussianShell& sh1,
+    const SGaussianShell& sh2,
+    const SGaussianShell& sh3,
+    const SGaussianShell& sh4)
+{
+    throw std::runtime_error("Int4C: compute_quartet2 not implemented for this type");
 }
 void Int4C::apply_spherical(
     int L1,
