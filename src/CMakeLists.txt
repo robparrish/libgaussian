@@ -8,6 +8,7 @@ set(LIBGAUSSIAN_HEADERS
     mints/constants.h
     mints/fjt.h
     mints/osrecur.h
+    ob/ob.h
 )
 
 set(LIBGAUSSIAN_SOURCES
@@ -26,6 +27,7 @@ set(LIBGAUSSIAN_SOURCES
     mints/potential4c.cc
     mints/osrecur.cc
     mints/schwarz.cc
+    ob/ob.cc
 )
 
 # build static libray

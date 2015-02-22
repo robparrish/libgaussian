@@ -36,6 +36,10 @@ void export_tensor()
         .def(vector_indexing_suite<aligned_vector<double>>())
         ;
 
+    class_<std::vector<Tensor>>("TensorVec")
+        .def(vector_indexing_suite<std::vector<Tensor>>())
+        ;
+
     class_<Tensor>("Tensor", no_init)
         .def("build", &Tensor::build)
         .staticmethod("build")

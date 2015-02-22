@@ -7,6 +7,7 @@ set(LIBPYGAUSSIAN_SOURCES
     export_tensor.cc
     export_core.cc
     export_mints.cc
+    export_ob.cc
 )
 
 add_library(pygaussian SHARED ${LIBPYGAUSSIAN_SOURCES} ${LIBPYGAUSSIAN_HEADERS})
