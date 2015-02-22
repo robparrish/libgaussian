@@ -3,6 +3,7 @@ set(LIBPYGAUSSIAN_HEADERS
 
 set(LIBPYGAUSSIAN_SOURCES
     libpygaussian.cc
+    export_tensor.cc
     export_core.cc
     export_mints.cc
 )
