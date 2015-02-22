@@ -87,7 +87,7 @@ void Int2C::apply_spherical(
 
     if (S2 && L2 > 0) {
         memset(scratch,'\0',sizeof(double)*ncart1*npure2);
-        const SAngularMomentum& trans = am_info_[L1];
+        const SAngularMomentum& trans = am_info_[L2];
         size_t ncoef = trans.ncoef();
         const std::vector<int>& cart_inds  = trans.cartesian_inds();
         const std::vector<int>& pure_inds  = trans.spherical_inds();
@@ -105,7 +105,7 @@ void Int2C::apply_spherical(
 
     if (S1 && L1 > 0) {
         memset(target,'\0',sizeof(double)*npure1*nfun2);
-        const SAngularMomentum& trans = am_info_[L2];
+        const SAngularMomentum& trans = am_info_[L1];
         size_t ncoef = trans.ncoef();
         const std::vector<int>& cart_inds  = trans.cartesian_inds();
         const std::vector<int>& pure_inds  = trans.spherical_inds();
