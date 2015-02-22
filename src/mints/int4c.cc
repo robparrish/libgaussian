@@ -28,10 +28,6 @@ Int4C::Int4C(
     init_libint_base();
     init_libint(&libint_, max_am(), nprim4);
 }
-Int4C::Int4C()
-{
-    // TODO: libint nullptr 
-}
 Int4C::~Int4C()
 {
     free_libint(&libint_);

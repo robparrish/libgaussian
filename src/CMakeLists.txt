@@ -2,10 +2,11 @@ set(LIBGAUSSIAN_HEADERS
     core/molecule.h
     core/basisset.h
     core/am.h
-    mints/constants.h
-    mints/fjt.h
     mints/int2c.h
     mints/int4c.h
+    mints/schwarz.h
+    mints/constants.h
+    mints/fjt.h
     mints/osrecur.h
 )
 
@@ -24,6 +25,7 @@ set(LIBGAUSSIAN_SOURCES
     mints/int4c.cc
     mints/potential4c.cc
     mints/osrecur.cc
+    mints/schwarz.cc
 )
 
 # build static libray

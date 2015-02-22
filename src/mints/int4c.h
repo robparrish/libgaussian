@@ -58,8 +58,7 @@ public:
         const std::shared_ptr<SBasisSet>& basis4,
         int deriv = 0);
 
-    /// Default constructor, no initialization
-    Int4C();
+    //Int4C();
 
     /// Virtual destructor
     virtual ~Int4C();
@@ -222,6 +221,9 @@ public:
         double a = 1.0,
         double b = 0.0,
         double w = 0.0);
+
+    //PotentialInt4C() {}
+
     virtual ~PotentialInt4C();
 
     double a() const { return a_; }

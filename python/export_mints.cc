@@ -3,11 +3,13 @@
 #include <boost/python/overloads.hpp>
 #include <mints/int2c.h>
 #include <mints/int4c.h>
+#include <mints/schwarz.h>
 
 using namespace libgaussian;
 using namespace boost::python;
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(potential2c_nuc_overloads, PotentialInt2C::set_nuclear_potential, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(schwarz_print_overloads, SchwarzSieve::print, 0, 1)
 
 void export_mints()
 {
@@ -132,6 +134,27 @@ void export_mints()
         .def("a", &PotentialInt4C::a)
         .def("b", &PotentialInt4C::b)
         .def("w", &PotentialInt4C::w)
+        ;
+
+    class_<SchwarzSieve, std::shared_ptr<SchwarzSieve>>("SchwarzSieve", init<
+        const std::shared_ptr<SBasisSet>&,
+        const std::shared_ptr<SBasisSet>&,
+        double,
+        optional<
+        double,
+        double,
+        double
+        >>())
+        .def("symmetric", &SchwarzSieve::symmetric)
+        .def("basis1", &SchwarzSieve::basis1, return_value_policy<reference_existing_object>())
+        .def("basis2", &SchwarzSieve::basis2, return_value_policy<reference_existing_object>())
+        .def("cutoff", &SchwarzSieve::cutoff)
+        .def("a", &SchwarzSieve::a)
+        .def("b", &SchwarzSieve::b)
+        .def("w", &SchwarzSieve::w)
+        .def("printf", &SchwarzSieve::print, schwarz_print_overloads())
+        .def("shell_estimate_PQPQ", &SchwarzSieve::shell_estimate_PQPQ)
+        .def("shell_estimate_PQRS", &SchwarzSieve::shell_estimate_PQRS)
         ;
 
 }

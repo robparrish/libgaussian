@@ -194,6 +194,8 @@ public:
         const std::shared_ptr<SBasisSet>& basis2,
         int deriv = 0);
 
+    //OverlapInt2C() {}
+
     void compute_pair(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
@@ -230,6 +232,8 @@ public:
         const std::shared_ptr<SBasisSet>& basis2,
         int deriv = 0);
 
+    //DipoleInt2C() {}
+
     void compute_pair(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
@@ -265,6 +269,8 @@ public:
         const std::shared_ptr<SBasisSet>& basis2,
         int deriv = 0);
 
+    //QuadrupoleInt2C() {}
+
     void compute_pair(
         const SGaussianShell& sh1,
         const SGaussianShell& sh2) override;
@@ -295,6 +301,8 @@ public:
         const std::shared_ptr<SBasisSet>& basis1,
         const std::shared_ptr<SBasisSet>& basis2,
         int deriv = 0);
+
+    //KineticInt2C() {}
 
     void compute_pair(
         const SGaussianShell& sh1,
@@ -337,6 +345,8 @@ public:
         double a = 1.0,
         double b = 0.0,
         double w = 0.0);
+
+    //PotentialInt2C() {}
 
     ~PotentialInt2C();
 
