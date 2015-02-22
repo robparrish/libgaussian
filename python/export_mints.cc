@@ -153,6 +153,7 @@ void export_mints()
         .def("b", &SchwarzSieve::b)
         .def("w", &SchwarzSieve::w)
         .def("printf", &SchwarzSieve::print, schwarz_print_overloads())
+        .def("shell_pairs", &SchwarzSieve::shell_pairs, return_value_policy<reference_existing_object>())
         .def("shell_estimate_PQPQ", &SchwarzSieve::shell_estimate_PQPQ)
         .def("shell_estimate_PQRS", &SchwarzSieve::shell_estimate_PQRS)
         ;
