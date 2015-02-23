@@ -15,7 +15,7 @@ AODFERI::AODFERI(
     DFERI(sieve,auxiliary)
 {
 }
-Tensor AODFERI::compute_ao_task_core(double power) 
+Tensor AODFERI::compute_ao_task_core(double power) const
 {
     // => Pair state vector <= //
 
@@ -99,7 +99,7 @@ Tensor AODFERI::compute_ao_task_core(double power)
     
     return B;
 }
-Tensor AODFERI::compute_ao_task_disk(double power) 
+Tensor AODFERI::compute_ao_task_disk(double power) const
 {
     // TODO
     throw std::runtime_error("Not implemented.");

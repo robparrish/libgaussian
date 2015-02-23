@@ -170,7 +170,7 @@ public:
      *
      * @return the DF integrals as a CoreTensor
      **/
-    tensor::Tensor compute_ao_task_core(double power = -1.0/2.0);
+    tensor::Tensor compute_ao_task_core(double power = -1.0/2.0) const;
     /**!
      * Compute the AO-basis fitted DF integrals with the striping Q x pq, where
      * pq is sieved reduced triangular indexing (by shell pair) from the
@@ -180,7 +180,7 @@ public:
      *
      * @return the DF integrals as a DiskTensor
      **/
-    tensor::Tensor compute_ao_task_disk(double power = -1.0/2.0);
+    tensor::Tensor compute_ao_task_disk(double power = -1.0/2.0) const;
 
 protected:
 
@@ -337,17 +337,14 @@ public:
     /**!
      * Compute all queued tasks in this MODFERI as kCore
      *
-     * NOTE: the I/O for MODFERIs is usually so minimal compared to the FLOPs
-     * of (a) forming the 3-index integrals, (b) the SCF the necessarily
-     * preceded this and/or (c) the operations to be done with the MODFERIs
-     * that there is no significant speed gain affiliated with writing a
-     * separate set of routines to generate core tensors. This routine just
-     * calls the kDisk version, and then stripes the tensors out to kCore.
+     * NOTE: the IOPs for MODFERIs are usually minimal compared to the FLOPs
+     * needed to generate or use them. Therefore, this routine just calls the
+     * disk routine and then slices the result to core.
      *
      * @return map from key to Tensor (kCore) with the resultant 3-index
      * tensors requested above
      **/
-    std::map<std::string, tensor::Tensor> compute_mo_tasks_core();
+    std::map<std::string, tensor::Tensor> compute_mo_tasks_core() const;
         
     /**!
      * Compute all queued tasks in this MODFERI as kDisk
@@ -357,7 +354,7 @@ public:
      * @return map from key to Tensor (kDisk) with the resultant 3-index
      * tensors requested above
      **/
-    std::map<std::string, tensor::Tensor> compute_mo_tasks_disk();
+    std::map<std::string, tensor::Tensor> compute_mo_tasks_disk() const;
 
 protected: 
 
@@ -367,6 +364,8 @@ protected:
     std::map<std::string, double> powers_;
     std::map<std::string, std::string> stripings_;
 
+    std::map<std::string, tensor::Tensor> transform() const;
+    std::map<std::string, tensor::Tensor> fit(std::map<std::string, tensor::Tensor>& Aias) const;
 };
 
 } // namespace libgaussian
