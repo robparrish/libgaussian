@@ -30,6 +30,7 @@ set(LIBGAUSSIAN_SOURCES
     mints/schwarz.cc
     ob/ob.cc
     df/df.cc
+    df/aodf.cc
 )
 
 # build static libray

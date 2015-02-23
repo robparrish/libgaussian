@@ -110,8 +110,6 @@ protected:
     double metric_condition_;
 };
 
-#if 0
-
 /**!
  * Class AODFERI produces fitted 3-index DF integrals in the AO basis, with
  * Schwarz sparsity and permutational symmetry built in by shell
@@ -155,9 +153,8 @@ public:
      * Verbatim constructor, copies fields below
      **/
     AODFERI(
-        const std::shared_ptr<SBasisSet>& primary,
-        const std::shared_ptr<SBasisSet>& auxiliary,
-        const std::shared_ptr<SchwarzSieve>& sieve);
+        const std::shared_ptr<SchwarzSieve>& sieve,
+        const std::shared_ptr<SBasisSet>& primary);
 
     /// Default constructor, no initialization
     AODFERI() {}
@@ -170,18 +167,20 @@ public:
      * SchwarzSieve object
      * @return the DF integrals as a CoreTensor
      **/
-    Tensor compute_ao_task_core(double power = -1.0/2.0);
+    tensor::Tensor compute_ao_task_core(double power = -1.0/2.0);
     /**!
      * Compute the AO-basis fitted DF integrals with the striping Q x pq, where
      * pq is sieved reduced triangular indexing (by shell pair) from the
      * SchwarzSieve object
      * @return the DF integrals as a DiskTensor
      **/
-    Tensor compute_ao_task_disk(double power = -1.0/2.0);
+    tensor::Tensor compute_ao_task_disk(double power = -1.0/2.0);
 
 protected:
 
 };
+
+#if 0
 
 /**!
  * Class MODFERI produces fitted 3-index DF integrals with orbital
