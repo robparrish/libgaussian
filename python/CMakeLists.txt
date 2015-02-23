@@ -8,6 +8,7 @@ set(LIBPYGAUSSIAN_SOURCES
     export_core.cc
     export_mints.cc
     export_ob.cc
+    export_df.cc
 )
 
 add_library(pygaussian SHARED ${LIBPYGAUSSIAN_SOURCES} ${LIBPYGAUSSIAN_HEADERS})

@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <tensor.h>
+#include <tensor/tensor.h>
 
 namespace libgaussian {
 
@@ -41,9 +41,8 @@ public:
      * Verbatim constructor, copies fields below
      **/
     DFERI(
-        const std::shared_ptr<SBasisSet>& primary,
-        const std::shared_ptr<SBasisSet>& auxiliary,
-        const std::shared_ptr<SchwarzSieve>& sieve);
+        const std::shared_ptr<SchwarzSieve>& sieve,
+        const std::shared_ptr<SBasisSet>& auxiliary);
 
     /// Default constructor, no initialization
     DFERI() {}
@@ -53,21 +52,21 @@ public:
 
     // => Accessors <= //
 
+    /// The SchwarzSieve to guide significant primary shell pairs in sieved triangular indexing
+    const std::shared_ptr<SchwarzSieve>& sieve() const { return sieve_; }
     /// The primary basis set (size np)
     const std::shared_ptr<SBasisSet>& primary() const { return primary_; }
     /// The auxilairy basis set (size nQ)
     const std::shared_ptr<SBasisSet>& auxiliary() const { return auxiliary_; }
-    /// The SchwarzSieve to guide significant shell pairs in sieved triangular indexing
-    const std::shared_ptr<SBasisSet>& sieve() const { return sieve_; }
-    /// The allowed memory usage in doubles
+    /// The allowed memory usage in doubles (default 1 GB)
     size_t doubles() const { return doubles_; }
     /// The prefactor of 1/r_12 (default 1.0)
     double a() const { return a_; }
-    /// The prefactor of in erf(w r_12) to apply (default 0.0)
+    /// The prefactor of in erf(w r_12) (default 0.0)
     double b() const { return b_; }
-    /// The Ewald parameter in erf(w r_12) / r_12 to apply (default 0.0)
+    /// The Ewald parameter in erf(w r_12) / r_12 (default 0.0)
     double w() const { return w_; }
-    /// The maximum effective relative condition number to allow in the metric
+    /// The maximum effective relative condition number to allow in the metric (default 1.0E-12)
     double metric_condition() const { return metric_condition_; }
 
     // => Setters <= //
@@ -84,7 +83,7 @@ public:
      * Compute the metric matrix (A|B)
      * @return the metric matrix as kCore
      **/
-    Tensor metric() const;
+    tensor::Tensor metric_core() const;
 
     /**!
      * Compute the metric matrix (A|B)^power by eigendecomposition and
@@ -94,15 +93,15 @@ public:
      *  metric
      * @return the metric matrix power as kCore
      **/
-    Tensor metric_power(
+    tensor::Tensor metric_power_core(
         double power = -1.0/2.0, 
-        double condition) const;
+        double condition = 1.0E-12) const;
 
 protected:
 
+    std::shared_ptr<SchwarzSieve> sieve_;
     std::shared_ptr<SBasisSet> primary_;
     std::shared_ptr<SBasisSet> auxiliary_;
-    std::shared_ptr<SchwarzSieve> sieve_;
 
     size_t doubles_;
     double a_;
@@ -110,6 +109,8 @@ protected:
     double w_;
     double metric_condition_;
 };
+
+#if 0
 
 /**!
  * Class AODFERI produces fitted 3-index DF integrals in the AO basis, with
@@ -348,6 +349,8 @@ protected:
     std::map<std::string, std::string> stripings_;
 
 };
+
+#endif
 
 } // namespace libgaussian
 

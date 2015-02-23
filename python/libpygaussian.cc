@@ -7,6 +7,7 @@ void export_tensor();
 void export_core();
 void export_mints();
 void export_ob();
+void export_df();
 
 BOOST_PYTHON_MODULE(libpygaussian)
 {
@@ -15,4 +16,5 @@ BOOST_PYTHON_MODULE(libpygaussian)
     export_core();        
     export_mints();        
     export_ob();        
+    export_df();        
 }

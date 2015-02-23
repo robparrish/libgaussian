@@ -9,6 +9,7 @@ set(LIBGAUSSIAN_HEADERS
     mints/fjt.h
     mints/osrecur.h
     ob/ob.h
+    df/df.h
 )
 
 set(LIBGAUSSIAN_SOURCES
@@ -28,6 +29,7 @@ set(LIBGAUSSIAN_SOURCES
     mints/osrecur.cc
     mints/schwarz.cc
     ob/ob.cc
+    df/df.cc
 )
 
 # build static libray
