@@ -30,6 +30,14 @@ void MODFERI::add_mo_task(
     double power,
     const std::string& striping)
 {
+    if (Cls_.count(key)) throw std::runtime_error("MODFERI: Duplicate key " + key);
+
+    if (Cl.rank() != 2) throw std::runtime_error("MODFERI:: Cl must be rank 2");
+    if (Cl.dim(0) != primary_->nfunction()) throw std::runtime_error("MODFERI: Cl must be nbf x norb");
+
+    if (Cr.rank() != 2) throw std::runtime_error("MODFERI:: Cr must be rank 2");
+    if (Cr.dim(0) != primary_->nfunction()) throw std::runtime_error("MODFERI: Cr must be nbf x norb");
+
     std::vector<std::string> valid = { "lrQ", "rlQ",  "Qlr", "Qrl" };
     bool found = false;
     for (auto x : valid) {
@@ -45,16 +53,17 @@ void MODFERI::add_mo_task(
 }
 std::map<std::string, Tensor> MODFERI::compute_mo_tasks_core() const
 {
-    std::map<std::string, Tensor> disk = compute_mo_tasks_disk();
-
     size_t memory = 0L;
     for (auto key : keys_) {
-        memory += disk[key].numel(); 
+        memory += auxiliary_->nfunction() * 
+            Cls_.at(key).dim(1) *
+            Crs_.at(key).dim(1);
     }
     if (memory > doubles()) throw std::runtime_error("MODFERI out of memory (switch to disk algorithm)");
-    
+
+    std::map<std::string, Tensor> disk = compute_mo_tasks_disk();
+
     std::map<std::string, Tensor> core;
-    
     for (auto key : keys_) {
         core[key] = disk[key].clone(kCore);
     }
