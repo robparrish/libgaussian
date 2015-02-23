@@ -1,59 +1,18 @@
 #include <math.h>
-#include <libmints/int4c.h>
-#include <libmints/sieve.h>
+#include <mints/int4c.h>
+#include <mints/schwarz.h>
 #include "df.h"
+
+#include <omp.h>
+
+using namespace tensor;
 
 namespace libgaussian {
 
-DFERI::DFERI(
-    const std::shared_ptr<SchwarzSieve>& sieve,
-    const std::shared_ptr<SBasisSet>& auxiliary,
-    sieve_(sieve)
-    primary_(sieve->basis1()),
-    auxiliary_(auxiliary),
-    sieve_(sieve)
-{
-    if (!sieve_->is_symmetric()) throw std::runtime_error("DFERI sieve must be symmetric.");
-
-    doubles_ = 256000000L; // 1 GB
-    a_ = 1.0;
-    b_ = 0.0;
-    w_ = 0.0;
-    metric_condition_ = 1.0E-12;
-}
-Tensor DFERI::metric_core() const
-{
-    size_t naux = auxiliary_->nshell();
-    
-}
-Tensor DFERI::metric_power_core(
-    double power,
-    double condition) const 
-{
-    // TODO
-}
-
-AODFERI::AODFERI(
-    const std::shared_ptr<SBasisSet>& primary,
-    const std::shared_ptr<SBasisSet>& auxiliary,
-    const std::shared_ptr<SchwarzSieve>& sieve) :
-    DFERI(primary,auxiliary,sieve)
-{
-}
-Tensor AODFERI::compute_ao_task_core(double power) 
-{
-    // TODO
-}
-Tensor AODFERI::compute_ao_task_disk(double power) 
-{
-    // TODO
-}
-
 MODFERI::MODFERI(
-    const std::shared_ptr<SBasisSet>& primary,
-    const std::shared_ptr<SBasisSet>& auxiliary,
-    const std::shared_ptr<SchwarzSieve>& sieve) :
-    DFERI(primary,auxiliary,sieve)
+    const std::shared_ptr<SchwarzSieve>& sieve,
+    const std::shared_ptr<SBasisSet>& auxiliary) :
+    DFERI(sieve,auxiliary)
 {
 }
 void MODFERI::clear()
@@ -84,9 +43,28 @@ void MODFERI::add_mo_task(
     powers_[key] = power;
     stripings_[key] = striping;
 }
-std::map<std::string, Tensor> MODFERI::compute_mo_tasks()
+std::map<std::string, Tensor> MODFERI::compute_mo_tasks_core()
+{
+    std::map<std::string, Tensor> disk = compute_mo_tasks_disk();
+
+    size_t memory = 0L;
+    for (auto key : keys_) {
+        memory += disk[key].numel(); 
+    }
+    if (memory > doubles()) throw std::runtime_error("MODFERI out of memory (switch to disk algorithm)");
+    
+    std::map<std::string, Tensor> core;
+    
+    for (auto key : keys_) {
+        core[key] = disk[key].clone(kCore);
+    }
+
+    return core;
+}
+std::map<std::string, Tensor> MODFERI::compute_mo_tasks_disk()
 {
     // TODO
+    throw std::runtime_error("Not implemented.");
 }
 
 } // namespace libgaussian

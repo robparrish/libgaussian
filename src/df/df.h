@@ -165,6 +165,9 @@ public:
      * Compute the AO-basis fitted DF integrals with the striping Q x pq, where
      * pq is sieved reduced triangular indexing (by shell pair) from the
      * SchwarzSieve object
+     *
+     * Requires (nQ x npq + 2 nQ x nQ) memory, throws if not available
+     *
      * @return the DF integrals as a CoreTensor
      **/
     tensor::Tensor compute_ao_task_core(double power = -1.0/2.0);
@@ -172,6 +175,9 @@ public:
      * Compute the AO-basis fitted DF integrals with the striping Q x pq, where
      * pq is sieved reduced triangular indexing (by shell pair) from the
      * SchwarzSieve object
+     *
+     * Requires (3 nQ x nQ) memory, throws if not available
+     *
      * @return the DF integrals as a DiskTensor
      **/
     tensor::Tensor compute_ao_task_disk(double power = -1.0/2.0);
@@ -179,8 +185,6 @@ public:
 protected:
 
 };
-
-#if 0
 
 /**!
  * Class MODFERI produces fitted 3-index DF integrals with orbital
@@ -210,7 +214,7 @@ protected:
  *  // Queue task with key "biaQ"
  *  modf.add_mo_task("biaQ", C1, C2, -1.0/2.0, "lrQ");
  *  // Compute task(s) - Heavy operation
- *  std::map<std::string Tensor> results = modf.compute_mo_tasks();
+ *  std::map<std::string Tensor> results = modf.compute_mo_tasks_disk();
  *  // Extract the result Tensor (kDisk) by key
  *  Tensor biaQ = results["biaQ"];
  *  // Do stuff with the tensor
@@ -248,7 +252,7 @@ protected:
  *  // Queue another taks with key "baiQ"
  *  modf.add_mo_task("baiQ", C1, C2, -1.0/2.0, "rlQ");
  *  // Compute task(s) - Heavy operation
- *  std::map<std::string Tensor> results = modf.compute_mo_tasks();
+ *  std::map<std::string Tensor> results = modf.compute_mo_tasks_disk();
  *  // Extract the result Tensors (kDisk) by key
  *  Tensor biaQ = results["biaQ"];
  *  Tensor baiQ = results["baiQ"];
@@ -289,9 +293,8 @@ public:
      * Verbatim constructor, copies fields below
      **/
     MODFERI(
-        const std::shared_ptr<SBasisSet>& primary,
-        const std::shared_ptr<SBasisSet>& auxiliary,
-        const std::shared_ptr<SchwarzSieve>& sieve);
+        const std::shared_ptr<SchwarzSieve>& sieve,
+        const std::shared_ptr<SBasisSet>& auxiliary);
 
     /// Default constructor, no initialization
     MODFERI() {}
@@ -326,30 +329,45 @@ public:
      **/
     void add_mo_task(
         const std::string& key,
-        const Tensor& Cl,
-        const Tensor& Cr,
+        const tensor::Tensor& Cl,
+        const tensor::Tensor& Cr,
         double power = -1.0/2.0,
         const std::string& striping = "lrQ");
         
     /**!
-     * Compute all queued tasks in this MODFERI
+     * Compute all queued tasks in this MODFERI as kCore
+     *
+     * NOTE: the I/O for MODFERIs is usually so minimal compared to the FLOPs
+     * of (a) forming the 3-index integrals, (b) the SCF the necessarily
+     * preceded this and/or (c) the operations to be done with the MODFERIs
+     * that there is no significant speed gain affiliated with writing a
+     * separate set of routines to generate core tensors. This routine just
+     * calls the kDisk version, and then stripes the tensors out to kCore.
+     *
+     * @return map from key to Tensor (kCore) with the resultant 3-index
+     * tensors requested above
+     **/
+    std::map<std::string, tensor::Tensor> compute_mo_tasks_core();
+        
+    /**!
+     * Compute all queued tasks in this MODFERI as kDisk
+     *
+     *
      *
      * @return map from key to Tensor (kDisk) with the resultant 3-index
      * tensors requested above
      **/
-    std::map<std::string, Tensor> compute_mo_tasks();
+    std::map<std::string, tensor::Tensor> compute_mo_tasks_disk();
 
 protected: 
 
     std::vector<std::string> keys_;
-    std::map<std::string, Tensor> Cls_;
-    std::map<std::string, Tensor> Crs_;
+    std::map<std::string, tensor::Tensor> Cls_;
+    std::map<std::string, tensor::Tensor> Crs_;
     std::map<std::string, double> powers_;
     std::map<std::string, std::string> stripings_;
 
 };
-
-#endif
 
 } // namespace libgaussian
 

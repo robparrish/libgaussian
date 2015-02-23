@@ -31,6 +31,7 @@ set(LIBGAUSSIAN_SOURCES
     ob/ob.cc
     df/df.cc
     df/aodf.cc
+    df/modf.cc
 )
 
 # build static libray
