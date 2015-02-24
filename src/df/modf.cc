@@ -91,9 +91,8 @@ std::map<std::string, tensor::Tensor> MODFERI::transform() const
     // => First-Half Transform Merging <= //
 
     std::vector<std::vector<std::string>> tasks;
-    for (size_t kind = 0; kind < keys_.size(); kind++) {
-        std::string key = keys_[kind];
-        bool found = true;
+    for (const std::string& key : keys_) {
+        bool found = false;
         for (size_t tind = 0; tind < tasks.size(); tind++) {
             if (Cls_.at(key) == Cls_.at(tasks[tind][0])) {
                 tasks[tind].push_back(key);
@@ -250,9 +249,8 @@ std::map<std::string, tensor::Tensor> MODFERI::fit(const std::map<std::string, t
     // => Metric Power Merging <= //
 
     std::vector<std::vector<std::string>> tasks;
-    for (size_t kind = 0; kind < keys_.size(); kind++) {
-        std::string key = keys_[kind];
-        bool found = true;
+    for (const std::string& key : keys_) {
+        bool found = false;
         for (size_t tind = 0; tind < tasks.size(); tind++) {
             if (powers_.at(key) == powers_.at(tasks[tind][0])) {
                 tasks[tind].push_back(key);
@@ -295,7 +293,7 @@ std::map<std::string, tensor::Tensor> MODFERI::fit(const std::map<std::string, t
             }
 
             if (stripe == "lrQ" || stripe == "rlQ") {
-                targets[key] = Tensor::build(kDisk, key, {naux,n1,n2});
+                targets[key] = Tensor::build(kDisk, key, {n1,n2,naux});
                 size_t rem = doubles() - naux * naux;
                 size_t max1 = rem / (n2 * naux);
                 max1 = std::min(max1,n1);
@@ -311,7 +309,7 @@ std::map<std::string, tensor::Tensor> MODFERI::fit(const std::map<std::string, t
                     targets[key]({{i1,i1+size1},{0,n2},{0,naux}}) = R({{0,size1},{0,n2},{0,naux}});
                 }
             } else {
-                targets[key] = Tensor::build(kDisk, key, {n1,n2,naux});
+                targets[key] = Tensor::build(kDisk, key, {naux,n1,n2});
                 size_t rem = doubles() - naux * naux;
                 size_t max1 = rem / (n2 * naux);
                 max1 = std::min(max1,n1);

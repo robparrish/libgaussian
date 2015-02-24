@@ -1,6 +1,7 @@
 #include <memory>
 #include <boost/python.hpp>
 #include <boost/python/overloads.hpp>
+#include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <tensor/tensor.h>
 
@@ -38,6 +39,10 @@ void export_tensor()
 
     class_<std::vector<Tensor>>("TensorVec")
         .def(vector_indexing_suite<std::vector<Tensor>>())
+        ;
+
+    class_<std::map<std::string, Tensor>>("TensorMap")
+        .def(map_indexing_suite<std::map<std::string, Tensor>>())
         ;
 
     class_<Tensor>("Tensor", no_init)

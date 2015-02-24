@@ -45,7 +45,7 @@ Tensor AODFERI::compute_ao_task_core(double power) const
     size_t required = 0L;
     required += 2L * naux * naux;
     required += naux * npq; 
-    if (required < doubles()) throw std::runtime_error("AODFERI needs 2J + Apq memory for core.");
+    if (required > doubles()) throw std::runtime_error("AODFERI needs 2J + Apq memory for core.");
 
     // => Inverse Metric <= //
         
@@ -129,7 +129,7 @@ Tensor AODFERI::compute_ao_task_disk(double power) const
     size_t required = 0L;
     required += 2L * naux * naux;
     required += naux * primary_->max_nfunction() * primary_->max_nfunction(); 
-    if (required < doubles()) throw std::runtime_error("AODFERI needs 2J + nA * maxp^2 memory for core.");
+    if (required > doubles()) throw std::runtime_error("AODFERI needs 2J + nA * maxp^2 memory for core.");
 
     size_t rem = doubles() - 2L * naux * naux;
     size_t maxpq = rem / naux;
