@@ -365,7 +365,7 @@ protected:
     std::map<std::string, std::string> stripings_;
 
     std::map<std::string, tensor::Tensor> transform() const;
-    std::map<std::string, tensor::Tensor> fit(std::map<std::string, tensor::Tensor>& Aias) const;
+    std::map<std::string, tensor::Tensor> fit(const std::map<std::string, tensor::Tensor>& Aias) const;
 };
 
 } // namespace libgaussian

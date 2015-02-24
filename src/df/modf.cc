@@ -245,7 +245,7 @@ std::map<std::string, tensor::Tensor> MODFERI::transform() const
 
     return targets;
 }
-std::map<std::string, tensor::Tensor> MODFERI::fit(std::map<std::string, tensor::Tensor>& Aias) const
+std::map<std::string, tensor::Tensor> MODFERI::fit(const std::map<std::string, tensor::Tensor>& Aias) const
 {
     // => Metric Power Merging <= //
 
@@ -280,7 +280,7 @@ std::map<std::string, tensor::Tensor> MODFERI::fit(std::map<std::string, tensor:
 
         for (const std::string& key : task) {
             
-            Tensor& Aia = Aias.at(key);
+            const Tensor& Aia = Aias.at(key);
             const Tensor& Cl = Cls_.at(key);
             const Tensor& Cr = Crs_.at(key);
             const std::string& stripe = stripings_.at(key);
