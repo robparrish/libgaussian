@@ -142,7 +142,7 @@ Tensor AODFERI::compute_ao_task_disk(double power) const
     for (size_t ind = 0, pqoff = 0; ind < shell_pairs.size(); ind++) {
         size_t pqstart = pqstarts[PQtasks.back()];
         size_t pqstop = pqstarts[ind];
-        if (pqstart - pqstop > maxpq) {
+        if (pqstop - pqstart > maxpq) {
             PQtasks.push_back(ind);
         }
     }
