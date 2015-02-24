@@ -186,7 +186,7 @@ std::map<std::string, tensor::Tensor> MODFERI::transform() const
         
         #pragma omp parallel for schedule(dynamic)
         for (size_t APQtask = 0; APQtask < APQsize; APQtask++) {
-            size_t A  = APQtask / PQsize;
+            size_t A  = APQtask / PQsize + Astart;
             size_t PQ = APQtask % PQsize;
             size_t P = shell_pairs[PQ].first; 
             size_t Q = shell_pairs[PQ].second; 
