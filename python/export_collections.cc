@@ -1,11 +1,14 @@
 #include <memory>
 #include <boost/python.hpp>
+#include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <tensor/tensor.h>
 #include <core/am.h>
 #include <core/molecule.h>
 #include <core/basisset.h>
 
 using namespace libgaussian;
+using namespace tensor;
 using namespace boost::python;
 
 void export_collections()
@@ -28,8 +31,28 @@ void export_collections()
         .def(vector_indexing_suite<std::vector<size_t>>())
         ;
 
+    class_<std::vector<std::vector<size_t>>>("Size_tVecVec")
+        .def(vector_indexing_suite<std::vector<std::vector<size_t>>>())
+        ;
+
     class_<std::vector<double>>("DoubleVec")
         .def(vector_indexing_suite<std::vector<double>>())
+        ;
+
+    class_<std::vector<std::string>>("StringVec")
+        .def(vector_indexing_suite<std::vector<std::string>>())
+        ;
+
+    class_<aligned_vector<double>>("AlignedVec")
+        .def(vector_indexing_suite<aligned_vector<double>>())
+        ;
+
+    class_<std::vector<Tensor>>("TensorVec")
+        .def(vector_indexing_suite<std::vector<Tensor>>())
+        ;
+
+    class_<std::map<std::string, Tensor>>("TensorMap")
+        .def(map_indexing_suite<std::map<std::string, Tensor>>())
         ;
 
     class_<std::vector<SAtom>>("SAtomVec")

@@ -1,14 +1,14 @@
 #include <memory>
 #include <boost/python.hpp>
 #include <boost/python/overloads.hpp>
-#include <boost/python/suite/indexing/map_indexing_suite.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <tensor/tensor.h>
 
 using namespace tensor;
 using namespace boost::python;
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tensor_print_ov, Tensor::print, 0, 4)
+
+aligned_vector<double>& (Tensor::*data)() = &Tensor::data;
 
 void export_tensor()
 {
@@ -25,26 +25,6 @@ void export_tensor()
         .value("kDescending", kDescending)
         ;
 
-    class_<Dimension>("Dimension")
-        .def(vector_indexing_suite<Dimension>())
-        ;
-
-    class_<Dimension>("Indices")
-        .def(vector_indexing_suite<Indices>())
-        ;
-
-    class_<aligned_vector<double>>("AlignedVec")
-        .def(vector_indexing_suite<aligned_vector<double>>())
-        ;
-
-    class_<std::vector<Tensor>>("TensorVec")
-        .def(vector_indexing_suite<std::vector<Tensor>>())
-        ;
-
-    class_<std::map<std::string, Tensor>>("TensorMap")
-        .def(map_indexing_suite<std::map<std::string, Tensor>>())
-        ;
-
     class_<Tensor>("Tensor", no_init)
         .def("build", &Tensor::build)
         .staticmethod("build")
@@ -59,11 +39,12 @@ void export_tensor()
         .def(self == self)
         .def(self != self)
         .def("printf", &Tensor::print,tensor_print_ov())
-        //.def("data", &Tensor::data)
+        .def("data", data, return_value_policy<reference_existing_object>())
         .def("norm", &Tensor::norm)
         .def("zero", &Tensor::zero)
         .def("scale", &Tensor::scale)
         .def("copy", &Tensor::copy)
+        .def("slice", &Tensor::slice)
         .def("permute", &Tensor::permute)
         .def("contract", &Tensor::contract)
         .def("gemm", &Tensor::gemm)
