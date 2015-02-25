@@ -139,7 +139,7 @@ def parse_input():
             help="""Path to the location of LibInt. This location should have include and lib in it.""")
 
     group = parser.add_argument_group('LibTensor')
-    group.add_argument('--libtensor',
+    group.add_argument('--libambit',
             action='store',
             default=None,
             help="""Path to the location of LibTensor. This location should have include and lib in it.""")
@@ -432,8 +432,8 @@ def gen_cmake_command(args):
     if args.libint:
         command += ' -DLIBINT={0}'.format(args.libint)
 
-    if args.libtensor:
-        command += ' -DLIBTENSOR={0}'.format(args.libtensor)
+    if args.libambit:
+        command += ' -DLIBAMBIT={0}'.format(args.libambit)
 
     if args.extra_cc_flags:
         command += ' -DEXTRA_C_FLAGS="%s"' % args.extra_cc_flags

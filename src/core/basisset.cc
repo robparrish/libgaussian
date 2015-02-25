@@ -1,7 +1,7 @@
 #include <math.h>
 #include "basisset.h"
 
-namespace libgaussian {
+namespace lightspeed {
 
 SBasisSet::SBasisSet(
     const std::string& name,
@@ -106,4 +106,4 @@ void SBasisSet::print(FILE* fh) const
     fprintf(fh,"\n");
 }
 
-} // namespace libgaussian
+} // namespace lightspeed

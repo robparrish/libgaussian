@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <tensor/tensor.h>
+#include <ambit/tensor.h>
 
-namespace libgaussian {
+namespace lightspeed {
 
 class SMolecule;
 class SBasisSet;
@@ -73,7 +73,7 @@ public:
      * @param scale the scale of integrals to add into S
      **/
     virtual void compute_S(
-        tensor::Tensor& S,
+        ambit::Tensor& S,
         double scale = 1.0) const;
 
      /**!
@@ -88,7 +88,7 @@ public:
      * @param scale the scale of integrals to add into T
      **/
     virtual void compute_T(
-        tensor::Tensor& T,
+        ambit::Tensor& T,
         double scale = 1.0) const;
 
      /**!
@@ -105,7 +105,7 @@ public:
      * @param scale the scales of integrals to add into X
      **/
     virtual void compute_X(
-        std::vector<tensor::Tensor>& Xs,
+        std::vector<ambit::Tensor>& Xs,
         const std::vector<double>& origin = {0.0, 0.0, 0.0},
         const std::vector<double>& scale = {1.0, 1.0, 1.0}) const;
 
@@ -124,12 +124,12 @@ public:
      * @param scale the scales of integrals to add into Q
      **/
     virtual void compute_Q(
-        std::vector<tensor::Tensor>& Xs,
+        std::vector<ambit::Tensor>& Xs,
         const std::vector<double>& origin = {0.0, 0.0, 0.0},
         const std::vector<double>& scale = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}) const;
 
     virtual void compute_V(
-        tensor::Tensor& V,
+        ambit::Tensor& V,
         const std::vector<double>& xs,
         const std::vector<double>& ys,
         const std::vector<double>& zs,
@@ -151,7 +151,7 @@ public:
      * @param scale the scale of integrals to add into T
      **/
     virtual void compute_V_nuclear(
-        tensor::Tensor& V,
+        ambit::Tensor& V,
         const std::shared_ptr<SMolecule> mol,
         bool use_nuclear = true,
         double a = 1.0,
@@ -211,6 +211,6 @@ protected:
 
 };
 
-} // namespace libgaussian
+} // namespace lightspeed
 
 #endif

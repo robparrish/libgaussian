@@ -2,7 +2,7 @@
 #include <tuple>
 #include "am.h"
 
-namespace libgaussian {
+namespace lightspeed {
 
 SAngularMomentum::SAngularMomentum(int am) :
     am_(am)
@@ -200,4 +200,4 @@ void SAngularMomentum::build_spherical()
     }
 }
 
-} // namespace libgaussian
+} // namespace lightspeed

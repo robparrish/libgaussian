@@ -1,8 +1,8 @@
-set(LIBPYGAUSSIAN_HEADERS
+set(LIBPYLIGHTSPEED_HEADERS
 )
 
-set(LIBPYGAUSSIAN_SOURCES
-    libpygaussian.cc
+set(LIBPYLIGHTSPEED_SOURCES
+    python.cc
     export_collections.cc
     export_tensor.cc
     export_core.cc
@@ -11,9 +11,9 @@ set(LIBPYGAUSSIAN_SOURCES
     export_df.cc
 )
 
-add_library(pygaussian SHARED ${LIBPYGAUSSIAN_SOURCES} ${LIBPYGAUSSIAN_HEADERS})
+add_library(pylightspeed SHARED ${LIBPYLIGHTSPEED_SOURCES} ${LIBPYLIGHTSPEED_HEADERS})
 
-target_link_libraries(pygaussian gaussian -lboost_python -lboost_system)
+target_link_libraries(pylightspeed lightspeed -lboost_python -lboost_system)
 
-#install(TARGETS pygaussian SHARED DESTINATION lib)
+#install(TARGETS pylightspeed SHARED DESTINATION lib)
 

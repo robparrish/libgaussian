@@ -2,7 +2,7 @@
 #include <string.h>
 #include "int2c.h"
 
-namespace libgaussian {
+namespace lightspeed {
 
 OverlapInt2C::OverlapInt2C(
     const std::shared_ptr<SBasisSet>& basis1,
@@ -123,4 +123,4 @@ void OverlapInt2C::compute_pair2(
 }
 
 
-} // namespace libgaussian
+} // namespace lightspeed

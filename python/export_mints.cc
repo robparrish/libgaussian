@@ -5,7 +5,7 @@
 #include <mints/int4c.h>
 #include <mints/schwarz.h>
 
-using namespace libgaussian;
+using namespace lightspeed;
 using namespace boost::python;
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(potential2c_nuc_overloads, PotentialInt2C::set_nuclear_potential, 1, 2)

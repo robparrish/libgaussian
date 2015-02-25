@@ -3,12 +3,12 @@
 Core Libraries (C++):
 libcore - molecule, basis set, angular momentum
 
-Ring1 Libraries (C++):
+Ring1 Libraries (C++/Libint):
 libmints - molecular integrals and schwarz sieve
 libgrid - grid specification and collocation
 libfunctional - local density functional specification and computation
 
-Ring2 Libraries (C++/Tensor):
+Ring2 Libraries (C++/Ambit):
 libob - S,X,Q,T,V, etc matrices, gradients and hessians
 libdf - DF ERI tensors, gradients, etc
 libjk - J/K matrices, gradients, and hessians

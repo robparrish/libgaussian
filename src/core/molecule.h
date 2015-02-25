@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace libgaussian {
+namespace lightspeed {
 
 /**!
  * Class SAtom is a data container for a simple atom
@@ -218,6 +218,6 @@ private:
 };
 
 
-} // namespace libgaussian
+} // namespace lightspeed
 
 #endif

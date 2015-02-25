@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace libgaussian {
+namespace lightspeed {
 
 /**!
  * Class SAngularMomentum describes the ordering and composition of cartesian
@@ -199,6 +199,6 @@ private:
 
 };
 
-} // namespace libgaussian
+} // namespace lightspeed
 
 #endif

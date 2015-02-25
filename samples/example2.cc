@@ -3,7 +3,7 @@
 #include <core/am.h>
 #include <vector>
 
-using namespace libgaussian;
+using namespace lightspeed;
 
 int main(int argc, char* argv[])
 {

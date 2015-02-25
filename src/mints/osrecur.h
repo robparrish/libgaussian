@@ -1,7 +1,7 @@
 #ifndef OSRECUR_H
 #define OSRECUR_H
 
-namespace libgaussian {
+namespace lightspeed {
 
 /*! \ingroup MINTS
  *  \class ObaraSaikaTwoCenterRecursion

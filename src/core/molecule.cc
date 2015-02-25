@@ -1,7 +1,7 @@
 #include <math.h>
 #include "molecule.h"
 
-namespace libgaussian {
+namespace lightspeed {
 
 double SAtom::distance(const SAtom& other) const 
 {
@@ -88,4 +88,4 @@ double SMolecule::nuclear_repulsion_energy_other(
     return E;
 }
 
-} // namespace libgaussian
+} // namespace lightspeed

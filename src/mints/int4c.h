@@ -9,7 +9,7 @@
 
 #include <libint/libint.h>
 
-namespace libgaussian {
+namespace lightspeed {
 
 /**!
  * Class Int4C provides a common interface for the low-level computation of
@@ -256,6 +256,6 @@ protected:
 
 };
 
-} // namespace libgaussian
+} // namespace lightspeed
 
 #endif

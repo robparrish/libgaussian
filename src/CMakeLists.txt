@@ -1,4 +1,4 @@
-set(LIBGAUSSIAN_HEADERS
+set(LIBLIGHTSPEED_HEADERS
     core/molecule.h
     core/basisset.h
     core/am.h
@@ -12,7 +12,7 @@ set(LIBGAUSSIAN_HEADERS
     df/df.h
 )
 
-set(LIBGAUSSIAN_SOURCES
+set(LIBLIGHTSPEED_SOURCES
     core/molecule.cc
     core/basisset.cc
     core/am.cc
@@ -35,11 +35,11 @@ set(LIBGAUSSIAN_SOURCES
 )
 
 # build static libray
-#add_library(gaussian STATIC ${LIBGAUSSIAN_SOURCES} ${LIBGAUSSIAN_HEADERS})
-add_library(gaussian SHARED ${LIBGAUSSIAN_SOURCES} ${LIBGAUSSIAN_HEADERS})
+#add_library(lightspeed STATIC ${LIBLIGHTSPEED_SOURCES} ${LIBLIGHTSPEED_HEADERS})
+add_library(lightspeed SHARED ${LIBLIGHTSPEED_SOURCES} ${LIBLIGHTSPEED_HEADERS})
 
-target_link_libraries(gaussian ${LIBINT}/lib/libint.so ${LIBTENSOR}/lib/libtensor.a)
+target_link_libraries(lightspeed ${LIBINT}/lib/libint.so ${LIBAMBIT}/lib/libambit.a)
 
-#install(TARGETS gaussian ARCHIVE DESTINATION lib)
-#install(TARGETS gaussian SHARED DESTINATION lib)
+#install(TARGETS lightspeed ARCHIVE DESTINATION lib)
+#install(TARGETS lightspeed SHARED DESTINATION lib)
 

@@ -7,7 +7,7 @@
 #include <core/basisset.h>
 #include "osrecur.h"
 
-namespace libgaussian {
+namespace lightspeed {
 
 class SMolecule;
 
@@ -399,6 +399,6 @@ protected:
 };
 
 
-} // namespace libgaussian
+} // namespace lightspeed
 
 #endif

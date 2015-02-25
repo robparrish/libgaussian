@@ -5,9 +5,9 @@
 
 #include <omp.h>
 
-using namespace tensor;
+using namespace ambit;
 
-namespace libgaussian {
+namespace lightspeed {
 
 DFERI::DFERI(
     const std::shared_ptr<SchwarzSieve>& sieve,
@@ -78,4 +78,4 @@ Tensor DFERI::metric_power_core(
 }
 
 
-} // namespace libgaussian
+} // namespace lightspeed

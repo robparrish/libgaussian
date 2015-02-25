@@ -2,7 +2,7 @@
 #include "int4c.h"
 #include "constants.h"
 
-namespace libgaussian {
+namespace lightspeed {
 
 Int4C::Int4C(
     const std::shared_ptr<SBasisSet>& basis1,
@@ -231,4 +231,4 @@ void Int4C::apply_spherical(
     }
 }
 
-} // namespace libgaussian
+} // namespace lightspeed

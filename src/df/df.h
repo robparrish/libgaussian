@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <tensor/tensor.h>
+#include <ambit/tensor.h>
 
-namespace libgaussian {
+namespace lightspeed {
 
 class SBasisSet;
 class SchwarzSieve;
@@ -83,7 +83,7 @@ public:
      * Compute the metric matrix (A|B)
      * @return the metric matrix as kCore
      **/
-    tensor::Tensor metric_core() const;
+    ambit::Tensor metric_core() const;
 
     /**!
      * Compute the metric matrix (A|B)^power by eigendecomposition and
@@ -93,7 +93,7 @@ public:
      *  metric
      * @return the metric matrix power as kCore
      **/
-    tensor::Tensor metric_power_core(
+    ambit::Tensor metric_power_core(
         double power = -1.0/2.0, 
         double condition = 1.0E-12) const;
 
@@ -135,12 +135,12 @@ protected:
  *  Tensor b = aodf.compute_ao_task_core(-1.0/2.0);
  *  // If needed, grab the SchwarzSieve for indexing
  *  std::shared_ptr<SchwarzSieve> sieve2 = aodf.sieve();
- *  // Do stuff with the tensor
+ *  // Do stuff with the ambit
  *  ...
  *
  * Notes:
  *  Whether to construct a kCore or kDisk Tensor is up to the user, if
- *  sufficient memory is available. The code will throw if a kCore tensor is
+ *  sufficient memory is available. The code will throw if a kCore ambit is
  *  requested without enough memory - there is no internal switch.
  **/
 class AODFERI final : public DFERI {
@@ -170,7 +170,7 @@ public:
      *
      * @return the DF integrals as a CoreTensor
      **/
-    tensor::Tensor compute_ao_task_core(double power = -1.0/2.0) const;
+    ambit::Tensor compute_ao_task_core(double power = -1.0/2.0) const;
     /**!
      * Compute the AO-basis fitted DF integrals with the striping Q x pq, where
      * pq is sieved reduced triangular indexing (by shell pair) from the
@@ -180,7 +180,7 @@ public:
      *
      * @return the DF integrals as a DiskTensor
      **/
-    tensor::Tensor compute_ao_task_disk(double power = -1.0/2.0) const;
+    ambit::Tensor compute_ao_task_disk(double power = -1.0/2.0) const;
 
 protected:
 
@@ -217,7 +217,7 @@ protected:
  *  std::map<std::string Tensor> results = modf.compute_mo_tasks_disk();
  *  // Extract the result Tensor (kDisk) by key
  *  Tensor biaQ = results["biaQ"];
- *  // Do stuff with the tensor
+ *  // Do stuff with the ambit
  *  ...
  * 
  * => Example Use Case <= 
@@ -226,7 +226,7 @@ protected:
  *  Get the hole-particle (i->a) *and* particle-hole (a->i) DF integrals for
  *  use in computing the DF-MP2 OPDM vv and oo blocks together
  *
- *  This example burns a few FLOPs (one could permute the former tensor to
+ *  This example burns a few FLOPs (one could permute the former ambit to
  *  obtain the latter), but in practice you will probably not see the extra
  *  overhead for reasons discussed below
  *
@@ -256,7 +256,7 @@ protected:
  *  // Extract the result Tensors (kDisk) by key
  *  Tensor biaQ = results["biaQ"];
  *  Tensor baiQ = results["baiQ"];
- *  // Do stuff with the tensors
+ *  // Do stuff with the ambits
  *  ...
  * 
  * Notes:
@@ -307,11 +307,11 @@ public:
     /**!
      * Add a queued task to this MODFERI
      *
-     * @param key - the key by which this task is known (also name of 3-index tensor)
+     * @param key - the key by which this task is known (also name of 3-index ambit)
      * @param Cl  - the first set of molecular orbitals, ordered np x nl
      * @param Cr  - the second set of molecule orbitals, ordered np x nr 
      * @param power - the power of metric to apply 
-     * @param striping - the desired striping of the result tensor, a
+     * @param striping - the desired striping of the result ambit, a
      *  permutation string with three characters (l,r, and Q), one of:
      *  "lrQ", "rlQ", "Qlr", "Qrl". 
      *  "lQr" and "rQl" are NOT allowed
@@ -322,15 +322,15 @@ public:
      * 
      * NOTE: lrQ or rlQ stripings have the same cost, and are the fastest
      * stripings to produce. Qlr and Qrl stripings involve an additional
-     * permutation of the finished disk tensors.
+     * permutation of the finished disk ambits.
      *
      * NOTE: only references to Cl and Cr are kept - do not modify the data in
-     * your copy of these tensors
+     * your copy of these ambits
      **/
     void add_mo_task(
         const std::string& key,
-        const tensor::Tensor& Cl,
-        const tensor::Tensor& Cr,
+        const ambit::Tensor& Cl,
+        const ambit::Tensor& Cr,
         double power = -1.0/2.0,
         const std::string& striping = "lrQ");
         
@@ -342,9 +342,9 @@ public:
      * disk routine and then slices the result to core.
      *
      * @return map from key to Tensor (kCore) with the resultant 3-index
-     * tensors requested above
+     * ambits requested above
      **/
-    std::map<std::string, tensor::Tensor> compute_mo_tasks_core() const;
+    std::map<std::string, ambit::Tensor> compute_mo_tasks_core() const;
         
     /**!
      * Compute all queued tasks in this MODFERI as kDisk
@@ -352,22 +352,22 @@ public:
      *
      *
      * @return map from key to Tensor (kDisk) with the resultant 3-index
-     * tensors requested above
+     * ambits requested above
      **/
-    std::map<std::string, tensor::Tensor> compute_mo_tasks_disk() const;
+    std::map<std::string, ambit::Tensor> compute_mo_tasks_disk() const;
 
 protected: 
 
     std::vector<std::string> keys_;
-    std::map<std::string, tensor::Tensor> Cls_;
-    std::map<std::string, tensor::Tensor> Crs_;
+    std::map<std::string, ambit::Tensor> Cls_;
+    std::map<std::string, ambit::Tensor> Crs_;
     std::map<std::string, double> powers_;
     std::map<std::string, std::string> stripings_;
 
-    std::map<std::string, tensor::Tensor> transform() const;
-    std::map<std::string, tensor::Tensor> fit(const std::map<std::string, tensor::Tensor>& Aias) const;
+    std::map<std::string, ambit::Tensor> transform() const;
+    std::map<std::string, ambit::Tensor> fit(const std::map<std::string, ambit::Tensor>& Aias) const;
 };
 
-} // namespace libgaussian
+} // namespace lightspeed
 
 #endif

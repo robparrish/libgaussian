@@ -5,7 +5,7 @@
 #include <core/molecule.h>
 #include <core/basisset.h>
 
-using namespace libgaussian;
+using namespace lightspeed;
 using namespace boost::python;
 
 void export_collections()

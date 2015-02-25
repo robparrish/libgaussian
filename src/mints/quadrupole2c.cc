@@ -1,7 +1,7 @@
 #include <math.h>
 #include "int2c.h"
 
-namespace libgaussian {
+namespace lightspeed {
 
 QuadrupoleInt2C::QuadrupoleInt2C(
     const std::shared_ptr<SBasisSet>& basis1,
@@ -40,4 +40,4 @@ void QuadrupoleInt2C::compute_pair2(
 }
 
 
-} // namespace libgaussian
+} // namespace lightspeed

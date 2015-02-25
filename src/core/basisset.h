@@ -7,7 +7,7 @@
 #include <string>
 #include "am.h"
 
-namespace libgaussian {
+namespace lightspeed {
 
 /**!
  * Class SGaussianShell is a data container for a simple Gaussian basis shell
@@ -284,6 +284,6 @@ private:
     size_t nprimitive_;
 };
 
-} // namespace libgaussian
+} // namespace lightspeed
 
 #endif

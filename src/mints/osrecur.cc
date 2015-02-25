@@ -7,7 +7,7 @@
 #include "osrecur.h"
 #include "constants.h"
 
-namespace libgaussian {
+namespace lightspeed {
 
 namespace {
 double ***init_box(int a, int b, int c)
@@ -2633,4 +2633,4 @@ void ObaraSaikaThreeCenterRecursion::compute(double GA[3], double GB[3], double 
     }
 }
 
-} // namespace libgaussian
+} // namespace lightspeed

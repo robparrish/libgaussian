@@ -2,7 +2,7 @@
 #include <string.h>
 #include "int2c.h"
 
-namespace libgaussian {
+namespace lightspeed {
 
 KineticInt2C::KineticInt2C(
     const std::shared_ptr<SBasisSet>& basis1,
@@ -138,4 +138,4 @@ void KineticInt2C::compute_pair2(
 }
 
 
-} // namespace libgaussian
+} // namespace lightspeed

@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 
-namespace libgaussian {
+namespace lightspeed {
 
 class SBasisSet;
 
@@ -96,6 +96,6 @@ private:
     
 };    
 
-} // namespace libgaussian
+} // namespace lightspeed
 
 #endif

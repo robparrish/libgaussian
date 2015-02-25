@@ -1,6 +1,6 @@
 #include "constants.h"
 
-namespace libgaussian {
+namespace lightspeed {
 
 namespace constants {
 

@@ -3,7 +3,7 @@
 #include <boost/python/overloads.hpp>
 #include <df/df.h>
 
-using namespace libgaussian;
+using namespace lightspeed;
 using namespace boost::python;
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(df_power_ov, DFERI::metric_power_core, 0, 2)

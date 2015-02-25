@@ -5,7 +5,7 @@
 #include <core/molecule.h>
 #include <core/basisset.h>
 
-using namespace libgaussian;
+using namespace lightspeed;
 using namespace boost::python;
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(smolecule_print_overloads, SMolecule::print, 0, 2)

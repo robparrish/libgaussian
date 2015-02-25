@@ -1,7 +1,7 @@
 #ifndef _chemistry_qc_basis_fjt_h
 #define _chemistry_qc_basis_fjt_h
 
-namespace libgaussian {
+namespace lightspeed {
 
 class CorrelationFactor;
 

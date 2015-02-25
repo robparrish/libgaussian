@@ -5,9 +5,9 @@
 
 #include <omp.h>
 
-using namespace tensor;
+using namespace ambit;
 
-namespace libgaussian {
+namespace lightspeed {
 
 AODFERI::AODFERI(
     const std::shared_ptr<SchwarzSieve>& sieve,
@@ -224,4 +224,4 @@ Tensor AODFERI::compute_ao_task_disk(double power) const
     return B;
 }
 
-} // namespace libgaussian
+} // namespace lightspeed

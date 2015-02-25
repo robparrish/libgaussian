@@ -4,7 +4,7 @@
 
 #include <omp.h>
 
-namespace libgaussian {
+namespace lightspeed {
 
 SchwarzSieve::SchwarzSieve(
     const std::shared_ptr<SBasisSet>& basis1,
@@ -159,4 +159,4 @@ double SchwarzSieve::shell_estimate_PQRS(
 }
 
 
-} // namespace libgaussian
+} // namespace lightspeed

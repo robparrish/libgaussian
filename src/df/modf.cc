@@ -5,9 +5,9 @@
 
 #include <omp.h>
 
-using namespace tensor;
+using namespace ambit;
 
-namespace libgaussian {
+namespace lightspeed {
 
 MODFERI::MODFERI(
     const std::shared_ptr<SchwarzSieve>& sieve,
@@ -79,7 +79,7 @@ std::map<std::string, Tensor> MODFERI::compute_mo_tasks_disk() const
     std::map<std::string, Tensor> iaQ  = fit(Aia);
     return iaQ;
 }
-std::map<std::string, tensor::Tensor> MODFERI::transform() const
+std::map<std::string, ambit::Tensor> MODFERI::transform() const
 {
     // => Sizing <= //
 
@@ -244,7 +244,7 @@ std::map<std::string, tensor::Tensor> MODFERI::transform() const
 
     return targets;
 }
-std::map<std::string, tensor::Tensor> MODFERI::fit(const std::map<std::string, tensor::Tensor>& Aias) const
+std::map<std::string, ambit::Tensor> MODFERI::fit(const std::map<std::string, ambit::Tensor>& Aias) const
 {
     // => Metric Power Merging <= //
 
@@ -331,4 +331,4 @@ std::map<std::string, tensor::Tensor> MODFERI::fit(const std::map<std::string, t
     return targets;
 }
 
-} // namespace libgaussian
+} // namespace lightspeed

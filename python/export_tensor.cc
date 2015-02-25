@@ -3,14 +3,14 @@
 #include <boost/python/overloads.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include <tensor/tensor.h>
+#include <ambit/tensor.h>
 
-using namespace tensor;
+using namespace ambit;
 using namespace boost::python;
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tensor_print_ov, Tensor::print, 0, 4)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ambit_print_ov, Tensor::print, 0, 4)
 
-void export_tensor()
+void export_ambit()
 {
     enum_<TensorType>("TensorType")
         .value("kCurrent", kCurrent)
@@ -58,7 +58,7 @@ void export_tensor()
         .def("set_name", &Tensor::set_name)
         .def(self == self)
         .def(self != self)
-        .def("printf", &Tensor::print,tensor_print_ov())
+        .def("printf", &Tensor::print,ambit_print_ov())
         //.def("data", &Tensor::data)
         .def("norm", &Tensor::norm)
         .def("zero", &Tensor::zero)

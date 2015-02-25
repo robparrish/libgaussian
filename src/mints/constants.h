@@ -1,7 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-namespace libgaussian {
+namespace lightspeed {
 
 namespace constants {
 

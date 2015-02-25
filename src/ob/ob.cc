@@ -7,9 +7,9 @@
 
 #include <omp.h>
 
-using namespace tensor;
+using namespace ambit;
 
-namespace libgaussian {
+namespace lightspeed {
 
 OneBody::OneBody(const std::shared_ptr<SchwarzSieve>& sieve) :
     sieve_(sieve),
@@ -474,4 +474,4 @@ void OneBody::compute_V_nuclear(
     compute_V(V,xs,ys,zs,Zs,a,b,w,scale);
 }
 
-} // namespace libgaussian
+} // namespace lightspeed

@@ -3,7 +3,7 @@
 #include "int2c.h"
 #include "constants.h"
 
-namespace libgaussian {
+namespace lightspeed {
 
 DipoleInt2C::DipoleInt2C(
     const std::shared_ptr<SBasisSet>& basis1,
@@ -142,4 +142,4 @@ void DipoleInt2C::compute_pair2(
 }
 
 
-} // namespace libgaussian
+} // namespace lightspeed

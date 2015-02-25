@@ -2,15 +2,15 @@
 #include <cstdio>
 #include <vector>
 #include <math.h>
-#include <tensor/tensor.h>
+#include <ambit/tensor.h>
 #include <core/am.h>
 #include <core/basisset.h>
 #include <core/molecule.h>
 #include <mints/int2c.h>
 #include <mints/int4c.h>
 
-using namespace tensor;
-using namespace libgaussian;
+using namespace ambit;
+using namespace lightspeed;
 
 std::shared_ptr<SMolecule> get_h2o()
 {

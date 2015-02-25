@@ -4,9 +4,9 @@
 #include <cstddef>
 #include <memory> 
 #include <vector>
-#include <tensor.h>
+#include <ambit.h>
 
-namespace libgaussian {
+namespace lightspeed {
 
 enum class JKType {
     kDirect,
@@ -20,7 +20,7 @@ public:
     virtual ~JK() {}    
 
     virtual JKType type() const = 0;
-    virtual TensorType tensor_type() const = 0;
+    virtual TensorType ambit_type() const = 0;
 
     const std::shared_ptr<SBasisSet>& primary() const { return primary_; }
     size_t doubles() const { return doubles_; }
@@ -122,7 +122,7 @@ public:
     virtual ~DirectJK() override {}    
 
     JKType type() const override { return JKType::kDirect; }
-    TensorType tensor_type() const override { return kCore; }
+    TensorType ambit_type() const override { return kCore; }
 
     void initialize() override {}
     
@@ -159,7 +159,7 @@ public:
     virtual ~DFJK() override {}    
 
     JKType type() const override { return JKType::kDF; }
-    TensorType tensor_type() const override { return kCore; }
+    TensorType ambit_type() const override { return kCore; }
 
     double metric_condition() const { return metric_condition_; }
 
@@ -195,6 +195,6 @@ protected:
 
 };
 
-} // namespace libgaussian
+} // namespace lightspeed
 
 #endif

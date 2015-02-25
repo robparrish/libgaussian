@@ -40,7 +40,7 @@ option(CYCLOPS              "Location of the Cyclops build directory" "")
 option(ELEMENTAL            "Location of the Elemental build directory" "")
 
 option(LIBINT               "Location of libint installation" "")
-option(LIBTENSOR            "Location of libtensor installation" "")
+option(LIBAMBIT             "Location of ambit installation" "")
 
 # include cmake modules as needed
 include(ConfigVersion)
@@ -91,7 +91,7 @@ endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(
     ${LIBINT}/include
-    ${LIBTENSOR}/include
+    ${LIBAMBIT}/include
     ${PROJECT_BINARY_DIR}/include
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/src
@@ -111,9 +111,6 @@ add_subdirectory(src)
 
 #python wrappers
 add_subdirectory(python)
-
-# test suite
-#add_subdirectory(test)
 
 # sample suite
 add_subdirectory(samples)

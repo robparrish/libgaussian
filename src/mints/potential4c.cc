@@ -4,7 +4,7 @@
 #include "constants.h"
 #include "fjt.h"
 
-namespace libgaussian {
+namespace lightspeed {
 
 namespace {
 
@@ -486,4 +486,4 @@ void PotentialInt4C::compute_quartet2(
 }
 
 
-} // namespace libgaussian
+} // namespace lightspeed
