@@ -8,6 +8,7 @@ void export_core();
 void export_mints();
 void export_ob();
 void export_df();
+void export_jk();
 
 BOOST_PYTHON_MODULE(libpylightspeed)
 {
@@ -17,4 +18,5 @@ BOOST_PYTHON_MODULE(libpylightspeed)
     export_mints();        
     export_ob();        
     export_df();        
+    export_jk();        
 }

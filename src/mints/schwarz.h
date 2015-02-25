@@ -49,7 +49,12 @@ public:
     void print(FILE* fh = stdout) const;
     
     /**!
-     * Return the maximum possible value for a shell of type (PQ|PQ)
+     * Return the maximum possible value for any shell-quartet
+     **/
+    double max_PQRS() const { return overall_max_; }
+
+    /**!
+     * Return the maximum possible value for a shell-quartet of type (PQ|PQ)
      *
      * NOTE: (PQ|RS) is not bounded by (PQ|PQ)
      *
@@ -62,7 +67,7 @@ public:
         size_t Q) const;
 
     /**!
-     * Return the maximum possible value for a shell of type (PQ|RS), which is
+     * Return the maximum possible value for a shell-quarter of type (PQ|RS), which is
      * given by the Cauchy-Schwarz bound \sqrt{(PQ|PQ)(RS|RS)}
      *
      * @param P the shell index in basis1 in coordinate 1

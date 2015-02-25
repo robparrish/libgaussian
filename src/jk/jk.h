@@ -8,7 +8,11 @@
 
 namespace lightspeed {
 
+class SBasisSet;
+class SchwarzSieve;
+
 enum JKType {
+    kBase,
     kDirect,
     kDF,
 };
@@ -19,8 +23,8 @@ public:
     JK(const std::shared_ptr<SchwarzSieve>& sieve);
     virtual ~JK() {}    
 
-    virtual JKType type() const = 0;
-    virtual ambit::TensorType tensor_type() const = 0;
+    virtual JKType type() const { return kBase; }
+    virtual ambit::TensorType tensor_type() const { return ambit::kCore; }
 
     const std::shared_ptr<SBasisSet>& primary() const { return primary_; }
     const std::shared_ptr<SchwarzSieve>& sieve() const { return sieve_; }
@@ -40,10 +44,10 @@ public:
     void set_w(double w) { w_ = w; }
     void set_product_cutoff(double product_cutoff) { product_cutoff_ = product_cutoff; }
 
-    virtual void initialize() = 0;
+    virtual void initialize();
     
     virtual void print(
-        FILE* fh = stdout) const = 0;
+        FILE* fh = stdout) const;
 
     virtual void compute_JK_from_C(
         const std::vector<ambit::Tensor>& L,
@@ -51,7 +55,7 @@ public:
         std::vector<ambit::Tensor>& J,
         std::vector<ambit::Tensor>& K,
         const std::vector<double>& scaleJ = {},
-        const std::vector<double>& scaleK = {}) = 0;
+        const std::vector<double>& scaleK = {});
 
     virtual void compute_JK_from_D(
         const std::vector<ambit::Tensor>& D,
@@ -59,9 +63,9 @@ public:
         std::vector<ambit::Tensor>& J,
         std::vector<ambit::Tensor>& K,
         const std::vector<double>& scaleJ = {},
-        const std::vector<double>& scaleK = {}) = 0;
+        const std::vector<double>& scaleK = {});
 
-    virtual void finalize() = 0;
+    virtual void finalize();
 
 #if 0
 

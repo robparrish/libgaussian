@@ -10,6 +10,7 @@ set(LIBLIGHTSPEED_HEADERS
     mints/osrecur.h
     ob/ob.h
     df/df.h
+    jk/jk.h
 )
 
 set(LIBLIGHTSPEED_SOURCES
@@ -32,6 +33,8 @@ set(LIBLIGHTSPEED_SOURCES
     df/df.cc
     df/aodf.cc
     df/modf.cc
+    jk/jk.cc
+    jk/directjk.cc
 )
 
 # build static libray

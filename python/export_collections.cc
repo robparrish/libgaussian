@@ -43,6 +43,10 @@ void export_collections()
         .def(vector_indexing_suite<std::vector<std::string>>())
         ;
 
+    class_<std::vector<bool>>("BoolVec")
+        .def(vector_indexing_suite<std::vector<bool>>())
+        ;
+
     class_<aligned_vector<double>>("AlignedVec")
         .def(vector_indexing_suite<aligned_vector<double>>())
         ;
