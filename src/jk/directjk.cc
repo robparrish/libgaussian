@@ -165,7 +165,7 @@ void DirectJK::compute_JK_from_D(
 
     // ==> Master Loop <== //
 
-    //#pragma omp parallel for schedule(dynamic)
+    #pragma omp parallel for schedule(dynamic)
     for (size_t ABCDtask = 0; ABCDtask < natom_task4; ABCDtask++) {
         size_t AB = ABCDtask / natom_task2;
         size_t CD = ABCDtask % natom_task2;
