@@ -58,8 +58,9 @@ void export_jk()
         .def("printf", &DirectJK::print, directjk_print_ov())
         ;
 
-    class_<DirectJK, std::shared_ptr<DirectJK>, bases<JK>>("DirectJK", init<
-        const std::shared_ptr<SchwarzSieve>&
+    class_<DFJK, std::shared_ptr<DFJK>, bases<JK>>("DFJK", init<
+        const std::shared_ptr<SchwarzSieve>&,
+        const std::shared_ptr<SBasisSet>&
         >())
         .def("metric_condition", &DFJK::metric_condition)
         .def("force_disk", &DFJK::force_disk)
