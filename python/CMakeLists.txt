@@ -10,6 +10,7 @@ set(LIBPYLIGHTSPEED_SOURCES
     export_ob.cc
     export_df.cc
     export_jk.cc
+    export_solver.cc
 )
 
 add_library(pylightspeed SHARED ${LIBPYLIGHTSPEED_SOURCES} ${LIBPYLIGHTSPEED_HEADERS})

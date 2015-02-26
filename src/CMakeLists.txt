@@ -11,6 +11,7 @@ set(LIBLIGHTSPEED_HEADERS
     ob/ob.h
     df/df.h
     jk/jk.h
+    solver/diis.h
 )
 
 set(LIBLIGHTSPEED_SOURCES
@@ -36,6 +37,7 @@ set(LIBLIGHTSPEED_SOURCES
     jk/jk.cc
     jk/directjk.cc
     jk/dfjk.cc
+    solver/diis.cc
 )
 
 # build static libray
