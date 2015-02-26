@@ -35,6 +35,7 @@ set(LIBLIGHTSPEED_SOURCES
     df/modf.cc
     jk/jk.cc
     jk/directjk.cc
+    jk/dfjk.cc
 )
 
 # build static libray

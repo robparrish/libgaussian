@@ -156,40 +156,40 @@ public:
 
 };
 
-#if 0
 class DFJK final: public JK {
 
 public:
     DFJK(
-        std::shared_ptr<SBasisSet>& primary,
-        std::shared_ptr<SBasisSet>& auxiliary);
+        const std::shared_ptr<SchwarzSieve>& sieve,
+        const std::shared_ptr<SBasisSet>& auxiliary);
     virtual ~DFJK() override {}    
 
     JKType type() const override { return kDF; }
     ambit::TensorType tensor_type() const override { return ambit::kCore; }
 
     double metric_condition() const { return metric_condition_; }
-
+    bool force_disk() const { return force_disk_; }
     void set_metric_condition(double metric_condition) { metric_condition_ = metric_condition; }
+    void set_force_disk(bool force_disk) { force_disk_ = force_disk; }
 
     void initialize() override;
     
     virtual void print(
-        FILE* fh,
-        int level = 1) const override;
+        FILE* fh = stdout) const;
 
     void compute_JK_from_C(
         const std::vector<ambit::Tensor>& L,
         const std::vector<ambit::Tensor>& R,
-        std::vector<ambit::Tensor>& J = {},
-        std::vector<ambit::Tensor>& K = {},
+        std::vector<ambit::Tensor>& J,
+        std::vector<ambit::Tensor>& K,
         const std::vector<double>& scaleJ = {},
         const std::vector<double>& scaleK = {}) override;
 
     void compute_JK_from_D(
         const std::vector<ambit::Tensor>& D,
-        std::vector<ambit::Tensor>& J = {},
-        std::vector<ambit::Tensor>& K = {},
+        const std::vector<bool>& symm,
+        std::vector<ambit::Tensor>& J,
+        std::vector<ambit::Tensor>& K,
         const std::vector<double>& scaleJ = {},
         const std::vector<double>& scaleK = {}) override;
 
@@ -198,10 +198,16 @@ public:
 protected:
     
     std::shared_ptr<SBasisSet> auxiliary_;
-    double metric_condition_;
+    double metric_condition_ = 1.0E-12;
+    bool force_disk_ = false;
+
+private:
+    
+    bool is_core_ = true;
+    ambit::Tensor df_tensor_;
+    bool initialized_ = false;
 
 };
-#endif
 
 } // namespace lightspeed
 

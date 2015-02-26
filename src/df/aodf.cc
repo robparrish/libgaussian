@@ -15,6 +15,29 @@ AODFERI::AODFERI(
     DFERI(sieve,auxiliary)
 {
 }
+size_t AODFERI::ao_task_core_doubles() const 
+{
+    size_t naux = auxiliary_->nfunction();
+    const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
+    size_t nPQshell = sieve_->shell_pairs().size();
+    size_t npq = 0;
+    std::vector<size_t> pqstarts(nPQshell);
+    pqstarts[0] = 0;
+    for (size_t PQ = 0; PQ < nPQshell; PQ++) {
+        size_t P = shell_pairs[PQ].first;
+        size_t Q = shell_pairs[PQ].second;
+        size_t offset = primary_->shell(P).nfunction() * primary_->shell(Q).nfunction();
+        if (PQ < nPQshell - 1) pqstarts[PQ + 1] = pqstarts[PQ] + offset;
+        npq += offset;
+    }
+    
+    return 2L * naux * naux + naux * npq;
+}
+size_t AODFERI::ao_task_disk_doubles() const 
+{
+    size_t naux = auxiliary_->nfunction();
+    return 3L * naux; 
+}
 Tensor AODFERI::compute_ao_task_core(double power) const
 {
     // => Pair state vector <= //
@@ -42,9 +65,7 @@ Tensor AODFERI::compute_ao_task_core(double power) const
     
     // => Memory Check <= //
     
-    size_t required = 0L;
-    required += 2L * naux * naux;
-    required += naux * npq; 
+    size_t required = ao_task_core_doubles();
     if (required > doubles()) throw std::runtime_error("AODFERI needs 2J + Apq memory for core.");
 
     // => Inverse Metric <= //

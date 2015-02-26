@@ -162,6 +162,22 @@ public:
     // => Methods <= //
 
     /**!
+     * Return the memory required to form the AODFERIs on core
+     * (nQ * npq + 2 * nQ * nQ) in doubles
+     *
+     * @return required memory in doubles
+     **/
+    size_t ao_task_core_doubles() const;
+
+    /**!
+     * Return the memory required to form the AODFERIs on disk
+     * (3 * nQ * nQ) in doubles
+     *
+     * @return required memory in doubles
+     **/
+    size_t ao_task_disk_doubles() const;
+
+    /**!
      * Compute the AO-basis fitted DF integrals with the striping Q x pq, where
      * pq is sieved reduced triangular indexing (by shell pair) from the
      * SchwarzSieve object

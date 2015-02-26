@@ -38,6 +38,8 @@ void export_df()
         const std::shared_ptr<SchwarzSieve>&,
         const std::shared_ptr<SBasisSet>&
         >())
+        .def("ao_task_core_doubles", &AODFERI::ao_task_core_doubles)
+        .def("ao_task_disk_doubles", &AODFERI::ao_task_disk_doubles)
         .def("compute_ao_task_core", &AODFERI::compute_ao_task_core, aodf_core_ov())
         .def("compute_ao_task_disk", &AODFERI::compute_ao_task_disk, aodf_disk_ov())
         ;

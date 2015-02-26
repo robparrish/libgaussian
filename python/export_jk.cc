@@ -12,6 +12,9 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(jk_compute_JK_from_D_ov, JK::compute_JK_f
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(directjk_print_ov, DirectJK::print, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(directjk_compute_JK_from_C_ov, DirectJK::compute_JK_from_C, 4, 6)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(directjk_compute_JK_from_D_ov, DirectJK::compute_JK_from_D, 4, 6)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(dfjk_print_ov, DFJK::print, 0, 1)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(dfjk_compute_JK_from_C_ov, DFJK::compute_JK_from_C, 4, 6)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(dfjk_compute_JK_from_D_ov, DFJK::compute_JK_from_D, 4, 6)
 
 void export_jk()
 {
@@ -53,6 +56,18 @@ void export_jk()
         .def("compute_JK_from_C", &DirectJK::compute_JK_from_C, directjk_compute_JK_from_C_ov())
         .def("compute_JK_from_D", &DirectJK::compute_JK_from_D, directjk_compute_JK_from_D_ov())
         .def("printf", &DirectJK::print, directjk_print_ov())
+        ;
+
+    class_<DirectJK, std::shared_ptr<DirectJK>, bases<JK>>("DirectJK", init<
+        const std::shared_ptr<SchwarzSieve>&
+        >())
+        .def("metric_condition", &DFJK::metric_condition)
+        .def("force_disk", &DFJK::force_disk)
+        .def("set_metric_condition", &DFJK::set_metric_condition)
+        .def("set_force_disk", &DFJK::set_force_disk)
+        .def("compute_JK_from_C", &DFJK::compute_JK_from_C, dfjk_compute_JK_from_C_ov())
+        .def("compute_JK_from_D", &DFJK::compute_JK_from_D, dfjk_compute_JK_from_D_ov())
+        .def("printf", &DFJK::print, dfjk_print_ov())
         ;
 
 }

@@ -20,8 +20,8 @@ void DirectJK::print(FILE* fh) const
     fprintf(fh, "  DirectJK:\n");
     fprintf(fh, "    Primary Basis   = %14s\n", primary_->name().c_str());
     fprintf(fh, "    Doubles         = %14zu\n", doubles_);
-    fprintf(fh, "    Compute J       = %14s\n", compute_J_ ? "Yes" : "No");
-    fprintf(fh, "    Compute K       = %14s\n", compute_K_ ? "Yes" : "No");
+    fprintf(fh, "    Compute J?      = %14s\n", compute_J_ ? "Yes" : "No");
+    fprintf(fh, "    Compute K?      = %14s\n", compute_K_ ? "Yes" : "No");
     fprintf(fh, "    Operator a      = %14.6E\n", a_);
     fprintf(fh, "    Operator b      = %14.6E\n", b_);
     fprintf(fh, "    Operator w      = %14.6E\n", w_);
