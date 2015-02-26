@@ -227,7 +227,8 @@ void DFJK::compute_JK_from_C(
 
             double* Bp = B.data().data() + Boff;
             double* Cp = C.data().data();
-            #pragma omp parallel for
+            memset(Cp,'\0',sizeof(double)*nbf*Asize*nbf);
+            //#pragma omp parallel for
             for (int A = 0; A < Asize; A++) {
                 size_t pq = 0;
                 for (size_t PQ = 0; PQ < shell_pairs.size(); PQ++) {
@@ -242,9 +243,9 @@ void DFJK::compute_JK_from_C(
                         Cp[(p + oP) * Asize * nbf + A * nbf + (q + oQ)] = 
                         Cp[(q + oQ) * Asize * nbf + A * nbf + (p + oP)] = 
                         Bp[A*npq + pq];
+                        pq++;
                     }}
                 }    
-                pq++;
             }
             
             // > Contractions < //
