@@ -32,7 +32,7 @@ SAD::SAD(
         // Dummy atoms are ignored (e.g., midbond functions)
         if (N == 0) continue;
         // Ghost atoms are ignored
-        if (atom.Z() == 0.0 && atom.Ya() == 0.0 && atom.Yb() == 0.0) continue;
+        if (atom.Ya() == 0.0 && atom.Yb() == 0.0) continue;
         
         // Check primary basis set centers
         for (size_t P2 = 0; P2 < primary_->atoms_to_shell_inds()[A].size(); P2++) {
@@ -112,7 +112,7 @@ SAD::SAD(
 }
 void SAD::print(FILE* fh) const
 {
-    fprintf(fh, "  SAD:\n\n");
+    fprintf(fh, "  SAD:\n");
     fprintf(fh, "    Molecule      = %18s\n", molecule_->name().c_str());
     fprintf(fh, "    Primary Basis = %18s\n", primary_->name().c_str());
     fprintf(fh, "    MinAO Basis   = %18s\n", minao_->name().c_str());
@@ -144,7 +144,7 @@ Tensor SAD::compute_C_helper(const std::string& key) const
         // Dummy atoms are ignored (e.g., midbond functions)
         if (N == 0) continue;
         // Ghost atoms are ignored
-        if (atom.Z() == 0.0 && atom.Ya() == 0.0 && atom.Yb() == 0.0) continue;
+        if (atom.Ya() == 0.0 && atom.Yb() == 0.0) continue;
         
         double Q = 0.0;
         if (key == "C") {
