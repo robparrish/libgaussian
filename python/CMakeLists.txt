@@ -18,7 +18,7 @@ add_library(pylightspeed SHARED ${LIBPYLIGHTSPEED_SOURCES} ${LIBPYLIGHTSPEED_HEA
 
 target_link_libraries(pylightspeed
     lightspeed
-    ${LIBINT}/lib/libint.a
+    ${LIBINT}/lib/libint2.a
     ${LIBAMBIT}/lib/libambit.a
     ${LAPACK_LIBRARIES}
     ${BLAS_LIBRARIES}

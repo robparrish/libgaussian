@@ -90,7 +90,7 @@ endif()
 # libgaussian-specific includes and libraries
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(
-    ${LIBINT}/include
+    ${LIBINT}/include ${LIBINT}/include/libint2
     ${LIBAMBIT}/include
     ${PROJECT_BINARY_DIR}/include
     ${PROJECT_SOURCE_DIR}/include
