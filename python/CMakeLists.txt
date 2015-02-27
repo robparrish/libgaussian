@@ -10,6 +10,7 @@ set(LIBPYLIGHTSPEED_SOURCES
     export_ob.cc
     export_df.cc
     export_jk.cc
+    export_sad.cc
     export_solver.cc
 )
 
