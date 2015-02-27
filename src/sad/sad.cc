@@ -170,6 +170,7 @@ Tensor SAD::compute_C_helper(const std::string& key) const
         size_t nbfA = C.dim(0);
         size_t noccA = C.dim(1);
         L({{nbfstart,nbfstart+nbfA},{occstart,occstart+noccA}}) = C();
+        occstart += noccA; // FMS
     }
     return L;
 }
