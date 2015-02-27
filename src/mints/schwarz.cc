@@ -2,7 +2,9 @@
 #include "schwarz.h"
 #include "int4c.h"
 
+#if defined(_OPENMP)
 #include <omp.h>
+#endif
 
 namespace lightspeed {
 
@@ -47,9 +49,13 @@ void SchwarzSieve::build_integrals()
     }
 
     // Target
-    shell_maxs_.resize(nshell1*nshell2,0.0); 
+    shell_maxs_.resize(nshell1*nshell2,0.0);
 
+    #if defined(_OPENMP)
     int nthread = omp_get_max_threads();
+    #else
+    int nthread = 1;
+    #endif
     std::vector<std::shared_ptr<PotentialInt4C>> ints;
     for (int t = 0; t < nthread; t++) {
         ints.push_back(std::shared_ptr<PotentialInt4C>(new PotentialInt4C(basis1_,basis2_,basis1_,basis2_,0,a_,b_,w_)));
@@ -61,7 +67,11 @@ void SchwarzSieve::build_integrals()
         int Q = shell_tasks[ind].second;
         int nP = basis1_->shell(P).nfunction();
         int nQ = basis2_->shell(Q).nfunction();
+        #if defined(_OPENMP)
         int t = omp_get_thread_num();
+        #else
+        int t = 0;
+        #endif
         ints[t]->compute_shell(P,Q,P,Q);
         double* buffer = ints[t]->buffer();
         double max_val = 0.0;
@@ -72,14 +82,14 @@ void SchwarzSieve::build_integrals()
             }
         }
         if (symm) {
-            shell_maxs_[P * nshell2 + Q] = 
-            shell_maxs_[Q * nshell2 + P] = 
+            shell_maxs_[P * nshell2 + Q] =
+            shell_maxs_[Q * nshell2 + P] =
             max_val;
         } else {
-            shell_maxs_[P * nshell2 + Q] = 
+            shell_maxs_[P * nshell2 + Q] =
             max_val;
-        }    
-    } 
+        }
+    }
 
     // Target
     overall_max_ = 0.0;
@@ -125,8 +135,8 @@ void SchwarzSieve::print(FILE* fh) const
     size_t nshell1 = basis1_->nshell();
     size_t nshell2 = basis2_->nshell();
 
-    size_t possible = symm ? 
-        nshell1 * (nshell1 + 1) / 2 : 
+    size_t possible = symm ?
+        nshell1 * (nshell1 + 1) / 2 :
         nshell1 * nshell2;
     size_t sieved = shell_pairs_.size();
 

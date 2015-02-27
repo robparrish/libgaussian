@@ -16,7 +16,7 @@ namespace lightspeed {
  * balancing of the DIIS B matrix to attenuate condition problems near
  * convergence
  *
- * => Example Use (UHF) <= 
+ * => Example Use (UHF) <=
  *
  * Description:
  *  Use DIIS to extrapolate the Fa and Fb Fock matrices with respect to the
@@ -55,10 +55,10 @@ public:
      * Verbatim Constructor, fills fields below
      **/
     DIIS(
-        size_t min_vectors, 
+        size_t min_vectors,
         size_t max_vectors,
         bool use_disk);
-    
+
     /// DIIS is noncopyable due to internal data references
     DIIS(const DIIS& other) = delete;
     DIIS& operator=(const DIIS& other) = delete;
@@ -77,7 +77,7 @@ public:
     // => Methods <= //
 
     /**
-     * Reset the state of the DIIS object and flush all 
+     * Reset the state of the DIIS object and flush all
      * accumulated error vectors
      *
      * @result the DIIS object will look as though it has
@@ -88,7 +88,7 @@ public:
     /**!
      * Add an iteration's worth of data to the DIIS object
      *
-     * NOTE: These objects are copied internally, possibly 
+     * NOTE: These objects are copied internally, possibly
      * striped onto disk. You may overwrite these objects as soon as this call
      * is made without loss.
      *
@@ -100,7 +100,7 @@ public:
      * already saturated to max_vectors
      **/
     void add_iteration(
-        const std::vector<ambit::Tensor>& state_vec, 
+        const std::vector<ambit::Tensor>& state_vec,
         const std::vector<ambit::Tensor>& error_vec);
 
     /**!
@@ -112,13 +112,13 @@ public:
      * @result returns true and overwrites state_vec if cur_vectors() >=
      * min_vectors(), otherwise returns false and does not modify state_vec
      **/
-    bool extrapolate( 
+    bool extrapolate(
         std::vector<ambit::Tensor>& state_vec);
 
 protected:
 
-    int min_vectors_;
-    int max_vectors_;
+    size_t min_vectors_;
+    size_t max_vectors_;
     bool use_disk_;
 
     std::vector<std::vector<ambit::Tensor>> state_vecs_;

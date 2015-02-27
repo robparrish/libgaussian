@@ -3,7 +3,9 @@
 #include <mints/schwarz.h>
 #include "df.h"
 
+#if defined(_OPENMP)
 #include <omp.h>
+#endif
 
 using namespace ambit;
 
@@ -41,7 +43,7 @@ void MODFERI::add_mo_task(
     std::vector<std::string> valid = { "lrQ", "rlQ",  "Qlr", "Qrl" };
     bool found = false;
     for (auto x : valid) {
-        if (x == striping) found = true;    
+        if (x == striping) found = true;
     }
     if (!found) throw std::runtime_error("MODFERI: Invalid striping " + striping);
 
@@ -55,7 +57,7 @@ std::map<std::string, Tensor> MODFERI::compute_mo_tasks_core() const
 {
     size_t memory = 0L;
     for (auto key : keys_) {
-        memory += auxiliary_->nfunction() * 
+        memory += auxiliary_->nfunction() *
             Cls_.at(key).dim(1) *
             Crs_.at(key).dim(1);
     }
@@ -72,7 +74,7 @@ std::map<std::string, Tensor> MODFERI::compute_mo_tasks_core() const
 }
 std::map<std::string, Tensor> MODFERI::compute_mo_tasks_disk() const
 {
-    if (3L * auxiliary_->nfunction() * auxiliary_->nfunction() > doubles()) 
+    if (3L * auxiliary_->nfunction() * auxiliary_->nfunction() > doubles())
         throw std::runtime_error("MODFERI: out of memory");
 
     std::map<std::string, Tensor> Aia  = transform();
@@ -83,10 +85,14 @@ std::map<std::string, ambit::Tensor> MODFERI::transform() const
 {
     // => Sizing <= //
 
-    size_t nbf  = primary_->nfunction(); 
-    size_t naux = auxiliary_->nfunction(); 
+    size_t nbf  = primary_->nfunction();
+    size_t naux = auxiliary_->nfunction();
 
+    #if defined(_OPENMP)
     int nthread = omp_get_max_threads();
+    #else
+    int nthread = 1;
+    #endif
 
     // => First-Half Transform Merging <= //
 
@@ -98,7 +104,7 @@ std::map<std::string, ambit::Tensor> MODFERI::transform() const
                 tasks[tind].push_back(key);
                 found = true;
                 break;
-            }    
+            }
         }
         if (!found) tasks.push_back({key});
     }
@@ -107,7 +113,7 @@ std::map<std::string, ambit::Tensor> MODFERI::transform() const
 
     size_t maxpq = nbf * nbf;
     size_t max1q = 0L;
-    size_t max12 = 0L;  
+    size_t max12 = 0L;
     for (auto key : keys_) {
         max1q = std::max(Cls_.at(key).dim(1)*nbf,max1q);
         max12 = std::max(Cls_.at(key).dim(1)*Crs_.at(key).dim(1),max12);
@@ -139,7 +145,7 @@ std::map<std::string, ambit::Tensor> MODFERI::transform() const
     Tensor Api = Tensor::build(kCore, "Api", {max_rows, max1q});
     Tensor Aia = Tensor::build(kCore, "Aia", {max_rows, max12});
     double* Ap = Apq.data().data();
-    
+
     // => Targets <= //
 
     std::map<std::string, Tensor> targets;
@@ -151,7 +157,7 @@ std::map<std::string, ambit::Tensor> MODFERI::transform() const
         } else {
             dims = {naux, Crs_.at(key).dim(1)*Cls_.at(key).dim(1)};
         }
-        targets[key] = Tensor::build(kDisk, key + "_ints", dims); 
+        targets[key] = Tensor::build(kDisk, key + "_ints", dims);
     }
 
     // => Integrals <= //
@@ -167,7 +173,7 @@ std::map<std::string, ambit::Tensor> MODFERI::transform() const
     const std::vector<std::pair<int,int>> shell_pairs = sieve_->shell_pairs();
 
     // ==> Master Loop <== //
-    
+
     for (size_t Atask = 0; Atask < Ashell_tasks.size() - 1; Atask++) {
 
         // => Shell Task Indexing <= //
@@ -176,26 +182,30 @@ std::map<std::string, ambit::Tensor> MODFERI::transform() const
         size_t Astop   = Ashell_tasks[Atask+1];
         size_t Asize   = Astop - Astart;
         size_t astart  = auxiliary_->shell(Astart).function_index();
-        size_t astop   = (Astop == auxiliary_->nshell() ? auxiliary_->nfunction() : auxiliary_->shell(Astop).function_index()); 
+        size_t astop   = (Astop == auxiliary_->nshell() ? auxiliary_->nfunction() : auxiliary_->shell(Astop).function_index());
         size_t asize   = astop - astart;
         size_t PQsize  = shell_pairs.size();
         size_t APQsize = Asize * PQsize;
 
         // => Integrals <= //
-        
+
         #pragma omp parallel for schedule(dynamic)
         for (size_t APQtask = 0; APQtask < APQsize; APQtask++) {
             size_t A  = APQtask / PQsize + Astart;
             size_t PQ = APQtask % PQsize;
-            size_t P = shell_pairs[PQ].first; 
-            size_t Q = shell_pairs[PQ].second; 
+            size_t P = shell_pairs[PQ].first;
+            size_t Q = shell_pairs[PQ].second;
             int nA = auxiliary_->shell(A).nfunction();
             int nP = primary_->shell(P).nfunction();
             int nQ = primary_->shell(Q).nfunction();
             size_t oA = auxiliary_->shell(A).function_index();
             size_t oP = primary_->shell(P).function_index();
             size_t oQ = primary_->shell(Q).function_index();
+            #if defined(_OPENMP)
             int t = omp_get_thread_num();
+            #else
+            int t = 0;
+            #endif
             ints[t]->compute_shell(A,0,P,Q);
             double* buffer = ints[t]->buffer();
             for (int a = 0; a < nA; a++) {
@@ -208,21 +218,21 @@ std::map<std::string, ambit::Tensor> MODFERI::transform() const
         }
 
         // => Orbital Transform <= //
-        
+
         for (const std::vector<std::string>& task : tasks) {
-            
+
             // > First Half-Transform < //
 
             const Tensor& Cl = Cls_.at(task[0]);
-            size_t n1 = Cl.dim(1); 
+            size_t n1 = Cl.dim(1);
             Api.gemm(Apq,Cl,false,false,asize*nbf,n1,nbf,nbf,n1,n1,0,0,0,1.0,0.0);
-            
+
             for (const std::string& key : task) {
-                
+
                 // > Second Half-Transform < //
 
-                const Tensor& Cr = Crs_.at(key); 
-                size_t n2 = Cr.dim(1); 
+                const Tensor& Cr = Crs_.at(key);
+                size_t n2 = Cr.dim(1);
                 const std::string& stripe = stripings_.at(key);
                 Tensor& target = targets[key];
                 if (stripe == "lrQ" || stripe == "Qlr") {
@@ -256,7 +266,7 @@ std::map<std::string, ambit::Tensor> MODFERI::fit(const std::map<std::string, am
                 tasks[tind].push_back(key);
                 found = true;
                 break;
-            }    
+            }
         }
         if (!found) tasks.push_back({key});
     }
@@ -264,20 +274,20 @@ std::map<std::string, ambit::Tensor> MODFERI::fit(const std::map<std::string, am
     // => Targets <= //
 
     std::map<std::string, Tensor> targets;
-    
+
     // ==> Master Loop <== //
 
     for (const std::vector<std::string>& task : tasks) {
 
         // => Metric Power <= //
-        
+
         Tensor J = metric_power_core(powers_.at(task[0]),metric_condition_);
         size_t naux = J.dim(0);
 
         // => Task Fitting <= //
 
         for (const std::string& key : task) {
-            
+
             const Tensor& Aia = Aias.at(key);
             const Tensor& Cl = Cls_.at(key);
             const Tensor& Cr = Crs_.at(key);

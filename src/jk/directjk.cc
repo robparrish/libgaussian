@@ -5,7 +5,9 @@
 #include <mints/int4c.h>
 #include "jk.h"
 
+#if defined(_OPENMP)
 #include <omp.h>
+#endif
 
 using namespace ambit;
 
@@ -15,7 +17,7 @@ DirectJK::DirectJK(const std::shared_ptr<SchwarzSieve>& sieve) :
     JK(sieve)
 {
 }
-void DirectJK::print(FILE* fh) const 
+void DirectJK::print(FILE* fh) const
 {
     fprintf(fh, "  DirectJK:\n");
     fprintf(fh, "    Primary Basis   = %14s\n", primary_->name().c_str());
@@ -53,32 +55,36 @@ void DirectJK::compute_JK_from_D(
     std::vector<Tensor>& Ks,
     const std::vector<double>& scaleJ,
     const std::vector<double>& scaleK)
-{ 
+{
     // => Scale Defaults <= //
 
     std::vector<double> sJ = (scaleJ.size() ? scaleJ : std::vector<double>(Ds.size(),1.0));
     std::vector<double> sK = (scaleK.size() ? scaleK : std::vector<double>(Ds.size(),1.0));
 
     // => Tasking <= //
-    
+
     bool JK_symm = true;
     for (bool v : symm) {
         JK_symm = JK_symm && v;
     }
     bool do_J = compute_J_;
     bool do_K = compute_K_;
-    if (!do_J && !do_K) return; 
+    if (!do_J && !do_K) return;
 
     // => Sizing <= //
-    
+
     size_t natom   = primary_->natom();
     size_t nshell  = primary_->nshell();
     size_t nbf     = primary_->nfunction();
+    #if defined(_OPENMP)
     size_t nthread = omp_get_max_threads();
+    #else
+    size_t nthread = 1;
+    #endif
 
     // => Atom Indices <= //
 
-    const std::vector<std::vector<size_t>>& atoms_to_shells = primary_->atoms_to_shell_inds(); 
+    const std::vector<std::vector<size_t>>& atoms_to_shells = primary_->atoms_to_shell_inds();
     size_t max_nbf = 0;
     for (int A = 0; A < natom; A++) {
         const std::vector<size_t>& Ainds = atoms_to_shells[A];
@@ -145,12 +151,12 @@ void DirectJK::compute_JK_from_D(
     }
 
     // => Integrals <= //
-    
+
     std::vector<std::shared_ptr<PotentialInt4C>> ints;
     for (int t = 0; t < nthread; t++) {
         ints.push_back(std::shared_ptr<PotentialInt4C>(new PotentialInt4C(
             primary_,primary_,primary_,primary_,0,a_,b_,w_)));
-    } 
+    }
 
     // => Buffers <= //
 
@@ -173,7 +179,7 @@ void DirectJK::compute_JK_from_D(
         size_t B = atom_pairs[AB].second;
         size_t C = atom_pairs[CD].first;
         size_t D = atom_pairs[CD].second;
-    
+
         if (A < C) continue;
 
         const std::vector<size_t>& Pinds = atoms_to_shells[A];
@@ -201,7 +207,11 @@ void DirectJK::compute_JK_from_D(
         size_t dRsize = R2stop - R2start;
         size_t dSsize = S2stop - S2start;
 
+        #if defined(_OPENMP)
         int t = omp_get_thread_num();
+        #else
+        int t = 0;
+        #endif
 
         // => Shell Quartets <= //
 
@@ -222,9 +232,9 @@ void DirectJK::compute_JK_from_D(
             if (R < S) continue;
             if (P * nshell + Q < R * nshell + S) continue;
 
-            // => Schwarz Screening <= // 
+            // => Schwarz Screening <= //
 
-            double IPQRS = sieve_->shell_estimate_PQRS(P,Q,R,S); 
+            double IPQRS = sieve_->shell_estimate_PQRS(P,Q,R,S);
             if (IPQRS < sieve_->cutoff()) continue;
 
             // => Density Screening <= //
@@ -235,7 +245,7 @@ void DirectJK::compute_JK_from_D(
                 if (DSp[Q * nshell + P] * IPQRS >= product_cutoff_) product_significant = true;
                 if (DSp[R * nshell + S] * IPQRS >= product_cutoff_) product_significant = true;
                 if (DSp[S * nshell + R] * IPQRS >= product_cutoff_) product_significant = true;
-            } 
+            }
             if (do_K && !product_significant) {
                 if (DSp[P * nshell + R] * IPQRS >= product_cutoff_) product_significant = true;
                 if (DSp[P * nshell + S] * IPQRS >= product_cutoff_) product_significant = true;
@@ -250,12 +260,12 @@ void DirectJK::compute_JK_from_D(
             }
             if (!product_significant) continue;
 
-            ints[t]->compute_shell(P,Q,R,S); 
+            ints[t]->compute_shell(P,Q,R,S);
             double* buffer = ints[t]->buffer();
 
-            double prefactor = 
-                (P == Q ? 0.5 : 1.0) * 
-                (R == S ? 0.5 : 1.0) * 
+            double prefactor =
+                (P == Q ? 0.5 : 1.0) *
+                (R == S ? 0.5 : 1.0) *
                 (P == R && Q == S ? 0.5 : 1.0);
 
             int Psize = primary_->shell(P).nfunction();
@@ -395,7 +405,7 @@ void DirectJK::compute_JK_from_D(
                     }}
                 }}
 
-            } 
+            }
 
             if (do_K) {
 
@@ -403,7 +413,7 @@ void DirectJK::compute_JK_from_D(
 
                 for (int P2 = 0; P2 < nPtask; P2++) {
                 for (int R2 = 0; R2 < nRtask; R2++) {
-                    int P = Pinds[P2]; 
+                    int P = Pinds[P2];
                     int R = Rinds[R2];
                     int Psize = primary_->shell(P).nfunction();
                     int Rsize = primary_->shell(R).nfunction();
@@ -505,7 +515,7 @@ void DirectJK::compute_JK_from_D(
     }
 
     // => Hermitivitize <= //
-    
+
     if (do_J) {
         for (size_t ind = 0; ind < Ds.size(); ind++) {
             double* J2p = Jsp[ind];
@@ -517,7 +527,7 @@ void DirectJK::compute_JK_from_D(
             }
             Js[ind].scale(sJ[ind]);
         }
-    } 
+    }
 
     if (do_K && JK_symm) {
         for (size_t ind = 0; ind < Ds.size(); ind++) {

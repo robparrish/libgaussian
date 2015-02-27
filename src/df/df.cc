@@ -3,7 +3,9 @@
 #include <mints/schwarz.h>
 #include "df.h"
 
+#if defined(_OPENMP)
 #include <omp.h>
+#endif
 
 using namespace ambit;
 
@@ -34,7 +36,11 @@ Tensor DFERI::metric_core() const
 
     std::shared_ptr<SBasisSet> zero = SBasisSet::zero_basis();
 
-    int nthread = omp_get_max_threads();    
+    #if defined(_OPENMP)
+    int nthread = omp_get_max_threads();
+    #else
+    int nthread = 1;
+    #endif
     std::vector<std::shared_ptr<PotentialInt4C>> Jints;
     for (int t = 0; t < nthread; t++) {
         Jints.push_back(std::shared_ptr<PotentialInt4C>(new PotentialInt4C(auxiliary_,zero,auxiliary_,zero,0,a_,b_,w_)));
@@ -46,7 +52,7 @@ Tensor DFERI::metric_core() const
             shell_pairs[index++] = std::pair<int,int>(P,Q);
         }
     }
-    
+
     #pragma omp parallel for schedule(dynamic)
     for (size_t ind = 0; ind < shell_pairs.size(); ind++) {
         int P = shell_pairs[ind].first;
@@ -55,7 +61,11 @@ Tensor DFERI::metric_core() const
         int nQ = auxiliary_->shell(Q).nfunction();
         int oP = auxiliary_->shell(P).function_index();
         int oQ = auxiliary_->shell(Q).function_index();
+        #if defined(_OPENMP)
         int t = omp_get_thread_num();
+        #else
+        int t = 0;
+        #endif
         Jints[t]->compute_shell(P,0,Q,0);
         double* Jbuffer = Jints[t]->buffer();
         for (int p = 0; p < nP; p++) {
@@ -66,12 +76,12 @@ Tensor DFERI::metric_core() const
             }
         }
     }
-    
-    return J; 
+
+    return J;
 }
 Tensor DFERI::metric_power_core(
     double power,
-    double condition) const 
+    double condition) const
 {
     Tensor J = metric_core();
     return J.power(power,condition);

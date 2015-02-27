@@ -5,7 +5,9 @@
 #include <df/df.h>
 #include "jk.h"
 
+#if defined(_OPENMP)
 #include <omp.h>
+#endif
 
 using namespace ambit;
 
@@ -28,15 +30,15 @@ void DFJK::initialize()
     df.set_metric_condition(metric_condition());
 
     if (!force_disk() && doubles() >= df.ao_task_core_doubles()) {
-        is_core_ = true; 
-        df_tensor_ = df.compute_ao_task_core(); 
+        is_core_ = true;
+        df_tensor_ = df.compute_ao_task_core();
     } else {
         is_core_ = false;
-        df_tensor_ = df.compute_ao_task_disk(); 
+        df_tensor_ = df.compute_ao_task_disk();
     }
     initialized_ = true;
 }
-void DFJK::print(FILE* fh) const 
+void DFJK::print(FILE* fh) const
 {
     fprintf(fh, "  DFJK:\n");
     fprintf(fh, "    Primary Basis    = %14s\n", primary_->name().c_str());
@@ -63,7 +65,7 @@ void DFJK::compute_JK_from_C(
     const std::vector<double>& scaleK)
 {
     // => Check Initialization <= //
-    
+
     if (!initialized_) throw std::runtime_error("DFJK: Call initalize before computing J/K matrices");
 
     // => Scale Defaults <= //
@@ -72,20 +74,24 @@ void DFJK::compute_JK_from_C(
     std::vector<double> sK = (scaleK.size() ? scaleK : std::vector<double>(Ls.size(),1.0));
 
     // => Tasking <= //
-    
+
     bool JK_symm = true;
     for (size_t ind = 0; ind < Ls.size(); ind++) {
         JK_symm = JK_symm && Ls[ind] == Rs[ind];
     }
     bool do_J = compute_J_;
     bool do_K = compute_K_;
-    if (!do_J && !do_K) return; 
+    if (!do_J && !do_K) return;
 
     // => Sizing <= //
-    
+
     size_t naux    = auxiliary_->nfunction();
     size_t nbf     = primary_->nfunction();
+    #if defined(_OPENMP)
     size_t nthread = omp_get_max_threads();
+    #else
+    size_t nthread = 1;
+    #endif
     size_t max_nocc = 0;
     for (size_t ind = 0; ind < Ls.size(); ind++) {
         max_nocc = std::max(max_nocc, Ls[ind].dim(1));
@@ -116,7 +122,7 @@ void DFJK::compute_JK_from_C(
     std::vector<Tensor> Jtri;
     if (do_J) {
         for (size_t ind = 0; ind < Ls.size(); ind++) {
-            Tensor DF = Tensor::build(kCore, "DF", {nbf,nbf});  
+            Tensor DF = Tensor::build(kCore, "DF", {nbf,nbf});
             DF("pq") = Ls[ind]("pi") * Rs[ind]("qi");
             Dtri.push_back(Tensor::build(kCore, "Dtri", {npq}));
             Jtri.push_back(Tensor::build(kCore, "Jtri", {npq}));
@@ -172,14 +178,14 @@ void DFJK::compute_JK_from_C(
     }
 
     // => J Buffers <= //
-    
+
     Tensor d;
     if (do_J) {
         d = Tensor::build(kCore,"d",{max_naux});
     }
 
     // => K Buffers <= //
-    
+
     Tensor C;
     Tensor E;
     Tensor F;
@@ -222,7 +228,7 @@ void DFJK::compute_JK_from_C(
         // => K <= //
 
         if (do_K) {
-            
+
             // > Unpack B < //
 
             double* Bp = B.data().data() + Boff;
@@ -240,24 +246,24 @@ void DFJK::compute_JK_from_C(
                     int oQ = primary_->shell(Q).function_index();
                     for (int p = 0; p < nP; p++) {
                     for (int q = 0; q < nQ; q++) {
-                        Cp[(p + oP) * Asize * nbf + A * nbf + (q + oQ)] = 
-                        Cp[(q + oQ) * Asize * nbf + A * nbf + (p + oP)] = 
+                        Cp[(p + oP) * Asize * nbf + A * nbf + (q + oQ)] =
+                        Cp[(q + oQ) * Asize * nbf + A * nbf + (p + oP)] =
                         Bp[A*npq + pq];
                         pq++;
                     }}
-                }    
+                }
             }
-            
+
             // > Contractions < //
 
             for (size_t ind = 0; ind < Ls.size(); ind++) {
                 size_t nocc = Ls[ind].dim(1);
                 if (ind == 0 || Ls[ind] != Ls[ind-1]) {
                     E.gemm(C,Ls[ind],false,false,nbf*Asize,nocc,nbf,nbf,nocc,nocc,0,0,0,1.0,0.0);
-                }     
+                }
                 if ((!JK_symm) && (ind == 0 || Rs[ind] != Rs[ind-1])) {
                     F.gemm(C,Rs[ind],false,false,nbf*Asize,nocc,nbf,nbf,nocc,nocc,0,0,0,1.0,0.0);
-                } 
+                }
                 Ks[ind].gemm(E,F,false,true,nbf,nbf,Asize*nocc,Asize*nocc,Asize*nocc,nbf,0,0,0,sK[ind],1.0);
             }
         }
@@ -265,7 +271,7 @@ void DFJK::compute_JK_from_C(
     }
 
     // => J Extraction <= //
-    
+
     if (do_J) {
         for (size_t ind = 0; ind < Ls.size(); ind++) {
             double* Jtp = Jtri[ind].data().data();
@@ -296,7 +302,7 @@ void DFJK::compute_JK_from_D(
     std::vector<Tensor>& Ks,
     const std::vector<double>& scaleJ,
     const std::vector<double>& scaleK)
-{ 
+{
     throw std::runtime_error("DFJK: Cannot do this yet.");
 }
 void DFJK::finalize()

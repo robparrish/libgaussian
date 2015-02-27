@@ -3,7 +3,9 @@
 #include <mints/schwarz.h>
 #include "df.h"
 
+#if defined(_OPENMP)
 #include <omp.h>
+#endif
 
 using namespace ambit;
 
@@ -15,7 +17,7 @@ AODFERI::AODFERI(
     DFERI(sieve,auxiliary)
 {
 }
-size_t AODFERI::ao_task_core_doubles() const 
+size_t AODFERI::ao_task_core_doubles() const
 {
     size_t naux = auxiliary_->nfunction();
     const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
@@ -30,13 +32,13 @@ size_t AODFERI::ao_task_core_doubles() const
         if (PQ < nPQshell - 1) pqstarts[PQ + 1] = pqstarts[PQ] + offset;
         npq += offset;
     }
-    
+
     return 2L * naux * naux + naux * npq;
 }
-size_t AODFERI::ao_task_disk_doubles() const 
+size_t AODFERI::ao_task_disk_doubles() const
 {
     size_t naux = auxiliary_->nfunction();
-    return 3L * naux; 
+    return 3L * naux;
 }
 Tensor AODFERI::compute_ao_task_core(double power) const
 {
@@ -62,24 +64,28 @@ Tensor AODFERI::compute_ao_task_core(double power) const
         if (PQ < nPQshell - 1) pqstarts[PQ + 1] = pqstarts[PQ] + offset;
         npq += offset;
     }
-    
+
     // => Memory Check <= //
-    
+
     size_t required = ao_task_core_doubles();
     if (required > doubles()) throw std::runtime_error("AODFERI needs 2J + Apq memory for core.");
 
     // => Inverse Metric <= //
-        
+
     Tensor J = metric_power_core(power,metric_condition_);
 
     // => Target <= //
-    
+
     Tensor B = Tensor::build(kCore, "B", {naux, npq});
     double* Bp = B.data().data();
 
     // => Integrals <= //
 
-    int nthread = omp_get_max_threads();    
+    #if defined(_OPENMP)
+    int nthread = omp_get_max_threads();
+    #else
+    int nthread = 1;
+    #endif
     std::shared_ptr<SBasisSet> zero = SBasisSet::zero_basis();
     std::vector<std::shared_ptr<PotentialInt4C>> Bints;
     for (int t = 0; t < nthread; t++) {
@@ -97,8 +103,12 @@ Tensor AODFERI::compute_ao_task_core(double power) const
         int nP = primary_->shell(P).nfunction();
         int nQ = primary_->shell(Q).nfunction();
         size_t oA = auxiliary_->shell(A).function_index();
-        size_t opq = pqstarts[PQ]; 
+        size_t opq = pqstarts[PQ];
+        #if defined(_OPENMP)
         int t = omp_get_thread_num();
+        #else
+        int t = 0;
+        #endif
         Bints[t]->compute_shell(A,0,P,Q);
         double* Bbuffer = Bints[t]->buffer();
         for (int a = 0; a < nA; a++) {
@@ -108,16 +118,16 @@ Tensor AODFERI::compute_ao_task_core(double power) const
         }}}
     }
     Bints.clear();
-      
+
     // => Fitting <= //
 
-    Tensor T = Tensor::build(kCore, "T", {naux, naux});     
+    Tensor T = Tensor::build(kCore, "T", {naux, naux});
     for (size_t pqstart = 0L; pqstart < npq; pqstart += naux) {
         size_t pqsize = (pqstart + naux >= npq ? npq - pqstart : naux);
         T({{0,naux},{0,pqsize}}) = B({{0,naux},{pqstart,pqstart+pqsize}});
         B.gemm(J,T,false,false,naux,pqsize,naux,naux,naux,npq,0,0,pqstart,1.0,0.0);
     }
-    
+
     return B;
 }
 Tensor AODFERI::compute_ao_task_disk(double power) const
@@ -144,12 +154,12 @@ Tensor AODFERI::compute_ao_task_disk(double power) const
         if (PQ < nPQshell - 1) pqstarts[PQ + 1] = pqstarts[PQ] + offset;
         npq += offset;
     }
-    
+
     // => Memory Check <= //
-    
+
     size_t required = 0L;
     required += 2L * naux * naux;
-    required += naux * primary_->max_nfunction() * primary_->max_nfunction(); 
+    required += naux * primary_->max_nfunction() * primary_->max_nfunction();
     if (required > doubles()) throw std::runtime_error("AODFERI needs 2J + nA * maxp^2 memory for core.");
 
     size_t rem = doubles() - 2L * naux * naux;
@@ -170,22 +180,26 @@ Tensor AODFERI::compute_ao_task_disk(double power) const
     PQtasks.push_back(shell_pairs.size());
 
     // => Inverse Metric <= //
-        
+
     Tensor J = metric_power_core(power,metric_condition_);
 
     // => Target <= //
-    
+
     Tensor B = Tensor::build(kDisk, "B", {naux, npq});
-    
+
     // => Buffers <= //
 
-    Tensor T = Tensor::build(kCore, "T", {naux, naux});     
+    Tensor T = Tensor::build(kCore, "T", {naux, naux});
     Tensor B2 = Tensor::build(kCore, "B2", {naux, maxpq});
     double* Bp = B2.data().data();
 
     // => Integrals <= //
 
-    int nthread = omp_get_max_threads();    
+    #if defined(_OPENMP)
+    int nthread = omp_get_max_threads();
+    #else
+    int nthread = 1;
+    #endif
     std::shared_ptr<SBasisSet> zero = SBasisSet::zero_basis();
     std::vector<std::shared_ptr<PotentialInt4C>> Bints;
     for (int t = 0; t < nthread; t++) {
@@ -200,14 +214,14 @@ Tensor AODFERI::compute_ao_task_disk(double power) const
 
         size_t PQstart = PQtasks[PQtask];
         size_t PQstop  = PQtasks[PQtask + 1];
-        size_t PQsize  = PQstop - PQstart; 
+        size_t PQsize  = PQstop - PQstart;
         size_t pqstart = pqstarts[PQtask];
         size_t pqstop  = (PQstop == shell_pairs.size() ? npq : pqstarts[PQtask+1]);
         size_t pqsize  = pqstop - pqstart;
         size_t APQsize = nAshell * PQsize;
 
         // => Integrals <= //
-    
+
         #pragma omp parallel for schedule(dynamic)
         for (size_t APQtask = 0; APQtask < APQsize; APQtask++) {
             size_t A  = APQtask / PQsize;
@@ -218,8 +232,12 @@ Tensor AODFERI::compute_ao_task_disk(double power) const
             int nP = primary_->shell(P).nfunction();
             int nQ = primary_->shell(Q).nfunction();
             size_t oA = auxiliary_->shell(A).function_index();
-            size_t opq = pqstarts[PQ] - pqstart; 
+            size_t opq = pqstarts[PQ] - pqstart;
+            #if defined(_OPENMP)
             int t = omp_get_thread_num();
+            #else
+            int t = 0;
+            #endif
             Bints[t]->compute_shell(A,0,P,Q);
             double* Bbuffer = Bints[t]->buffer();
             for (int a = 0; a < nA; a++) {
@@ -228,7 +246,7 @@ Tensor AODFERI::compute_ao_task_disk(double power) const
                 Bp[(a + oA) * maxpq + p*nQ + q + opq] = (*Bbuffer++);
             }}}
         }
-      
+
         // => Fitting <= //
 
         for (size_t pqstart2 = 0L; pqstart2 < pqsize; pqstart2 += naux) {
@@ -241,7 +259,7 @@ Tensor AODFERI::compute_ao_task_disk(double power) const
 
         B({{0,naux},{pqstart,pqstart+pqsize}}) = B2({{0,naux},{0,pqsize}});
     }
-    
+
     return B;
 }
 

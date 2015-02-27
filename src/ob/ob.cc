@@ -5,7 +5,9 @@
 #include <mints/int2c.h>
 #include "ob.h"
 
+#if defined(_OPENMP)
 #include <omp.h>
+#endif
 
 using namespace ambit;
 
@@ -28,16 +30,20 @@ void OneBody::compute_S(
     if (S.type() != kCore) throw std::runtime_error("S must be kCore");
     if (S.rank() != 2) throw std::runtime_error("S must be rank-2");
     if (S.dim(0) != nbf1 || S.dim(1) != nbf2) throw std::runtime_error("S must be nbf1 x nbf2");
-   
-    int nthread = omp_get_max_threads();    
+
+    #if defined(_OPENMP)
+    int nthread = omp_get_max_threads();
+    #else
+    int nthread = 1;
+    #endif
     std::vector<std::shared_ptr<OverlapInt2C>> Sints;
     for (int t = 0; t < nthread; t++) {
         Sints.push_back(std::shared_ptr<OverlapInt2C>(new OverlapInt2C(basis1_,basis2_,0)));
     }
-    
+
     const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
 
-    double* Sp = S.data().data(); 
+    double* Sp = S.data().data();
 
     #pragma omp parallel for schedule(dynamic)
     for (size_t ind = 0; ind < shell_pairs.size(); ind++) {
@@ -47,7 +53,11 @@ void OneBody::compute_S(
         int nQ = basis2_->shell(Q).nfunction();
         int oP = basis1_->shell(P).function_index();
         int oQ = basis2_->shell(Q).function_index();
+        #if defined(_OPENMP)
         int t = omp_get_thread_num();
+        #else
+        int t = 0;
+        #endif
         Sints[t]->compute_shell(P,Q);
         double* Sbuffer = Sints[t]->buffer();
         if (symm) {
@@ -82,16 +92,20 @@ void OneBody::compute_T(
     if (T.type() != kCore) throw std::runtime_error("T must be kCore");
     if (T.rank() != 2) throw std::runtime_error("T must be rank-2");
     if (T.dim(0) != nbf1 || T.dim(1) != nbf2) throw std::runtime_error("T must be nbf1 x nbf2");
-   
-    int nthread = omp_get_max_threads();    
+
+    #if defined(_OPENMP)
+    int nthread = omp_get_max_threads();
+    #else
+    int nthread = 1;
+    #endif
     std::vector<std::shared_ptr<KineticInt2C>> Tints;
     for (int t = 0; t < nthread; t++) {
         Tints.push_back(std::shared_ptr<KineticInt2C>(new KineticInt2C(basis1_,basis2_,0)));
     }
-    
+
     const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
 
-    double* Tp = T.data().data(); 
+    double* Tp = T.data().data();
 
     #pragma omp parallel for schedule(dynamic)
     for (size_t ind = 0; ind < shell_pairs.size(); ind++) {
@@ -101,7 +115,11 @@ void OneBody::compute_T(
         int nQ = basis2_->shell(Q).nfunction();
         int oP = basis1_->shell(P).function_index();
         int oQ = basis2_->shell(Q).function_index();
+        #if defined(_OPENMP)
         int t = omp_get_thread_num();
+        #else
+        int t = 0;
+        #endif
         Tints[t]->compute_shell(P,Q);
         double* Tbuffer = Tints[t]->buffer();
         if (symm) {
@@ -142,8 +160,12 @@ void OneBody::compute_X(
         if (X[i].rank() != 2) throw std::runtime_error("X must be rank-2");
         if (X[i].dim(0) != nbf1 || X[i].dim(1) != nbf2) throw std::runtime_error("X must be nbf1 x nbf2");
     }
-   
-    int nthread = omp_get_max_threads();    
+
+    #if defined(_OPENMP)
+    int nthread = omp_get_max_threads();
+    #else
+    int nthread = 1;
+    #endif
     std::vector<std::shared_ptr<DipoleInt2C>> Xints;
     for (int t = 0; t < nthread; t++) {
         Xints.push_back(std::shared_ptr<DipoleInt2C>(new DipoleInt2C(basis1_,basis2_,0)));
@@ -151,12 +173,12 @@ void OneBody::compute_X(
         Xints[t]->set_y(origin[1]);
         Xints[t]->set_z(origin[2]);
     }
-    
+
     const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
 
-    double* Xp = X[0].data().data(); 
-    double* Yp = X[1].data().data(); 
-    double* Zp = X[2].data().data(); 
+    double* Xp = X[0].data().data();
+    double* Yp = X[1].data().data();
+    double* Zp = X[2].data().data();
 
     size_t chunk_size = Xints[0]->chunk_size();
 
@@ -168,7 +190,11 @@ void OneBody::compute_X(
         int nQ = basis2_->shell(Q).nfunction();
         int oP = basis1_->shell(P).function_index();
         int oQ = basis2_->shell(Q).function_index();
+        #if defined(_OPENMP)
         int t = omp_get_thread_num();
+        #else
+        int t = 0;
+        #endif
         Xints[t]->compute_shell(P,Q);
         double* Xbuffer = Xints[t]->buffer();
         double* Ybuffer = Xbuffer + chunk_size;
@@ -243,8 +269,12 @@ void OneBody::compute_Q(
         if (Q[i].rank() != 2) throw std::runtime_error("Q must be rank-2");
         if (Q[i].dim(0) != nbf1 || Q[i].dim(1) != nbf2) throw std::runtime_error("Q must be nbf1 x nbf2");
     }
-   
-    int nthread = omp_get_max_threads();    
+
+    #if defined(_OPENMP)
+    int nthread = omp_get_max_threads();
+    #else
+    int nthread = 1;
+    #endif
     std::vector<std::shared_ptr<QuadrupoleInt2C>> Qints;
     for (int t = 0; t < nthread; t++) {
         Qints.push_back(std::shared_ptr<QuadrupoleInt2C>(new QuadrupoleInt2C(basis1_,basis2_,0)));
@@ -252,15 +282,15 @@ void OneBody::compute_Q(
         Qints[t]->set_y(origin[1]);
         Qints[t]->set_z(origin[2]);
     }
-    
+
     const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
 
-    double* XXp = Q[0].data().data(); 
-    double* XYp = Q[1].data().data(); 
-    double* XZp = Q[2].data().data(); 
-    double* YYp = Q[3].data().data(); 
-    double* YZp = Q[4].data().data(); 
-    double* ZZp = Q[5].data().data(); 
+    double* XXp = Q[0].data().data();
+    double* XYp = Q[1].data().data();
+    double* XZp = Q[2].data().data();
+    double* YYp = Q[3].data().data();
+    double* YZp = Q[4].data().data();
+    double* ZZp = Q[5].data().data();
 
     size_t chunk_size = Qints[0]->chunk_size();
 
@@ -272,7 +302,11 @@ void OneBody::compute_Q(
         int nQ = basis2_->shell(Q).nfunction();
         int oP = basis1_->shell(P).function_index();
         int oQ = basis2_->shell(Q).function_index();
+        #if defined(_OPENMP)
         int t = omp_get_thread_num();
+        #else
+        int t = 0;
+        #endif
         Qints[t]->compute_shell(P,Q);
         double* XXbuffer = Qints[t]->buffer();
         double* XYbuffer = XXbuffer + 1L * chunk_size;
@@ -399,8 +433,12 @@ void OneBody::compute_V(
     if (V.type() != kCore) throw std::runtime_error("V must be kCore");
     if (V.rank() != 2) throw std::runtime_error("V must be rank-2");
     if (V.dim(0) != nbf1 || V.dim(1) != nbf2) throw std::runtime_error("V must be nbf1 x nbf2");
-   
-    int nthread = omp_get_max_threads();    
+
+    #if defined(_OPENMP)
+    int nthread = omp_get_max_threads();
+    #else
+    int nthread = 1;
+    #endif
     std::vector<std::shared_ptr<PotentialInt2C>> Vints;
     for (int t = 0; t < nthread; t++) {
         Vints.push_back(std::shared_ptr<PotentialInt2C>(new PotentialInt2C(basis1_,basis2_,0,a,b,w)));
@@ -413,10 +451,10 @@ void OneBody::compute_V(
         Vints[t]->zs().insert(Vints[t]->zs().begin(),zs.begin(),zs.end());
         Vints[t]->Zs().insert(Vints[t]->Zs().begin(),Zs.begin(),Zs.end());
     }
-    
+
     const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
 
-    double* Vp = V.data().data(); 
+    double* Vp = V.data().data();
 
     #pragma omp parallel for schedule(dynamic)
     for (size_t ind = 0; ind < shell_pairs.size(); ind++) {
@@ -426,7 +464,11 @@ void OneBody::compute_V(
         int nQ = basis2_->shell(Q).nfunction();
         int oP = basis1_->shell(P).function_index();
         int oQ = basis2_->shell(Q).function_index();
+        #if defined(_OPENMP)
         int t = omp_get_thread_num();
+        #else
+        int t = 0;
+        #endif
         Vints[t]->compute_shell(P,Q);
         double* Vbuffer = Vints[t]->buffer();
         if (symm) {
@@ -456,7 +498,7 @@ void OneBody::compute_V_nuclear(
     bool use_nuclear,
     double a,
     double b,
-    double w, 
+    double w,
     double scale) const
 {
     std::vector<double> xs(mol->natom());
