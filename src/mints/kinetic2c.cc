@@ -163,6 +163,9 @@ void KineticInt2C::compute_pair1(
     const int am2 = sh2.am();
     const size_t nprim1 = sh1.nprimitive();
     const size_t nprim2 = sh2.nprimitive();
+    const int ncenteri = sh1.ncenter();
+    const int ncenterj = sh2.ncenter();
+
 
     const double Ax = sh1.x();
     const double Ay = sh1.y();
@@ -260,8 +263,16 @@ void KineticInt2C::compute_pair1(
 
     bool s1 = sh1.is_spherical();
     bool s2 = sh2.is_spherical();
-    if (is_spherical_) apply_spherical(am1, am2, s1, s2, buffer1_, buffer2_);
+    if (is_spherical_) {
+        apply_spherical(am1, am2, s1, s2, buffer1_ + 0L * chunk_size(), buffer2_ + 0L * chunk_size());
+        apply_spherical(am1, am2, s1, s2, buffer1_ + 1L * chunk_size(), buffer2_ + 1L * chunk_size());
+        apply_spherical(am1, am2, s1, s2, buffer1_ + 2L * chunk_size(), buffer2_ + 2L * chunk_size());
+        apply_spherical(am1, am2, s1, s2, buffer1_ + 3L * chunk_size(), buffer2_ + 3L * chunk_size());
+        apply_spherical(am1, am2, s1, s2, buffer1_ + 4L * chunk_size(), buffer2_ + 4L * chunk_size());
+        apply_spherical(am1, am2, s1, s2, buffer1_ + 5L * chunk_size(), buffer2_ + 5L * chunk_size());
+    }
 }
+
 void KineticInt2C::compute_pair2(
     const SGaussianShell& sh1,
     const SGaussianShell& sh2)
