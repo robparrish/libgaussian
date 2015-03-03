@@ -16,7 +16,7 @@ set(LIBPYLIGHTSPEED_SOURCES
 
 add_library(pylightspeed SHARED ${LIBPYLIGHTSPEED_SOURCES} ${LIBPYLIGHTSPEED_HEADERS})
 
-target_link_libraries(pylightspeed lightspeed -lboost_python -lboost_system)
+target_link_libraries(pylightspeed lightspeed -lboost_python -lboost_system -lboost_timer)
 
 #install(TARGETS pylightspeed SHARED DESTINATION lib)
 
