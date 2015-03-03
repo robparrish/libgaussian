@@ -10,7 +10,7 @@ using namespace boost::python;
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(ambit_print_ov, Tensor::print, 0, 4)
 
-aligned_vector<double>& (Tensor::*data)() = &Tensor::data;
+std::vector<double>& (Tensor::*data)() = &Tensor::data;
 
 void export_ambit()
 {
