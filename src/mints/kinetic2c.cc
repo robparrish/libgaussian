@@ -163,9 +163,6 @@ void KineticInt2C::compute_pair1(
     const int am2 = sh2.am();
     const size_t nprim1 = sh1.nprimitive();
     const size_t nprim2 = sh2.nprimitive();
-    const int ncenteri = sh1.ncenter();
-    const int ncenterj = sh2.ncenter();
-
 
     const double Ax = sh1.x();
     const double Ay = sh1.y();
