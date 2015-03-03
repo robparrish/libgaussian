@@ -18,19 +18,9 @@ Int4C::Int4C(
 {
     is_spherical_ = true;
     am_info_ = SAngularMomentum::build(max_am());
-
-    size_t nprim4 = 
-        basis1_->max_nprimitive() *
-        basis2_->max_nprimitive() *
-        basis3_->max_nprimitive() *
-        basis4_->max_nprimitive();
-
-    init_libint_base();
-    init_libint(&libint_, max_am(), nprim4);
 }
 Int4C::~Int4C()
 {
-    free_libint(&libint_);
 }
 int Int4C::max_am() const
 {
@@ -131,7 +121,7 @@ void Int4C::apply_spherical(
     double* scratch)
 {
     if (!S1 && !S2 && !S3 && !S4) return;
-    
+
     int ncart1 = constants::ncartesian(L1);
     int ncart2 = constants::ncartesian(L2);
     int ncart3 = constants::ncartesian(L3);
@@ -160,7 +150,7 @@ void Int4C::apply_spherical(
             for (size_t ind = 0L; ind < ncoef; ind++) {
                 *(purep + pure_inds[ind]) += cart_coefs[ind] * *(cartp + cart_inds[ind]);
             }
-        } 
+        }
     } else {
         memcpy(scratch,target,sizeof(double)*ncart1*ncart2*ncart3*ncart4);
     }
@@ -183,7 +173,7 @@ void Int4C::apply_spherical(
                     *purep++ += coef * *cartp++;
                 }
             }
-        } 
+        }
     } else {
         memcpy(target,scratch,sizeof(double)*ncart1*ncart2*ncart3*nfun4);
     }
@@ -206,7 +196,7 @@ void Int4C::apply_spherical(
                     *purep++ += coef * *cartp++;
                 }
             }
-        } 
+        }
     } else {
         memcpy(scratch,target,sizeof(double)*ncart1*ncart2*nfun3*nfun4);
     }

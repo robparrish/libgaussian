@@ -1,16 +1,22 @@
 # Just change the Boost version number here
-set(BOOSTVER 1.56.0)
-set(BOOSTVERMIN 1.55.0)
+set(BOOSTVER 1.54.0)
+set(BOOSTVERMIN 1.54.0)
 set(BUILD_CUSTOM_BOOST FALSE)
 # List all components needed (except mpi and unit_test_framework) here.
 # mpi and unit_test_framework will be added afterwards, if needed.
 list(APPEND needed_components filesystem chrono system timer)
-set(Boost_USE_STATIC_LIBS    ON)
+#set(Boost_USE_STATIC_LIBS    ON)
 set(Boost_USE_MULTITHREADED  ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
 if(ENABLE_PYTHON)
-    list(APPEND needed_components python)
+    if(PYTHON_VERSION_MAJOR MATCHES "3")
+        list(APPEND needed_components python3)
+    elseif(PYTHON_VERSION_MAJOR MATCHES "2")
+        list(APPEND needed_components python)
+    else()
+        message(FATAL "Unrecognized major version of Python: ${PYTHON_VERSION_MAJOR}")
+    endif()
 endif()
 
 if(ENABLE_UNIT_TESTS)

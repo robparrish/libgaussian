@@ -5,10 +5,6 @@
 #include <memory>
 #include <core/basisset.h>
 
-#include "fjt.h"
-
-#include <libint/libint.h>
-
 namespace lightspeed {
 
 /**!
@@ -144,16 +140,14 @@ protected:
     std::shared_ptr<SBasisSet> basis4_;
     int deriv_;
 
-    std::vector<double> data1_; 
-    std::vector<double> data2_; 
+    std::vector<double> data1_;
+    std::vector<double> data2_;
     double* buffer1_;
     double* buffer2_;
 
     bool is_spherical_;
     /// Internal CO->SO transformation information
     std::vector<SAngularMomentum> am_info_;
-
-    Libint_t libint_;
 
     /**!
      * Helper to apply spherical transformations to the cartesian integrals
@@ -252,7 +246,8 @@ protected:
     double b_;
     double w_;
 
-    Fjt *fjt_;
+    struct Impl;
+    Impl* impl_;
 
 };
 

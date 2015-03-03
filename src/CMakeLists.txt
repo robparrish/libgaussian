@@ -43,10 +43,11 @@ set(LIBLIGHTSPEED_SOURCES
 )
 
 # build static libray
-#add_library(lightspeed STATIC ${LIBLIGHTSPEED_SOURCES} ${LIBLIGHTSPEED_HEADERS})
-add_library(lightspeed SHARED ${LIBLIGHTSPEED_SOURCES} ${LIBLIGHTSPEED_HEADERS})
+add_library(lightspeed STATIC ${LIBLIGHTSPEED_SOURCES} ${LIBLIGHTSPEED_HEADERS})
+#add_library(lightspeed SHARED ${LIBLIGHTSPEED_SOURCES} ${LIBLIGHTSPEED_HEADERS})
 
-target_link_libraries(lightspeed ${LIBINT}/lib/libint.so ${LIBAMBIT}/lib/libambit.a)
+#target_link_libraries(lightspeed ${LIBINT}/lib/libint.so ${LIBAMBIT}/lib/libambit.a)
+target_link_libraries(lightspeed ${LIBINT}/lib/libint2.a ${LIBAMBIT}/lib/libambit.a ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
 
 #install(TARGETS lightspeed ARCHIVE DESTINATION lib)
 #install(TARGETS lightspeed SHARED DESTINATION lib)

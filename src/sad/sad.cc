@@ -4,7 +4,9 @@
 #include <core/basisset.h>
 #include <mints/int2c.h>
 
+#if defined(_OPENMP)
 #include <omp.h>
+#endif
 
 using namespace ambit;
 
@@ -33,7 +35,7 @@ SAD::SAD(
         if (N == 0) continue;
         // Ghost atoms are ignored
         if (atom.Ya() == 0.0 && atom.Yb() == 0.0) continue;
-        
+
         // Check primary basis set centers
         for (size_t P2 = 0; P2 < primary_->atoms_to_shell_inds()[A].size(); P2++) {
             const SGaussianShell& shell = primary_->shell(primary_->atoms_to_shell_inds()[A][P2]);
@@ -54,60 +56,60 @@ SAD::SAD(
         //int nfrz;
         //int nact;
         //std::vector<int> nshell_by_am;
-        std::vector<int> am_types; 
+        std::vector<int> am_types;
         if (N <=2) {
             //nocc = 1; // 1s
-            //nfrz = 0; // 
+            //nfrz = 0; //
             //nact = 1; // 1s
             //nshell_by_am = {1};
-            am_types = {0};    
+            am_types = {0};
         } else if (N <= 10) {
             //nocc = 5; // 1s 2s 2p
             //nfrz = 1; // 1s
             //nact = 4; // 2s 2p
             //nshell_by_am = {2,1};
-            am_types = {0,0,1};    
+            am_types = {0,0,1};
         } else if (N <= 18) {
             //nocc = 9; // 1s 2s 2p 3s 3p
             //nfrz = 5; // 1s 2s 2p
             //nact = 4; // 3s 3p
             //nshell_by_am = {3,2};
-            am_types = {0,0,0,1,1};    
+            am_types = {0,0,0,1,1};
         } else if (N <= 36) {
             //nocc = 18; // 1s 2s 2p 3s 3p 4s 3d 4p
             //nfrz = 9;  // 1s 2s 2p 3s 3p
             //nact = 9;  // 4s 3d 4p
             //nshell_by_am = {4,3,1};
-            am_types = {0,0,0,0,1,1,1,2};    
+            am_types = {0,0,0,0,1,1,1,2};
         } else if (N <= 54) {
             //nocc = 27; // 1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p
             //nfrz = 18; // 1s 2s 2p 3s 3p 4s 3d 4p
             //nact = 9;  // 5s 4d 5p
             //nshell_by_am = {5,4,2};
-            am_types = {0,0,0,0,0,1,1,1,1,2,2};    
+            am_types = {0,0,0,0,0,1,1,1,1,2,2};
         } else if (N <= 86) {
             //nocc = 43; // 1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p 6s 4f 5d 6p
             //nfrz = 27; // 1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p
             //nact = 16; // 6s 4f 5d 6p
             //nshell_by_am = {6,5,3,1};
-            am_types = {0,0,0,0,0,0,1,1,1,1,1,2,2,2,3};    
+            am_types = {0,0,0,0,0,0,1,1,1,1,1,2,2,2,3};
         } else if (N <= 118) {
             //nocc = 59; // 1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p 6s 4f 5d 6p 7s 5f 6d 7p
             //nfrz = 43; // 1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p 6s 4f 5d 6p
             //nact = 16; // 7s 5f 6d 7p
             //nshell_by_am = {7,6,4,2};
-            am_types = {0,0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,3,3};    
+            am_types = {0,0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,3,3};
         } else {
             throw std::runtime_error("SAD: N > 118 not supported.");
         }
 
         if (minao_->atoms_to_shell_inds()[A].size() != am_types.size()) throw std::runtime_error("SAD: MinAO basis has wrong number of shells for atom: " + atom.label());
-        
+
         for (size_t P2 = 0; P2 < minao_->atoms_to_shell_inds()[A].size(); P2++) {
             const SGaussianShell& shell = minao_->shell(minao_->atoms_to_shell_inds()[A][P2]);
             if (am_types[P2] != shell.am()) throw std::runtime_error("SAD: AM types do not match for atom: " + atom.label());
             if (!shell.is_spherical()) throw std::runtime_error("SAD: MinAO Basis is not spherical for atom: " + atom.label());
-        } 
+        }
     }
 }
 void SAD::print(FILE* fh) const
@@ -145,10 +147,10 @@ Tensor SAD::compute_C_helper(const std::string& key) const
         if (N == 0) continue;
         // Ghost atoms are ignored
         if (atom.Ya() == 0.0 && atom.Yb() == 0.0) continue;
-        
+
         double Q = 0.0;
         if (key == "C") {
-            Q = 0.5 * (atom.Ya() + atom.Yb()); 
+            Q = 0.5 * (atom.Ya() + atom.Yb());
         } else if (key == "CA") {
             Q = atom.Ya();
         } else if (key == "CB") {
@@ -162,7 +164,7 @@ Tensor SAD::compute_C_helper(const std::string& key) const
         atom_blocks.push_back(C);
         offsets.push_back(primary_->shell(primary_->atoms_to_shell_inds()[A][0]).function_index());
     }
-    
+
     Tensor L = Tensor::build(kCore,"C (SAD)", {nbf,nocc});
     for (size_t ind = 0, occstart = 0; ind < atom_blocks.size(); ind++) {
         Tensor C = atom_blocks[ind];
@@ -185,53 +187,53 @@ Tensor SAD::compute_atom(
 
     // => Occupation <= //
 
-    int nocc;
-    int nfrz;
-    int nact;
+    size_t nocc;
+    size_t nfrz;
+    size_t nact;
     //std::vector<int> nshell_by_am;
-    //std::vector<int> am_types; 
+    //std::vector<int> am_types;
     if (N <=2) {
         nocc = 1; // 1s
-        nfrz = 0; // 
+        nfrz = 0; //
         nact = 1; // 1s
         //nshell_by_am = {1};
-        //am_types = {0};    
+        //am_types = {0};
     } else if (N <= 10) {
         nocc = 5; // 1s 2s 2p
         nfrz = 1; // 1s
         nact = 4; // 2s 2p
         //nshell_by_am = {2,1};
-        //am_types = {0,0,1};    
+        //am_types = {0,0,1};
     } else if (N <= 18) {
         nocc = 9; // 1s 2s 2p 3s 3p
         nfrz = 5; // 1s 2s 2p
         nact = 4; // 3s 3p
         //nshell_by_am = {3,2};
-        //am_types = {0,0,0,1,1};    
+        //am_types = {0,0,0,1,1};
     } else if (N <= 36) {
         nocc = 18; // 1s 2s 2p 3s 3p 4s 3d 4p
         nfrz = 9;  // 1s 2s 2p 3s 3p
         nact = 9;  // 4s 3d 4p
         //nshell_by_am = {4,3,1};
-        //am_types = {0,0,0,0,1,1,1,2};    
+        //am_types = {0,0,0,0,1,1,1,2};
     } else if (N <= 54) {
         nocc = 27; // 1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p
         nfrz = 18; // 1s 2s 2p 3s 3p 4s 3d 4p
         nact = 9;  // 5s 4d 5p
         //nshell_by_am = {5,4,2};
-        //am_types = {0,0,0,0,0,1,1,1,1,2,2};    
+        //am_types = {0,0,0,0,0,1,1,1,1,2,2};
     } else if (N <= 86) {
         nocc = 43; // 1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p 6s 4f 5d 6p
         nfrz = 27; // 1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p
         nact = 16; // 6s 4f 5d 6p
         //nshell_by_am = {6,5,3,1};
-        //am_types = {0,0,0,0,0,0,1,1,1,1,1,2,2,2,3};    
+        //am_types = {0,0,0,0,0,0,1,1,1,1,1,2,2,2,3};
     } else if (N <= 118) {
         nocc = 59; // 1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p 6s 4f 5d 6p 7s 5f 6d 7p
         nfrz = 43; // 1s 2s 2p 3s 3p 4s 3d 4p 5s 4d 5p 6s 4f 5d 6p
         nact = 16; // 7s 5f 6d 7p
         //nshell_by_am = {7,6,4,2};
-        //am_types = {0,0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,3,3};    
+        //am_types = {0,0,0,0,0,0,0,1,1,1,1,1,1,2,2,2,2,3,3};
     } else {
         throw std::runtime_error("SAD: N > 118 not supported.");
     }
@@ -243,7 +245,7 @@ Tensor SAD::compute_atom(
     if (Q < nfrz) {
         focc = Q / nfrz;
         aocc = 0.0;
-    }    
+    }
 
     //printf("Atom %4s: Q = %11.3E, focc = %11.3E aocc = %11.3E\n", atom.label().c_str(), Q, focc, aocc);
 
@@ -430,7 +432,7 @@ Tensor SAD::compute_atom(
         fp[ind] = sqrt(fp[ind]);
     }
 
-    // => Overlap Integrals <= // 
+    // => Overlap Integrals <= //
 
     const std::vector<size_t>& primary_shells = primary_->atoms_to_shell_inds()[A];
     const std::vector<size_t>& minao_shells = minao_->atoms_to_shell_inds()[A];
@@ -447,9 +449,9 @@ Tensor SAD::compute_atom(
 
     if (nmin != nocc) throw std::runtime_error("This should be impossible");
 
-    Tensor S11 = Tensor::build(kCore,"Spp",{nbf,nbf}); 
-    Tensor S12 = Tensor::build(kCore,"Spm",{nbf,nmin}); 
-    Tensor S22 = Tensor::build(kCore,"Smm",{nmin,nmin}); 
+    Tensor S11 = Tensor::build(kCore,"Spp",{nbf,nbf});
+    Tensor S12 = Tensor::build(kCore,"Spm",{nbf,nmin});
+    Tensor S22 = Tensor::build(kCore,"Smm",{nmin,nmin});
 
     double* S11p = S11.data().data();
     double* S12p = S12.data().data();
@@ -473,7 +475,7 @@ Tensor SAD::compute_atom(
         for (int q = 0; q < nQ; q++) {
             S11p[(p + oP) * nbf + (q + oQ)] = (*buffer++);
         }}
-    }} 
+    }}
 
     for (size_t P2 = 0; P2 < primary_shells.size(); P2++) {
     for (size_t Q2 = 0; Q2 < minao_shells.size(); Q2++) {
@@ -489,7 +491,7 @@ Tensor SAD::compute_atom(
         for (int q = 0; q < nQ; q++) {
             S12p[(p + oP) * nmin + (q + oQ)] = (*buffer++);
         }}
-    }} 
+    }}
 
     for (size_t P2 = 0; P2 < minao_shells.size(); P2++) {
     for (size_t Q2 = 0; Q2 < minao_shells.size(); Q2++) {
@@ -505,7 +507,7 @@ Tensor SAD::compute_atom(
         for (int q = 0; q < nQ; q++) {
             S22p[(p + oP) * nmin + (q + oQ)] = (*buffer++);
         }}
-    }} 
+    }}
 
     for (int p = 0; p < nmin; p++) {
         S22p[p*nmin + p] -= 1.0;
@@ -519,8 +521,8 @@ Tensor SAD::compute_atom(
     V12("pi") = S12("pi") * f("i");
     Tensor C   = Tensor::build(kCore,"C",{nbf,nmin});
     C("pi") = S11inv("pq") * V12("qi");
-    
+
     return C;
-} 
+}
 
 } // namespace lightspeed

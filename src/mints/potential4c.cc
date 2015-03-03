@@ -4,6 +4,9 @@
 #include "constants.h"
 #include "fjt.h"
 
+#include <libint2.h>
+#include <libint2/libint2_types.h>
+
 namespace lightspeed {
 
 namespace {
@@ -177,6 +180,35 @@ void permute_target(double *s, double *t,
 
 }
 
+struct PotentialInt4C::Impl
+{
+    Impl(const std::shared_ptr<SBasisSet> &basis1,
+         const std::shared_ptr<SBasisSet> &basis2,
+         const std::shared_ptr<SBasisSet> &basis3,
+         const std::shared_ptr<SBasisSet> &basis4) :
+            fjt_(new FJT(basis1->max_am()+ basis2->max_am()+ basis3->max_am()+ basis4->max_am())),
+            libint_(basis1->max_nprimitive()*basis2->max_nprimitive()*basis3->max_nprimitive()*basis4->max_nprimitive())
+    {
+        libint2_static_init();
+        libint2_init_eri(&libint_[0],
+                         std::max(
+                                 std::max(
+                                         basis1->max_am(),
+                                         basis2->max_am()),
+                                 std::max(
+                                         basis3->max_am(),
+                                         basis4->max_am()
+                                 )
+                         ), 0);
+    }
+    virtual ~Impl() {
+        libint2_cleanup_eri(&libint_[0]);
+        libint2_static_cleanup();
+    }
+    std::unique_ptr<Fjt> fjt_;
+    std::vector<Libint_t> libint_;
+};
+
 PotentialInt4C::PotentialInt4C(
         const std::shared_ptr<SBasisSet> &basis1,
         const std::shared_ptr<SBasisSet> &basis2,
@@ -189,7 +221,8 @@ PotentialInt4C::PotentialInt4C(
         Int4C(basis1, basis2, basis3, basis4, deriv),
         a_(a),
         b_(b),
-        w_(w)
+        w_(w),
+        impl_(new Impl(basis1, basis2, basis3, basis4))
 {
     if (a != 1.0 || b != 0.0 || w != 0.0)
         throw std::logic_error("Only standard repulsion integrals are supported.");
@@ -204,13 +237,11 @@ PotentialInt4C::PotentialInt4C(
     data2_.resize(size);
     buffer1_ = data1_.data();
     buffer2_ = data2_.data();
-
-    fjt_ = new FJT(basis1->max_am()+basis2->max_am()+basis3->max_am()+basis4->max_am());
 }
 PotentialInt4C::~PotentialInt4C()
 {
-    delete fjt_;
-    fjt_ = nullptr;
+    delete impl_;
+    impl_ = nullptr;
 }
 void PotentialInt4C::compute_quartet(
         const SGaussianShell &sh1,
@@ -269,15 +300,15 @@ void PotentialInt4C::compute_quartet(
 
     // s1, s2, s3, s4 contain the shells to do in libint order
 
-    int am1 = s1->am();
-    int am2 = s2->am();
-    int am3 = s3->am();
-    int am4 = s4->am();
-    int am = am1 + am2 + am3 + am4; // total am
-    int nprim1;
-    int nprim2;
-    int nprim3;
-    int nprim4;
+    const int am1 = s1->am();
+    const int am2 = s2->am();
+    const int am3 = s3->am();
+    const int am4 = s4->am();
+    const int am = am1 + am2 + am3 + am4; // total am
+    const size_t nprim1 = s1->nprimitive();
+    const size_t nprim2 = s2->nprimitive();
+    const size_t nprim3 = s3->nprimitive();
+    const size_t nprim4 = s4->nprimitive();
     double A[3], B[3], C[3], D[3];
 
     A[0] = s1->x();
@@ -303,19 +334,8 @@ void PotentialInt4C::compute_quartet(
     CD2 += (C[1] - D[1]) * (C[1] - D[1]);
     CD2 += (C[2] - D[2]) * (C[2] - D[2]);
 
-    libint_.AB[0] = A[0] - B[0];
-    libint_.AB[1] = A[1] - B[1];
-    libint_.AB[2] = A[2] - B[2];
-    libint_.CD[0] = C[0] - D[0];
-    libint_.CD[1] = C[1] - D[1];
-    libint_.CD[2] = C[2] - D[2];
-
     // Prepare all the data needed by libint
     size_t nprim = 0;
-    nprim1 = s1->nprimitive();
-    nprim2 = s2->nprimitive();
-    nprim3 = s3->nprimitive();
-    nprim4 = s4->nprimitive();
 
     const std::vector<double>&a1s = s1->es();
     const std::vector<double>&a2s = s2->es();
@@ -363,10 +383,18 @@ void PotentialInt4C::compute_quartet(
                     double oo2n = 1.0 / (2.0 * nu);
                     double oo2zn = 1.0 / (2.0 * (zeta + nu));
                     double rho = (zeta * nu) / (zeta + nu);
-                    double oo2rho = 1.0 / (2.0 * rho);
 
-                    double QC[3], QD[3], WP[3], WQ[3], PQ[3];
+                    double QD[3], PQ[3];
                     double Q[3], W[3], a3C[3], a4D[3];
+
+                    Libint_t& eri = impl_->libint_[nprim];
+
+                    eri.AB_x[0] = A[0] - B[0];
+                    eri.AB_y[0] = A[1] - B[1];
+                    eri.AB_z[0] = A[2] - B[2];
+                    eri.CD_x[0] = C[0] - D[0];
+                    eri.CD_y[0] = C[1] - D[1];
+                    eri.CD_z[0] = C[2] - D[2];
 
                     a3C[0] = a3 * C[0];
                     a3C[1] = a3 * C[1];
@@ -380,9 +408,6 @@ void PotentialInt4C::compute_quartet(
                     Q[1] = (a3C[1] + a4D[1]) * oon;
                     Q[2] = (a3C[2] + a4D[2]) * oon;
 
-                    QC[0] = Q[0] - C[0];
-                    QC[1] = Q[1] - C[1];
-                    QC[2] = Q[2] - C[2];
                     QD[0] = Q[0] - D[0];
                     QD[1] = Q[1] - D[1];
                     QD[2] = Q[2] - D[2];
@@ -398,35 +423,38 @@ void PotentialInt4C::compute_quartet(
                     W[0] = (zeta * P[0] + nu * Q[0]) / (zeta + nu);
                     W[1] = (zeta * P[1] + nu * Q[1]) / (zeta + nu);
                     W[2] = (zeta * P[2] + nu * Q[2]) / (zeta + nu);
-                    WP[0] = W[0] - P[0];
-                    WP[1] = W[1] - P[1];
-                    WP[2] = W[2] - P[2];
-                    WQ[0] = W[0] - Q[0];
-                    WQ[1] = W[1] - Q[1];
-                    WQ[2] = W[2] - Q[2];
 
-                    for (int i = 0; i < 3; ++i) {
-                        libint_.PrimQuartet[nprim].U[0][i] = PA[i];
-                        libint_.PrimQuartet[nprim].U[2][i] = QC[i];
-                        libint_.PrimQuartet[nprim].U[4][i] = WP[i];
-                        libint_.PrimQuartet[nprim].U[5][i] = WQ[i];
-                    }
-                    libint_.PrimQuartet[nprim].oo2z = oo2z;
-                    libint_.PrimQuartet[nprim].oo2n = oo2n;
-                    libint_.PrimQuartet[nprim].oo2zn = oo2zn;
-                    libint_.PrimQuartet[nprim].poz = rho * ooz;
-                    libint_.PrimQuartet[nprim].pon = rho * oon;
-                    libint_.PrimQuartet[nprim].oo2p = oo2rho;
+                    eri.PA_x[0] = PA[0];
+                    eri.PA_y[0] = PA[1];
+                    eri.PA_z[0] = PA[2];
+
+                    eri.QC_x[0] = Q[0] - C[0];
+                    eri.QC_y[0] = Q[1] - C[1];
+                    eri.QC_z[0] = Q[2] - C[2];
+
+                    eri.WP_x[0] = W[0] - P[0];
+                    eri.WP_y[0] = W[1] - P[1];
+                    eri.WP_z[0] = W[2] - P[2];
+
+                    eri.WQ_x[0] = W[0] - Q[0];
+                    eri.WQ_y[0] = W[1] - Q[1];
+                    eri.WQ_z[0] = W[2] - Q[2];
+
+                    eri.oo2z[0] = oo2z;
+                    eri.oo2e[0] = oo2n;
+                    eri.oo2ze[0] = oo2zn;
+                    eri.roz[0] = rho * ooz;
+                    eri.roe[0] = rho * oon;
 
                     double T = rho * PQ2;
-                    fjt_->set_rho(rho);
-                    double * F = fjt_->values(am, T);
+                    impl_->fjt_->set_rho(rho);
+                    double * F = impl_->fjt_->values(am, T);
 
                     // Modify F to include overlap of ab and cd, eqs 14, 15, 16 of libint manual
                     double Scd = pow(M_PI * oon, 3.0 / 2.0) * exp(-a3 * a4 * oon * CD2) * c3 * c4;
                     double val = 2.0 * sqrt(rho * M_1_PI) * Sab * Scd;
                     for (int i = 0; i <= am; ++i) {
-                        libint_.PrimQuartet[nprim].F[i] = F[i] * val;
+                        eri.LIBINT_T_SS_EREP_SS(0)[i] = F[i] * val;
                     }
                     nprim++;
                 }
@@ -434,20 +462,20 @@ void PotentialInt4C::compute_quartet(
         }
     }
 
+    impl_->libint_[0].contrdepth = nprim;
+
     // How many are there?
     // Compute the integral
     if (am) {
-        double *target_ints;
+        libint2_build_eri[am1][am2][am3][am4](impl_->libint_.data());
 
-        target_ints = build_eri[am1][am2][am3][am4](&libint_, nprim);
-
-        memcpy(buffer2_, target_ints, sizeof(double) * size);
+        memcpy(buffer2_, impl_->libint_[0].targets[0], sizeof(double) * size);
     }
     else {
         // Handle (ss|ss)
         double temp = 0.0;
         for (size_t i = 0; i < nprim; ++i)
-            temp += (double) libint_.PrimQuartet[i].F[0];
+            temp += impl_->libint_[i].LIBINT_T_SS_EREP_SS(0)[0];
         buffer2_[0] = temp;
     }
 
