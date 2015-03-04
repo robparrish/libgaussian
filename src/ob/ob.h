@@ -128,6 +128,33 @@ public:
         const std::vector<double>& origin = {0.0, 0.0, 0.0},
         const std::vector<double>& scale = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0}) const;
 
+     /**!
+     * Compute the V (nuclear potental energy) matrix:
+     *
+     *  V_pq += scale * 
+     *          \int_{\mathbb{R}^3} 
+     *          \mathrm{d}^3 r_1
+     *          \phi_p^1 [-Z_A / r_1A] \phi_q^1
+     *
+     * This routine can compute the potental matrix with an Ewald-type
+     * interaction operator of the form:
+     *
+     *  a / r_12 + b erf(w r_12) / r_12
+     *
+     * Note: this object uses the conventional definition of these integrals,
+     * in which positive Zs correspond to positive charges, which attract to
+     * electrons, resulting in negative matrix elements for positive  Zs.
+     * 
+     * @param V a Tensor of size np1 x np2 to add the results into
+     * @param xs the x positions of the point charges in au
+     * @param ys the y positions of the point charges in au
+     * @param zs the z positions of the point charges in au
+     * @param Zs the magnitudes of the point charges in au
+     * @param a the scale of the usual 1/r_12 interaction operator
+     * @param b the scale of the Ewald erf(w r_12)/r_12 interaction operator
+     * @param w the Ewald range-separation parameter
+     * @param scale the scale of integrals to add into V
+     **/
     virtual void compute_V(
         ambit::Tensor& V,
         const std::vector<double>& xs,
@@ -146,8 +173,22 @@ public:
      *          \int_{\mathbb{R}^3} 
      *          \mathrm{d}^3 r_1
      *          \phi_p^1 [-Z_A / r_1A] \phi_q^1
+     *
+     * This routine provides a convenient way to get the potential matrix for a
+     * molecular source. In reality, this calls the more general compute_V
+     * above
+     *
+     * This routine can compute the potental matrix with an Ewald-type
+     * interaction operator of the form:
+     *
+     *  a / r_12 + b erf(w r_12) / r_12
      * 
      * @param V a Tensor of size np1 x np2 to add the results into
+     * @param mol the molecule providing point charges {<Z_A,r_1A>}
+     * @param use_nuclear use nuclear (Z) or total (Q) charges?
+     * @param a the scale of the usual 1/r_12 interaction operator
+     * @param b the scale of the Ewald erf(w r_12)/r_12 interaction operator
+     * @param w the Ewald range-separation parameter
      * @param scale the scale of integrals to add into V
      **/
     virtual void compute_V_nuclear(
@@ -161,11 +202,61 @@ public:
 
     // > Gradients < //
 
+    /**!
+     * Compute the contraction of the overlap integral derivatives with the
+     * (energy-weighted) density matrix:
+     *
+     *  Sgrad_Ai += scale *
+     *              0.5 * (D_pq + D_qp) * 
+     *              \partial_Ai
+     *              \int_{\mathbb{R}^3} 
+     *              \mathrm{d}^3 r_1
+     *              \phi_p^1 \phi_q^1
+     * 
+     * Note that this method only works for symmetric OneBody objects, and that
+     * the number of atoms in the gradient register must match that in the
+     * basis set. 
+     *
+     * Note that this method performs the contraction with an effectively
+     * symmetrized D matrix - you do not need to explicitly symmetrize D in
+     * non-Hermetian and other weird methods
+     *
+     * @param D a Tensor of size np x np to contract against (energy-weighted
+     * density matrix)
+     * @param Sgrad a Tensor of size natom x 3 [0x,0y,0z; 1x,1y,1z, ...] to add
+     * the resultant gradient contribution into
+     * @param scale the scale of contraction to add into the result
+     **/
     virtual void compute_S1(
         const ambit::Tensor& D,
         ambit::Tensor& Sgrad,
         double scale = 1.0) const;
 
+    /**!
+     * Compute the contraction of the kinetic integral derivatives with the
+     * density matrix:
+     *
+     *  Sgrad_Ai += scale *
+     *              0.5 * (D_pq + D_qp) * 
+     *              \partial_Ai
+     *              \int_{\mathbb{R}^3} 
+     *              \mathrm{d}^3 r_1
+     *              \phi_p^1 [-1/2 \nabla^2] \phi_q^1
+     * 
+     * Note that this method only works for symmetric OneBody objects, and that
+     * the number of atoms in the gradient register must match that in the
+     * basis set. 
+     *
+     * Note that this method performs the contraction with an effectively
+     * symmetrized D matrix - you do not need to explicitly symmetrize D in
+     * non-Hermetian and other weird methods
+     *
+     * @param D a Tensor of size np x np to contract against (one-particle
+     * density matrix)
+     * @param Tgrad a Tensor of size natom x 3 [0x,0y,0z; 1x,1y,1z, ...] to add
+     * the resultant gradient contribution into
+     * @param scale the scale of contraction to add into the result
+     **/
     virtual void compute_T1(
         const ambit::Tensor& D,
         ambit::Tensor& Tgrad,
