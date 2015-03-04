@@ -142,13 +142,13 @@ public:
      /**!
      * Compute the V (nuclear potental energy) matrix:
      *
-     *  T_pq += scale * 
+     *  V_pq += scale * 
      *          \int_{\mathbb{R}^3} 
      *          \mathrm{d}^3 r_1
-     *          \phi_p^1 [-1/2 \nabla^2] \phi_q^1
+     *          \phi_p^1 [-Z_A / r_1A] \phi_q^1
      * 
-     * @param T a Tensor of size np1 x np2 to add the results into
-     * @param scale the scale of integrals to add into T
+     * @param V a Tensor of size np1 x np2 to add the results into
+     * @param scale the scale of integrals to add into V
      **/
     virtual void compute_V_nuclear(
         ambit::Tensor& V,
@@ -159,18 +159,19 @@ public:
         double w = 0.0, 
         double scale = 1.0) const;
 
-#if 0
-
     // > Gradients < //
 
-    virtual Tensor computeS1(
-        const Tensor& D,
-        Tensor& Sgrad,
-        double scale = 0);
+    virtual void compute_S1(
+        const ambit::Tensor& D,
+        ambit::Tensor& Sgrad,
+        double scale = 1.0) const;
+
     virtual void compute_T1(
-        const Tensor& D,
-        Tensor& T,
-        double scale = 1.0);
+        const ambit::Tensor& D,
+        ambit::Tensor& Tgrad,
+        double scale = 1.0) const;
+
+#if 0 
     virtual void compute_V1(
         const Tensor& D,
         Tensor& V,

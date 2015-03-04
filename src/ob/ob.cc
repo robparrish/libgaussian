@@ -1,9 +1,9 @@
+#include "ob.h"
 #include <math.h>
 #include <core/molecule.h>
 #include <core/basisset.h>
 #include <mints/schwarz.h>
 #include <mints/int2c.h>
-#include "ob.h"
 
 #if defined(_OPENMP)
 #include <omp.h>
@@ -514,6 +514,170 @@ void OneBody::compute_V_nuclear(
             mol->atom(ind).Q());
     }
     compute_V(V,xs,ys,zs,Zs,a,b,w,scale);
+}
+
+void OneBody::compute_S1(
+    const Tensor& D,
+    Tensor& Sgrad,
+    double scale) const
+{
+    bool symm = is_symmetric();
+    size_t nbf = basis1_->nfunction();
+    size_t natom = basis1_->natom();
+
+    if (!symm) throw std::runtime_error("OneBody must be symmetric for gradients");
+
+    if (D.type() != kCore) throw std::runtime_error("D must be kCore");
+    if (D.rank() != 2) throw std::runtime_error("D must be rank-2");
+    if (D.dim(0) != nbf || D.dim(1) != nbf) throw std::runtime_error("D must be nbf x nbf");
+
+    if (Sgrad.type() != kCore) throw std::runtime_error("Sgrad must be kCore");
+    if (Sgrad.rank() != 2) throw std::runtime_error("Sgrad must be rank-2");
+    if (Sgrad.dim(0) != natom || Sgrad.dim(1) != 3) throw std::runtime_error("Sgrad must be natom x 3");
+
+    #if defined(_OPENMP)
+    int nthread = omp_get_max_threads();
+    #else
+    int nthread = 1;
+    #endif
+    std::vector<std::shared_ptr<OverlapInt2C>> Sints;
+    std::vector<Tensor> Stemps;
+    for (int t = 0; t < nthread; t++) {
+        Sints.push_back(std::shared_ptr<OverlapInt2C>(new OverlapInt2C(basis1_,basis2_,1)));
+        Stemps.push_back(Tensor::build(kCore,"Stemp",{natom,3L}));
+    }
+
+    const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
+
+    const double* Dp = D.data().data();
+
+    #pragma omp parallel for schedule(dynamic)
+    for (size_t ind = 0; ind < shell_pairs.size(); ind++) {
+        int P = shell_pairs[ind].first;
+        int Q = shell_pairs[ind].second;
+        int nP = basis1_->shell(P).nfunction();
+        int nQ = basis1_->shell(Q).nfunction();
+        int oP = basis1_->shell(P).function_index();
+        int oQ = basis1_->shell(Q).function_index();
+        int aP = basis1_->shell(P).atom_index();
+        int aQ = basis1_->shell(Q).atom_index();
+        #if defined(_OPENMP)
+        int t = omp_get_thread_num();
+        #else
+        int t = 0;
+        #endif
+
+        Sints[t]->compute_shell1(P,Q);
+        double* Sbuffer = Sints[t]->buffer();
+        double* Sp = Stemps[t].data().data();
+
+        double perm = (P == Q ? 1.0 : 2.0);
+        size_t offset = Sints[t]->chunk_size();
+        double* Pxbuf = Sbuffer + 0L * offset;
+        double* Pybuf = Sbuffer + 1L * offset;
+        double* Pzbuf = Sbuffer + 2L * offset;
+        double* Qxbuf = Sbuffer + 3L * offset;
+        double* Qybuf = Sbuffer + 4L * offset;
+        double* Qzbuf = Sbuffer + 5L * offset;
+
+        for (int p = 0; p < nP; p++) {
+            for (int q = 0; q < nQ; q++) {
+                double Dval = perm * 0.5 * (Dp[(p + oP)*nbf + (q + oQ)] + Dp[(q + oQ)*nbf + (p + oP)]);
+                Sp[aP*natom + 0] += perm * Dval * (*Pxbuf++);
+                Sp[aP*natom + 1] += perm * Dval * (*Pybuf++);
+                Sp[aP*natom + 2] += perm * Dval * (*Pzbuf++);
+                Sp[aQ*natom + 0] += perm * Dval * (*Qxbuf++);
+                Sp[aQ*natom + 1] += perm * Dval * (*Qybuf++);
+                Sp[aQ*natom + 2] += perm * Dval * (*Qzbuf++);
+            }
+        }
+    }
+
+    for (int t = 0; t < nthread; t++) {
+        Sgrad("Ai") += scale * Stemps[t]("Ai");
+    }
+}
+
+void OneBody::compute_T1(
+    const Tensor& D,
+    Tensor& Tgrad,
+    double scale) const
+{
+    bool symm = is_symmetric();
+    size_t nbf = basis1_->nfunction();
+    size_t natom = basis1_->natom();
+
+    if (!symm) throw std::runtime_error("OneBody must be symmetric for gradients");
+
+    if (D.type() != kCore) throw std::runtime_error("D must be kCore");
+    if (D.rank() != 2) throw std::runtime_error("D must be rank-2");
+    if (D.dim(0) != nbf || D.dim(1) != nbf) throw std::runtime_error("D must be nbf x nbf");
+
+    if (Tgrad.type() != kCore) throw std::runtime_error("Tgrad must be kCore");
+    if (Tgrad.rank() != 2) throw std::runtime_error("Tgrad must be rank-2");
+    if (Tgrad.dim(0) != natom || Tgrad.dim(1) != 3) throw std::runtime_error("Tgrad must be natom x 3");
+
+    #if defined(_OPENMP)
+    int nthread = omp_get_max_threads();
+    #else
+    int nthread = 1;
+    #endif
+    std::vector<std::shared_ptr<KineticInt2C>> Tints;
+    std::vector<Tensor> Ttemps;
+    for (int t = 0; t < nthread; t++) {
+        Tints.push_back(std::shared_ptr<KineticInt2C>(new KineticInt2C(basis1_,basis2_,1)));
+        Ttemps.push_back(Tensor::build(kCore,"Ttemp",{natom,3L}));
+    }
+
+    const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
+
+    const double* Dp = D.data().data();
+
+    #pragma omp parallel for schedule(dynamic)
+    for (size_t ind = 0; ind < shell_pairs.size(); ind++) {
+        int P = shell_pairs[ind].first;
+        int Q = shell_pairs[ind].second;
+        int nP = basis1_->shell(P).nfunction();
+        int nQ = basis1_->shell(Q).nfunction();
+        int oP = basis1_->shell(P).function_index();
+        int oQ = basis1_->shell(Q).function_index();
+        int aP = basis1_->shell(P).atom_index();
+        int aQ = basis1_->shell(Q).atom_index();
+        #if defined(_OPENMP)
+        int t = omp_get_thread_num();
+        #else
+        int t = 0;
+        #endif
+
+        Tints[t]->compute_shell1(P,Q);
+        double* Tbuffer = Tints[t]->buffer();
+        double* Tp = Ttemps[t].data().data();
+
+        double perm = (P == Q ? 1.0 : 2.0);
+        size_t offset = Tints[t]->chunk_size();
+        double* Pxbuf = Tbuffer + 0L * offset;
+        double* Pybuf = Tbuffer + 1L * offset;
+        double* Pzbuf = Tbuffer + 2L * offset;
+        double* Qxbuf = Tbuffer + 3L * offset;
+        double* Qybuf = Tbuffer + 4L * offset;
+        double* Qzbuf = Tbuffer + 5L * offset;
+
+        for (int p = 0; p < nP; p++) {
+            for (int q = 0; q < nQ; q++) {
+                double Dval = perm * 0.5 * (Dp[(p + oP)*nbf + (q + oQ)] + Dp[(q + oQ)*nbf + (p + oP)]);
+                Tp[aP*natom + 0] += perm * Dval * (*Pxbuf++);
+                Tp[aP*natom + 1] += perm * Dval * (*Pybuf++);
+                Tp[aP*natom + 2] += perm * Dval * (*Pzbuf++);
+                Tp[aQ*natom + 0] += perm * Dval * (*Qxbuf++);
+                Tp[aQ*natom + 1] += perm * Dval * (*Qybuf++);
+                Tp[aQ*natom + 2] += perm * Dval * (*Qzbuf++);
+            }
+        }
+    }
+
+    for (int t = 0; t < nthread; t++) {
+        Tgrad("Ai") += scale * Ttemps[t]("Ai");
+    }
 }
 
 } // namespace lightspeed
