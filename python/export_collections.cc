@@ -47,10 +47,6 @@ void export_collections()
         .def(vector_indexing_suite<std::vector<bool>>())
         ;
 
-    class_<aligned_vector<double>>("AlignedVec")
-        .def(vector_indexing_suite<aligned_vector<double>>())
-        ;
-
     class_<std::vector<Tensor>>("TensorVec")
         .def(vector_indexing_suite<std::vector<Tensor>>())
         ;
