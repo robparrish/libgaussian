@@ -93,7 +93,7 @@ void KineticInt2C::compute_pair(
 
             double PA[3], PB[3];
 
-            const double Px = (a1*Ax + a2*Bz)*oog;
+            const double Px = (a1*Ax + a2*Bx)*oog;
             const double Py = (a1*Ay + a2*By)*oog;
             const double Pz = (a1*Az + a2*Bz)*oog;
             PA[0] = Px - Ax;
@@ -199,7 +199,7 @@ void KineticInt2C::compute_pair1(
 
             double PA[3], PB[3];
 
-            const double Px = (a1*Ax + a2*Bz)*oog;
+            const double Px = (a1*Ax + a2*Bx)*oog;
             const double Py = (a1*Ay + a2*By)*oog;
             const double Pz = (a1*Az + a2*Bz)*oog;
             PA[0] = Px - Ax;
