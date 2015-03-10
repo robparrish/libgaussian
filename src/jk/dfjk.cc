@@ -191,8 +191,8 @@ void DFJK::compute_JK_from_C(
     Tensor E;
     Tensor F;
     if (do_K) {
-        printf("Buffers:\n");
-        boost::timer::auto_cpu_timer tval;
+        //printf("Buffers:\n");
+        //boost::timer::auto_cpu_timer tval;
         C = Tensor::build(kCore,"C",{nbf,max_naux,nbf});
         E = Tensor::build(kCore,"E",{nbf,max_naux,max_nocc});
         if (JK_symm) {
@@ -222,8 +222,8 @@ void DFJK::compute_JK_from_C(
         // => J <= //
 
         if (do_J) {
-            printf("J:\n");
-            boost::timer::auto_cpu_timer tval;
+            //printf("J:\n");
+            //boost::timer::auto_cpu_timer tval;
             for (size_t ind = 0; ind < Ls.size(); ind++) {
                 d.gemm(B,Dtri[ind],false,false,Asize,1,npq,npq,1,1,Boff,0,0,1.0,0.0);
                 Jtri[ind].gemm(B,d,true,false,npq,1,Asize,npq,1,1,Boff,0,0,sJ[ind],1.0);
@@ -234,14 +234,14 @@ void DFJK::compute_JK_from_C(
 
         if (do_K) {
 
-            printf("K:\n");
-            boost::timer::auto_cpu_timer tval;
+            //printf("K:\n");
+            //boost::timer::auto_cpu_timer tval;
             
             // > Unpack B < //
 
             { // Timer
-            printf("K Unpack:\n");
-            boost::timer::auto_cpu_timer tval;
+            //printf("K Unpack:\n");
+            //boost::timer::auto_cpu_timer tval;
 
             double* Bp = B.data().data() + Boff;
             double* Cp = C.data().data();
@@ -270,8 +270,8 @@ void DFJK::compute_JK_from_C(
             // > Contractions < //
 
             { // Timer
-            printf("K Contract:\n");
-            boost::timer::auto_cpu_timer tval;
+            //printf("K Contract:\n");
+            //boost::timer::auto_cpu_timer tval;
             for (size_t ind = 0; ind < Ls.size(); ind++) {
                 size_t nocc = Ls[ind].dim(1);
                 if (ind == 0 || Ls[ind] != Ls[ind-1]) {
