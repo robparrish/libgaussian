@@ -64,6 +64,9 @@ std::shared_ptr<SBasisSet> get_h2o_sto3g(bool spherical)
 }
 int main(int argc, char* argv[])
 {
+    ambit::settings::debug = true;
+    ambit::initialize(argc, argv);
+
     std::shared_ptr<SMolecule> mol = get_h2o();
     std::shared_ptr<SBasisSet> bas = get_h2o_sto3g(false);
     size_t nbf  = bas->nfunction();
@@ -194,19 +197,19 @@ int main(int argc, char* argv[])
 
     // Hartree-Fock
     Tensor X = S.power(-0.5);
-    Tensor H = Tensor::build(kCore, "H", {nbf,nbf});  
-    Tensor Ft = Tensor::build(kCore, "Ft", {nbf,nbf});  
-    Tensor C = Tensor::build(kCore, "C", {nbf,nbf});  
+    Tensor H = Tensor::build(kCore, "H", {nbf,nbf});
+    Tensor Ft = Tensor::build(kCore, "Ft", {nbf,nbf});
+    Tensor C = Tensor::build(kCore, "C", {nbf,nbf});
     Tensor Cocc = Tensor::build(kCore, "Cocc", {nbf,nocc});
-    Tensor D = Tensor::build(kCore, "D", {nbf,nbf});  
-    Tensor F = Tensor::build(kCore, "F", {nbf,nbf}); 
+    Tensor D = Tensor::build(kCore, "D", {nbf,nbf});
+    Tensor F = Tensor::build(kCore, "F", {nbf,nbf});
 
     H() = T();
     H() += V();
 
     F() = H();
     Ft("ij") = X("pi") * H("pq") * X("qj");
-    auto Feig = Ft.syev(kAscending); 
+    auto Feig = Ft.syev(kAscending);
     C("pi") = X("pj") * Feig["eigenvectors"]("ij");
     Cocc() = C({{0,nbf},{0,nocc}});
     D("pq") = Cocc("pi") * Cocc("qi");
@@ -226,7 +229,7 @@ int main(int argc, char* argv[])
         printf("  @RHF iter %5d: %20.14lf\n", iter++, Enuc + Eelec);
 
         Ft("ij") = X("pi") * F("pq") * X("qj");
-        auto Feig = Ft.syev(kAscending); 
+        auto Feig = Ft.syev(kAscending);
         C("pi") = X("pj") * Feig["eigenvectors"]("ij");
         Cocc() = C({{0,nbf},{0,nocc}});
         D("pq") = Cocc("pi") * Cocc("qi");
@@ -237,6 +240,8 @@ int main(int argc, char* argv[])
         if (iter > 15)
             break;
     } while (!converged);
+
+    ambit::finalize();
 
     return EXIT_SUCCESS;
 }
