@@ -1,4 +1,4 @@
-set(LIBLIGHTSPEED_HEADERS
+set(LIGHTSPEED_HEADERS
     core/molecule.h
     core/basisset.h
     core/am.h
@@ -15,7 +15,7 @@ set(LIBLIGHTSPEED_HEADERS
     sad/sad.h
 )
 
-set(LIBLIGHTSPEED_SOURCES
+set(LIGHTSPEED_SOURCES
     core/molecule.cc
     core/basisset.cc
     core/am.cc
@@ -43,12 +43,12 @@ set(LIBLIGHTSPEED_SOURCES
 )
 
 # build static libray
-add_library(lightspeed STATIC ${LIBLIGHTSPEED_SOURCES} ${LIBLIGHTSPEED_HEADERS})
-#add_library(lightspeed SHARED ${LIBLIGHTSPEED_SOURCES} ${LIBLIGHTSPEED_HEADERS})
+add_library(lightspeed STATIC ${LIGHTSPEED_SOURCES} ${LIGHTSPEED_HEADERS})
 
-#target_link_libraries(lightspeed ${LIBINT}/lib/libint.so ${LIBAMBIT}/lib/libambit.a)
-target_link_libraries(lightspeed ${LIBINT}/lib/libint2.a ${LIBAMBIT}/lib/libambit.a ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+target_link_libraries(lightspeed ${LIBINT}/lib/libint2.a -L${LIBAMBIT}/lib -lambit)
 
-#install(TARGETS lightspeed ARCHIVE DESTINATION lib)
-#install(TARGETS lightspeed SHARED DESTINATION lib)
+#set_target_properties(lightspeed PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
+#set_target_properties(lightspeed PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
 
+install(TARGETS lightspeed ARCHIVE DESTINATION lib)
+install(FILES ${LIBLIGHTSPEED_HEADERS} DESTINATION include/lightspeed)

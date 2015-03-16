@@ -15,10 +15,11 @@ set(LIBPYLIGHTSPEED_SOURCES
 
 add_library(pylightspeed SHARED ${LIBPYLIGHTSPEED_SOURCES} ${LIBPYLIGHTSPEED_HEADERS})
 
+add_dependencies(pylightspeed lightspeed)
 target_link_libraries(pylightspeed
     lightspeed
     ${LIBINT}/lib/libint2.a
-    ${LIBAMBIT}/lib/libambit.a
+    -L${LIBAMBIT}/lib -lambit
     ${LAPACK_LIBRARIES}
     ${BLAS_LIBRARIES}
     ${Boost_LIBRARIES}
