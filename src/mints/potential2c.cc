@@ -25,7 +25,7 @@ PotentialInt2C::PotentialInt2C(
         size = 1L * chunk_size();
         recursion_ = new ObaraSaikaTwoCenterVIRecursion(basis1->max_am() + 1, basis2->max_am() + 1);
 
-    } else if (deriv_ = 1) {
+    } else if (deriv_ == 1) {
 
         size = 3L * chunk_size() * basis1->natom();
         recursion_ = new ObaraSaikaTwoCenterVIDerivRecursion(basis1->max_am()+2, basis2->max_am()+2);
