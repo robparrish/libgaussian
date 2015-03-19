@@ -119,7 +119,7 @@ void PotentialInt2C::compute_pair(
             double over_pf = exp(-a1*a2*AB2*oog) * sqrt(M_PI*oog) * M_PI * oog * c1 * c2;
 
             // loop over the charges
-            for (int atom=0; atom<ncharge; ++atom) {
+            for (size_t atom=0; atom<ncharge; ++atom) {
                 double PC[3];
 
                 double Z = Zs_[atom];

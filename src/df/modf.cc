@@ -170,7 +170,7 @@ std::map<std::string, ambit::Tensor> MODFERI::transform() const
 
     // => Schwarz Shell Pairs <= //
 
-    const std::vector<std::pair<int,int>> shell_pairs = sieve_->shell_pairs();
+    const std::vector<std::pair<size_t,size_t>> shell_pairs = sieve_->shell_pairs();
 
     // ==> Master Loop <== //
 
@@ -195,9 +195,9 @@ std::map<std::string, ambit::Tensor> MODFERI::transform() const
             size_t PQ = APQtask % PQsize;
             size_t P = shell_pairs[PQ].first;
             size_t Q = shell_pairs[PQ].second;
-            int nA = auxiliary_->shell(A).nfunction();
-            int nP = primary_->shell(P).nfunction();
-            int nQ = primary_->shell(Q).nfunction();
+            size_t nA = auxiliary_->shell(A).nfunction();
+            size_t nP = primary_->shell(P).nfunction();
+            size_t nQ = primary_->shell(Q).nfunction();
             size_t oA = auxiliary_->shell(A).function_index();
             size_t oP = primary_->shell(P).function_index();
             size_t oQ = primary_->shell(Q).function_index();
@@ -208,9 +208,9 @@ std::map<std::string, ambit::Tensor> MODFERI::transform() const
             #endif
             ints[t]->compute_shell(A,0,P,Q);
             double* buffer = ints[t]->buffer();
-            for (int a = 0; a < nA; a++) {
-            for (int p = 0; p < nP; p++) {
-            for (int q = 0; q < nQ; q++) {
+            for (size_t a = 0; a < nA; a++) {
+            for (size_t p = 0; p < nP; p++) {
+            for (size_t q = 0; q < nQ; q++) {
                 Ap[(a + oA - astart) * nbf * nbf + (p + oP) * nbf + (q + oQ)] =
                 Ap[(a + oA - astart) * nbf * nbf + (q + oQ) * nbf + (p + oP)] =
                 (*buffer++);

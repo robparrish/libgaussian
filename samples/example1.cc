@@ -75,51 +75,50 @@ int main(int argc, char* argv[])
     mol->print();
     bas->print();
 
-    OverlapInt2C Sints(bas,bas);
-    double* Sbuffer = Sints.buffer();
+    OverlapInt2C Ssize_ts(bas,bas);
+    double* Sbuffer = Ssize_ts.buffer();
     Tensor S = Tensor::build(kCore, "S", {nbf, nbf});
     double* Sp = S.data().data();
-    for (int P = 0; P < bas->nshell(); P++) {
-        for (int Q = 0; Q < bas->nshell(); Q++) {
-            Sints.compute_shell(P,Q);
-            int oP = bas->shell(P).function_index();
-            int oQ = bas->shell(Q).function_index();
-            int nP = bas->shell(P).nfunction();
-            int nQ = bas->shell(Q).nfunction();
-            for (int p = 0, index = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++, index++) {
+    for (size_t P = 0; P < bas->nshell(); P++) {
+        for (size_t Q = 0; Q < bas->nshell(); Q++) {
+            Ssize_ts.compute_shell(P,Q);
+            size_t oP = bas->shell(P).function_index();
+            size_t oQ = bas->shell(Q).function_index();
+            size_t nP = bas->shell(P).nfunction();
+            size_t nQ = bas->shell(Q).nfunction();
+            for (size_t p = 0, index = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++, index++) {
                     Sp[(p + oP) * nbf + (q + oQ)] = Sbuffer[index];
                 }
             }
         }
     }
-    //S.print();
+    //S.prsize_t();
 
-    KineticInt2C Tints(bas,bas);
-    double* Tbuffer = Tints.buffer();
+    KineticInt2C Tsize_ts(bas,bas);
+    double* Tbuffer = Tsize_ts.buffer();
     Tensor T = Tensor::build(kCore, "T", {nbf, nbf});
     double* Tp = T.data().data();
-    for (int P = 0; P < bas->nshell(); P++) {
-        for (int Q = 0; Q < bas->nshell(); Q++) {
-            Tints.compute_shell(P,Q);
-            int oP = bas->shell(P).function_index();
-            int oQ = bas->shell(Q).function_index();
-            int nP = bas->shell(P).nfunction();
-            int nQ = bas->shell(Q).nfunction();
-            for (int p = 0, index = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++, index++) {
+    for (size_t P = 0; P < bas->nshell(); P++) {
+        for (size_t Q = 0; Q < bas->nshell(); Q++) {
+            Tsize_ts.compute_shell(P,Q);
+            size_t oP = bas->shell(P).function_index();
+            size_t oQ = bas->shell(Q).function_index();
+            size_t nP = bas->shell(P).nfunction();
+            size_t nQ = bas->shell(Q).nfunction();
+            for (size_t p = 0, index = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++, index++) {
                     Tp[(p + oP) * nbf + (q + oQ)] = Tbuffer[index];
                 }
             }
         }
     }
-    //T.print();
+    //T.prsize_t();
 
-    DipoleInt2C Xints(bas,bas);
-    size_t Xchunk = Xints.chunk_size();
-    double* Xbuffer = Xints.buffer();
-    double* Ybuffer = Xbuffer + Xints.chunk_size();
-    double* Zbuffer = Ybuffer + Xints.chunk_size();
+    DipoleInt2C Xsize_ts(bas,bas);
+    double* Xbuffer = Xsize_ts.buffer();
+    double* Ybuffer = Xbuffer + Xsize_ts.chunk_size();
+    double* Zbuffer = Ybuffer + Xsize_ts.chunk_size();
     std::vector<Tensor> Xs(3);
     Xs[0] = Tensor::build(kCore, "X", {nbf, nbf});
     Xs[1] = Tensor::build(kCore, "Y", {nbf, nbf});
@@ -127,15 +126,15 @@ int main(int argc, char* argv[])
     double* Xp = Xs[0].data().data();
     double* Yp = Xs[1].data().data();
     double* Zp = Xs[2].data().data();
-    for (int P = 0; P < bas->nshell(); P++) {
-        for (int Q = 0; Q < bas->nshell(); Q++) {
-            Xints.compute_shell(P,Q);
-            int oP = bas->shell(P).function_index();
-            int oQ = bas->shell(Q).function_index();
-            int nP = bas->shell(P).nfunction();
-            int nQ = bas->shell(Q).nfunction();
-            for (int p = 0, index = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++, index++) {
+    for (size_t P = 0; P < bas->nshell(); P++) {
+        for (size_t Q = 0; Q < bas->nshell(); Q++) {
+            Xsize_ts.compute_shell(P,Q);
+            size_t oP = bas->shell(P).function_index();
+            size_t oQ = bas->shell(Q).function_index();
+            size_t nP = bas->shell(P).nfunction();
+            size_t nQ = bas->shell(Q).nfunction();
+            for (size_t p = 0, index = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++, index++) {
                     Xp[(p + oP) * nbf + (q + oQ)] = Xbuffer[index];
                     Yp[(p + oP) * nbf + (q + oQ)] = Ybuffer[index];
                     Zp[(p + oP) * nbf + (q + oQ)] = Zbuffer[index];
@@ -143,57 +142,57 @@ int main(int argc, char* argv[])
             }
         }
     }
-    //Xs[0].print();
-    //Xs[1].print();
-    //Xs[2].print();
+    //Xs[0].prsize_t();
+    //Xs[1].prsize_t();
+    //Xs[2].prsize_t();
 
-    PotentialInt2C Vints(bas,bas);
-    Vints.set_nuclear_potential(mol);
-    double* Vbuffer = Vints.buffer();
+    PotentialInt2C Vsize_ts(bas,bas);
+    Vsize_ts.set_nuclear_potential(mol);
+    double* Vbuffer = Vsize_ts.buffer();
     Tensor V = Tensor::build(kCore, "V", {nbf, nbf});
     double* Vp = V.data().data();
-    for (int P = 0; P < bas->nshell(); P++) {
-        for (int Q = 0; Q < bas->nshell(); Q++) {
-            Vints.compute_shell(P,Q);
-            int oP = bas->shell(P).function_index();
-            int oQ = bas->shell(Q).function_index();
-            int nP = bas->shell(P).nfunction();
-            int nQ = bas->shell(Q).nfunction();
-            for (int p = 0, index = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++, index++) {
+    for (size_t P = 0; P < bas->nshell(); P++) {
+        for (size_t Q = 0; Q < bas->nshell(); Q++) {
+            Vsize_ts.compute_shell(P,Q);
+            size_t oP = bas->shell(P).function_index();
+            size_t oQ = bas->shell(Q).function_index();
+            size_t nP = bas->shell(P).nfunction();
+            size_t nQ = bas->shell(Q).nfunction();
+            for (size_t p = 0, index = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++, index++) {
                     Vp[(p + oP) * nbf + (q + oQ)] = Vbuffer[index];
                 }
             }
         }
     }
-    //V.print();
+    //V.prsize_t();
 
-    PotentialInt4C Iints(bas,bas,bas,bas);
-    double* Ibuffer = Iints.buffer();
+    PotentialInt4C Isize_ts(bas,bas,bas,bas);
+    double* Ibuffer = Isize_ts.buffer();
     Tensor I = Tensor::build(kCore, "I", {nbf,nbf,nbf,nbf});
     double* Ip = I.data().data();
-    for (int P = 0; P < bas->nshell(); P++) {
-    for (int Q = 0; Q < bas->nshell(); Q++) {
-    for (int R = 0; R < bas->nshell(); R++) {
-    for (int S = 0; S < bas->nshell(); S++) {
-        Iints.compute_shell(P,Q,R,S);
-        int oP = bas->shell(P).function_index();
-        int oQ = bas->shell(Q).function_index();
-        int oR = bas->shell(R).function_index();
-        int oS = bas->shell(S).function_index();
-        int nP = bas->shell(P).nfunction();
-        int nQ = bas->shell(Q).nfunction();
-        int nR = bas->shell(R).nfunction();
-        int nS = bas->shell(S).nfunction();
-        int index = 0;
-        for (int p = 0; p < nP; p++) {
-        for (int q = 0; q < nQ; q++) {
-        for (int r = 0; r < nR; r++) {
-        for (int s = 0; s < nS; s++) {
+    for (size_t P = 0; P < bas->nshell(); P++) {
+    for (size_t Q = 0; Q < bas->nshell(); Q++) {
+    for (size_t R = 0; R < bas->nshell(); R++) {
+    for (size_t S = 0; S < bas->nshell(); S++) {
+        Isize_ts.compute_shell(P,Q,R,S);
+        size_t oP = bas->shell(P).function_index();
+        size_t oQ = bas->shell(Q).function_index();
+        size_t oR = bas->shell(R).function_index();
+        size_t oS = bas->shell(S).function_index();
+        size_t nP = bas->shell(P).nfunction();
+        size_t nQ = bas->shell(Q).nfunction();
+        size_t nR = bas->shell(R).nfunction();
+        size_t nS = bas->shell(S).nfunction();
+        size_t index = 0;
+        for (size_t p = 0; p < nP; p++) {
+        for (size_t q = 0; q < nQ; q++) {
+        for (size_t r = 0; r < nR; r++) {
+        for (size_t s = 0; s < nS; s++) {
             Ip[(p + oP) * nbf * nbf * nbf + (q + oQ) * nbf * nbf + (r + oR) * nbf + (s + oS)] = Ibuffer[index++];
         }}}}
     }}}}
-    //I.print();
+    //I.prsize_t();
 
     // Hartree-Fock
     Tensor X = S.power(-0.5);

@@ -31,7 +31,7 @@ void SchwarzSieve::build_integrals()
     size_t nshell1 = basis1_->nshell();
     size_t nshell2 = basis2_->nshell();
 
-    std::vector<std::pair<int,int> > shell_tasks;
+    std::vector<std::pair<size_t,size_t> > shell_tasks;
     if (symm) {
         shell_tasks.resize(nshell1 * (nshell1 + 1) / 2);
         for (size_t P = 0, index = 0; P < nshell1; P++) {
@@ -63,10 +63,10 @@ void SchwarzSieve::build_integrals()
 
     #pragma omp parallel for schedule(dynamic)
     for (size_t ind = 0; ind < shell_tasks.size(); ind++) {
-        int P = shell_tasks[ind].first;
-        int Q = shell_tasks[ind].second;
-        int nP = basis1_->shell(P).nfunction();
-        int nQ = basis2_->shell(Q).nfunction();
+        size_t P = shell_tasks[ind].first;
+        size_t Q = shell_tasks[ind].second;
+        size_t nP = basis1_->shell(P).nfunction();
+        size_t nQ = basis2_->shell(Q).nfunction();
         #if defined(_OPENMP)
         int t = omp_get_thread_num();
         #else
@@ -75,8 +75,8 @@ void SchwarzSieve::build_integrals()
         ints[t]->compute_shell(P,Q,P,Q);
         double* buffer = ints[t]->buffer();
         double max_val = 0.0;
-        for (int p = 0; p < nP; p++) {
-            for (int q = 0; q < nQ; q++) {
+        for (size_t p = 0; p < nP; p++) {
+            for (size_t q = 0; q < nQ; q++) {
                 double I = buffer[(p*nQ + q)*nP*nQ + (p*nQ + q)];
                 max_val = std::max(max_val, fabs(I));
             }
@@ -103,7 +103,7 @@ void SchwarzSieve::build_sieve()
     size_t nshell1 = basis1_->nshell();
     size_t nshell2 = basis2_->nshell();
 
-    std::vector<std::pair<int,int> > shell_tasks;
+    std::vector<std::pair<size_t,size_t>> shell_tasks;
     if (symm) {
         shell_tasks.resize(nshell1 * (nshell1 + 1) / 2);
         for (size_t P = 0, index = 0; P < nshell1; P++) {
@@ -122,8 +122,8 @@ void SchwarzSieve::build_sieve()
 
     shell_pairs_.clear();
     for (size_t ind = 0; ind < shell_tasks.size(); ind++) {
-        int P = shell_tasks[ind].first;
-        int Q = shell_tasks[ind].second;
+        size_t P = shell_tasks[ind].first;
+        size_t Q = shell_tasks[ind].second;
         if (cutoff_ == 0.0 || sqrt(shell_maxs_[P*nshell2 + Q] * overall_max_) >= cutoff_) {
             shell_pairs_.push_back(shell_tasks[ind]);
         }

@@ -122,20 +122,20 @@ void Int4C::apply_spherical(
 {
     if (!S1 && !S2 && !S3 && !S4) return;
 
-    int ncart1 = constants::ncartesian(L1);
-    int ncart2 = constants::ncartesian(L2);
-    int ncart3 = constants::ncartesian(L3);
-    int ncart4 = constants::ncartesian(L4);
+    size_t ncart1 = constants::ncartesian(L1);
+    size_t ncart2 = constants::ncartesian(L2);
+    size_t ncart3 = constants::ncartesian(L3);
+    size_t ncart4 = constants::ncartesian(L4);
 
-    int npure1 = constants::nspherical(L1);
-    int npure2 = constants::nspherical(L2);
-    int npure3 = constants::nspherical(L3);
-    int npure4 = constants::nspherical(L4);
+    size_t npure1 = constants::nspherical(L1);
+    size_t npure2 = constants::nspherical(L2);
+    size_t npure3 = constants::nspherical(L3);
+    size_t npure4 = constants::nspherical(L4);
 
-    int nfun1 = (S1 ? npure1 : ncart1);
-    int nfun2 = (S2 ? npure2 : ncart2);
-    int nfun3 = (S3 ? npure3 : ncart3);
-    int nfun4 = (S4 ? npure4 : ncart4);
+    size_t nfun1 = (S1 ? npure1 : ncart1);
+    size_t nfun2 = (S2 ? npure2 : ncart2);
+    size_t nfun3 = (S3 ? npure3 : ncart3);
+    size_t nfun4 = (S4 ? npure4 : ncart4);
 
     if (S4 && L4 > 0) {
         memset(scratch,'\0',sizeof(double)*ncart1*ncart2*ncart3*npure4);

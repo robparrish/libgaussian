@@ -100,17 +100,17 @@ void DFJK::compute_JK_from_C(
 
     // => Schwarz Layout <= //
 
-    const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
+    const std::vector<std::pair<size_t,size_t>>& shell_pairs = sieve_->shell_pairs();
     size_t npq = 0;
     for (size_t PQ = 0; PQ < shell_pairs.size(); PQ++) {
-        int P = shell_pairs[PQ].first;
-        int Q = shell_pairs[PQ].second;
-        int nP = primary_->shell(P).nfunction();
-        int nQ = primary_->shell(Q).nfunction();
-        int oP = primary_->shell(P).function_index();
-        int oQ = primary_->shell(Q).function_index();
-        for (int p = 0; p < nP; p++) {
-        for (int q = 0; q < nQ; q++) {
+        size_t P = shell_pairs[PQ].first;
+        size_t Q = shell_pairs[PQ].second;
+        size_t nP = primary_->shell(P).nfunction();
+        size_t nQ = primary_->shell(Q).nfunction();
+        size_t oP = primary_->shell(P).function_index();
+        size_t oQ = primary_->shell(Q).function_index();
+        for (size_t p = 0; p < nP; p++) {
+        for (size_t q = 0; q < nQ; q++) {
             npq++;
         }}
     }
@@ -131,15 +131,15 @@ void DFJK::compute_JK_from_C(
             double* Dtp = Dtri[ind].data().data();
             size_t index = 0;
             for (size_t PQ = 0; PQ < shell_pairs.size(); PQ++) {
-                int P = shell_pairs[PQ].first;
-                int Q = shell_pairs[PQ].second;
+                size_t P = shell_pairs[PQ].first;
+                size_t Q = shell_pairs[PQ].second;
                 double perm = (P == Q ? 0.5 : 1.0);
-                int nP = primary_->shell(P).nfunction();
-                int nQ = primary_->shell(Q).nfunction();
-                int oP = primary_->shell(P).function_index();
-                int oQ = primary_->shell(Q).function_index();
-                for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+                size_t nP = primary_->shell(P).nfunction();
+                size_t nQ = primary_->shell(Q).nfunction();
+                size_t oP = primary_->shell(P).function_index();
+                size_t oQ = primary_->shell(Q).function_index();
+                for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     Dtp[index++] = perm * (
                         DFp[(p + oP)*nbf + (q + oQ)] +
                         DFp[(q + oQ)*nbf + (p + oP)]);
@@ -236,7 +236,7 @@ void DFJK::compute_JK_from_C(
 
             //printf("K:\n");
             //boost::timer::auto_cpu_timer tval;
-            
+
             // > Unpack B < //
 
             { // Timer
@@ -247,17 +247,17 @@ void DFJK::compute_JK_from_C(
             double* Cp = C.data().data();
             memset(Cp,'\0',sizeof(double)*nbf*Asize*nbf);
             //#pragma omp parallel for
-            for (int A = 0; A < Asize; A++) {
+            for (size_t A = 0; A < Asize; A++) {
                 size_t pq = 0;
                 for (size_t PQ = 0; PQ < shell_pairs.size(); PQ++) {
-                    int P = shell_pairs[PQ].first;
-                    int Q = shell_pairs[PQ].second;
-                    int nP = primary_->shell(P).nfunction();
-                    int nQ = primary_->shell(Q).nfunction();
-                    int oP = primary_->shell(P).function_index();
-                    int oQ = primary_->shell(Q).function_index();
-                    for (int p = 0; p < nP; p++) {
-                    for (int q = 0; q < nQ; q++) {
+                    size_t P = shell_pairs[PQ].first;
+                    size_t Q = shell_pairs[PQ].second;
+                    size_t nP = primary_->shell(P).nfunction();
+                    size_t nQ = primary_->shell(Q).nfunction();
+                    size_t oP = primary_->shell(P).function_index();
+                    size_t oQ = primary_->shell(Q).function_index();
+                    for (size_t p = 0; p < nP; p++) {
+                    for (size_t q = 0; q < nQ; q++) {
                         Cp[(p + oP) * Asize * nbf + A * nbf + (q + oQ)] =
                         Cp[(q + oQ) * Asize * nbf + A * nbf + (p + oP)] =
                         Bp[A*npq + pq];
@@ -266,7 +266,7 @@ void DFJK::compute_JK_from_C(
                 }
             }
             } // Timer
-            
+
             // > Contractions < //
 
             { // Timer
@@ -295,15 +295,15 @@ void DFJK::compute_JK_from_C(
             double* Jp = Js[ind].data().data();
             size_t index = 0;
             for (size_t PQ = 0; PQ < shell_pairs.size(); PQ++) {
-                int P = shell_pairs[PQ].first;
-                int Q = shell_pairs[PQ].second;
+                size_t P = shell_pairs[PQ].first;
+                size_t Q = shell_pairs[PQ].second;
                 double perm = (P == Q ? 0.5 : 1.0);
-                int nP = primary_->shell(P).nfunction();
-                int nQ = primary_->shell(Q).nfunction();
-                int oP = primary_->shell(P).function_index();
-                int oQ = primary_->shell(Q).function_index();
-                for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+                size_t nP = primary_->shell(P).nfunction();
+                size_t nQ = primary_->shell(Q).nfunction();
+                size_t oP = primary_->shell(P).function_index();
+                size_t oQ = primary_->shell(Q).function_index();
+                for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     Jp[(p + oP) * nbf + (q + oQ)] += perm * Jtp[index];
                     Jp[(q + oQ) * nbf + (p + oP)] += perm * Jtp[index];
                     index++;

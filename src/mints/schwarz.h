@@ -39,15 +39,15 @@ public:
     double a() const { return a_; }
     double b() const { return b_; }
     double w() const { return w_; }
-    
-    const std::vector<std::pair<int,int>>& shell_pairs() const { return shell_pairs_; }
+
+    const std::vector<std::pair<size_t,size_t>>& shell_pairs() const { return shell_pairs_; }
     //const std::vector<std::vector<int>>& shell_to_shell() const { return shell_to_shell_; }
 
     //const std::vector<std::pair<int,int> >& function_pairs() const { return function_pairs_; }
     //const std::vector<std::vector<int> >& function_to_function() const { return function_to_function_; }
 
     void print(FILE* fh = stdout) const;
-    
+
     /**!
      * Return the maximum possible value for any shell-quartet
      **/
@@ -93,13 +93,13 @@ private:
     /// The maximum ERIs for shells stored in rectangular order
     double overall_max_;
     std::vector<double> shell_maxs_;
-    std::vector<std::pair<int,int>> shell_pairs_;
+    std::vector<std::pair<size_t,size_t>> shell_pairs_;
     //std::vector<std::vector<int>> shell_to_shell_;
-    
+
     void build_integrals();
     void build_sieve();
-    
-};    
+
+};
 
 } // namespace lightspeed
 

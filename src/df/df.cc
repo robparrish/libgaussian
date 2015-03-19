@@ -79,6 +79,71 @@ Tensor DFERI::metric_core() const
 
     return J;
 }
+
+Tensor DFERI::metric_distributed() const
+{
+    if (ambit::settings::distributed_capable) {
+        size_t nshell = auxiliary_->nshell();
+        size_t naux = auxiliary_->nfunction();
+        size_t max_nfunc = auxiliary_->max_nfunction();
+
+        Tensor J = Tensor::build(kDistributed, "J", {naux, naux});
+        Tensor localJ = Tensor::build(kCore, "J", {max_nfunc, max_nfunc});
+        double* localJp = localJ.data().data();
+
+        // Determine this node's work load
+        std::vector<std::pair<size_t, size_t>> shell_pairs(nshell * nshell); // over allocated
+        size_t index=0;
+        for (size_t P = 0, counter = 0; P < nshell; P++) {
+            for (size_t Q = 0; Q < nshell; Q++, counter++) {
+                if (counter % ambit::settings::nprocess == ambit::settings::rank)
+                    shell_pairs[index++] = std::pair<size_t, size_t>(P, Q);
+            }
+        }
+        shell_pairs.resize(index);
+
+        std::shared_ptr<SBasisSet> zero = SBasisSet::zero_basis();
+        std::shared_ptr<PotentialInt4C> Jint(new PotentialInt4C(auxiliary_, zero, auxiliary_, zero, 0, a_, b_, w_));
+
+        double* Jbuffer = Jint->buffer();
+        for (size_t i = 0; i < shell_pairs.size(); i++) {
+            const size_t P = shell_pairs[i].first;
+            const size_t Q = shell_pairs[i].second;
+
+            const size_t nP = auxiliary_->shell(P).nfunction();
+            const size_t nQ = auxiliary_->shell(Q).nfunction();
+            const size_t oP = auxiliary_->shell(P).function_index();
+            const size_t oQ = auxiliary_->shell(Q).function_index();
+
+            Jint->compute_shell(P, 0, Q, 0);
+
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
+                    localJp[p*max_nfunc + q] = Jbuffer[p*nQ + q];
+                }
+            }
+
+            J({{oP, oP+nP}, {oQ, oQ+nQ}}) = localJ({{0L, nP}, {0L, nQ}});
+        }
+
+        // If the work wasn't evenly distributed perform empty slices to make it even.
+        IndexRange zero_range;
+
+        for (size_t i=0; i<J.rank(); ++i) {
+            zero_range.push_back({0, 0});
+        }
+        for (int i = ((nshell * nshell) % ambit::settings::nprocess); i < ambit::settings::nprocess; i++) {
+            if (i == ambit::settings::rank) {
+                J(zero_range) = localJ(zero_range);
+            }
+        }
+
+        return J;
+    }
+    else {
+        throw std::runtime_error("DFERI::metric_core_distributed not supported.");
+    }
+}
 Tensor DFERI::metric_power_core(
     double power,
     double condition) const
@@ -87,5 +152,10 @@ Tensor DFERI::metric_power_core(
     return J.power(power,condition);
 }
 
+Tensor DFERI::metric_power_distributed(double power, double condition) const
+{
+    Tensor J = metric_distributed();
+    return J.power(power, condition);
+}
 
 } // namespace lightspeed

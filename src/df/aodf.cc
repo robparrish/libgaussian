@@ -20,7 +20,7 @@ AODFERI::AODFERI(
 size_t AODFERI::ao_task_core_doubles() const
 {
     size_t naux = auxiliary_->nfunction();
-    const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
+    const std::vector<std::pair<size_t,size_t>>& shell_pairs = sieve_->shell_pairs();
     size_t nPQshell = sieve_->shell_pairs().size();
     size_t npq = 0;
     std::vector<size_t> pqstarts(nPQshell);
@@ -44,7 +44,7 @@ Tensor AODFERI::compute_ao_task_core(double power) const
 {
     // => Pair state vector <= //
 
-    const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
+    const std::vector<std::pair<size_t,size_t>>& shell_pairs = sieve_->shell_pairs();
 
     // => Sizing <= //
 
@@ -134,7 +134,7 @@ Tensor AODFERI::compute_ao_task_disk(double power) const
 {
     // => Pair state vector <= //
 
-    const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
+    const std::vector<std::pair<size_t,size_t>>& shell_pairs = sieve_->shell_pairs();
 
     // => Sizing <= //
 
@@ -228,9 +228,9 @@ Tensor AODFERI::compute_ao_task_disk(double power) const
             size_t PQ = APQtask % PQsize + PQstart;
             size_t P = shell_pairs[PQ].first;
             size_t Q = shell_pairs[PQ].second;
-            int nA = auxiliary_->shell(A).nfunction();
-            int nP = primary_->shell(P).nfunction();
-            int nQ = primary_->shell(Q).nfunction();
+            size_t nA = auxiliary_->shell(A).nfunction();
+            size_t nP = primary_->shell(P).nfunction();
+            size_t nQ = primary_->shell(Q).nfunction();
             size_t oA = auxiliary_->shell(A).function_index();
             size_t opq = pqstarts[PQ] - pqstart;
             #if defined(_OPENMP)
@@ -240,9 +240,9 @@ Tensor AODFERI::compute_ao_task_disk(double power) const
             #endif
             Bints[t]->compute_shell(A,0,P,Q);
             double* Bbuffer = Bints[t]->buffer();
-            for (int a = 0; a < nA; a++) {
-            for (int p = 0; p < nP; p++) {
-            for (int q = 0; q < nQ; q++) {
+            for (size_t a = 0; a < nA; a++) {
+            for (size_t p = 0; p < nP; p++) {
+            for (size_t q = 0; q < nQ; q++) {
                 Bp[(a + oA) * maxpq + p*nQ + q + opq] = (*Bbuffer++);
             }}}
         }
@@ -259,6 +259,114 @@ Tensor AODFERI::compute_ao_task_disk(double power) const
 
         B({{0,naux},{pqstart,pqstart+pqsize}}) = B2({{0,naux},{0,pqsize}});
     }
+
+    return B;
+}
+
+Tensor AODFERI::compute_ao_task_distributed(double power) const
+{
+    // => Pair state vector <=
+
+    const std::vector<std::pair<size_t, size_t>>& shell_pairs = sieve_->shell_pairs();
+
+    // => Sizing <=
+
+    size_t nAshell = auxiliary_->nshell();
+    size_t nPQshell = sieve_->shell_pairs().size();
+    size_t naux = auxiliary_->nfunction();
+    size_t naux_max = auxiliary_->max_nfunction();
+    size_t nbas = primary_->nfunction();
+
+    size_t npq = 0;
+    for (size_t PQ = 0; PQ < nPQshell; PQ++) {
+        size_t P = shell_pairs[PQ].first;
+        size_t Q = shell_pairs[PQ].second;
+        size_t offset = primary_->shell(P).nfunction() * primary_->shell(Q).nfunction();
+        npq += offset;
+    }
+
+    // => Inverse metric <=
+    Tensor J = metric_power_distributed(power, metric_condition_);
+
+    // => Target <=
+
+    Tensor Btmp = Tensor::build(kDistributed, "Btmp", {naux, nbas, nbas});
+    Tensor B    = Tensor::build(kDistributed, "B", {naux, nbas, nbas});
+
+    // => Per node distribution calculations <=
+
+    Tensor localB = Tensor::build(kCore, "local B", {naux_max, nbas, nbas});
+    double *Bp = localB.data().data();
+
+    std::shared_ptr<SBasisSet> zero = SBasisSet::zero_basis();
+    PotentialInt4C Bint(auxiliary_, zero, primary_, primary_, 0, a_, b_, w_);
+
+    size_t nAPQtask = nAshell * nPQshell;
+    for (size_t APQtask = 0 ; APQtask < nAPQtask; ++APQtask) {
+//        printf("APQtask %d\n", APQtask);
+        if (APQtask % ambit::settings::nprocess == ambit::settings::rank) {
+            size_t A = APQtask / nPQshell;
+            size_t PQ = APQtask % nPQshell;
+            int P = shell_pairs[PQ].first;
+            int Q = shell_pairs[PQ].second;
+            size_t nA = auxiliary_->shell(A).nfunction();
+            size_t nP = primary_->shell(P).nfunction();
+            size_t nQ = primary_->shell(Q).nfunction();
+            size_t oA = auxiliary_->shell(A).function_index();
+            size_t oP = primary_->shell(P).function_index();
+            size_t oQ = primary_->shell(Q).function_index();
+
+//            printf("rank: %d; computing (A|PQ): (%d|%d %d)\n", ambit::settings::rank, A, P, Q);
+
+            Bint.compute_shell(A, 0, P, Q);
+            double *Bbuffer = Bint.buffer();
+
+            for (int a = 0; a < nA; a++) {
+                for (int p = 0; p < nP; p++) {
+                    for (int q = 0; q < nQ; q++) {
+//                        printf("a %d p %d q %d value %lf\n", a, p, q, *Bbuffer);
+                        Bp[a * nbas * nbas + p * nbas + q] = *Bbuffer++;
+                    }
+                }
+            }
+
+            Btmp({{oA, oA+nA}, {oP, oP+nP}, {oQ, oQ+nQ}}) = localB({{0L, nA}, {0L, nP}, {0, nQ}});
+
+            Bbuffer = Bint.buffer();
+
+            for (int a = 0; a < nA; a++) {
+                for (int p = 0; p < nP; p++) {
+                    for (int q = 0; q < nQ; q++) {
+//                        printf("a %d p %d q %d value %lf\n", a, p, q, *Bbuffer);
+                        Bp[a * nbas * nbas + q * nbas + p] = *Bbuffer++;
+                    }
+                }
+            }
+
+            Btmp({{oA, oA+nA}, {oQ, oQ+nQ}, {oP, oP+nP}}) = localB({{0L, nA}, {0L, nQ}, {0, nP}});
+
+        }
+    }
+
+    // If the work wasn't evenly distributed perform empty slices to make it even.
+    IndexRange zero_range;
+
+    for (size_t i=0; i<localB.rank(); ++i) {
+        zero_range.push_back({0, 0});
+    }
+    for (int i = (nAPQtask % ambit::settings::nprocess); i < ambit::settings::nprocess; i++) {
+        if (i == ambit::settings::rank) {
+            Btmp(zero_range) = localB(zero_range);
+        }
+    }
+
+//    ambit::Tensor localDist = ambit::Tensor::build(ambit::kCore, "Local (A|pq)", Btmp.dims());
+//    localDist() = Btmp();
+//
+//    if (ambit::settings::rank == 0)
+//        localDist.print();
+
+    B("B,p,q") = J("A,B") * Btmp("A,p,q");
 
     return B;
 }

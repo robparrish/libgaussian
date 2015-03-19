@@ -19,7 +19,7 @@ class SchwarzSieve;
  * Typically, one builds a specific DFERI subclass, changes some knobs,
  * possibly queues a set of tasks up, and then calls a compute method to do one
  * or more task at once.
- * 
+ *
  * These objects are all internally threaded, and should be called from a
  * master thread for optimal performance.
  *
@@ -86,6 +86,12 @@ public:
     ambit::Tensor metric_core() const;
 
     /**!
+     * Compute the metric matrix (A|B)
+     * @return the metric matrix as kDistributed
+     */
+    ambit::Tensor metric_distributed() const;
+
+    /**!
      * Compute the metric matrix (A|B)^power by eigendecomposition and
      * pseudoinversion
      * @param power the power to apply
@@ -94,8 +100,20 @@ public:
      * @return the metric matrix power as kCore
      **/
     ambit::Tensor metric_power_core(
-        double power = -1.0/2.0, 
+        double power = -1.0/2.0,
         double condition = 1.0E-12) const;
+
+    /**!
+     * Compute the metric matrix (A|B)^power by eigendecomposition and
+     * pseudoinversion
+     * @param power the power to apply
+     * @param condition the maximum relative condition number to keep in the
+     *  metric
+     * @return the metric matrix power as kCore
+     **/
+    ambit::Tensor metric_power_distributed(
+            double power = -1.0/2.0,
+            double condition = 1.0E-12) const;
 
 protected:
 
@@ -118,20 +136,20 @@ protected:
  *
  * Description:
  *  Get the AO-basis integrals on core for DF-SCF:
- * 
+ *
  * Definitions:
  *  3-index integral target - b_pq^Q is striped [Qpq] (nQ x npq, sieved
- *                            triangular indexing) 
+ *                            triangular indexing)
  *
  *  b_pq^Q = (Q|A)^{-1/2} (A|pq)
- * 
+ *
  * Code:
  *  // Constructor
  *  AODFERI aodf(primary, auxiliary, sieve);
  *  ...
  *  // Knobs
  *  aodf.set_double(doubles);
- *  // Compute the 
+ *  // Compute the
  *  Tensor b = aodf.compute_ao_task_core(-1.0/2.0);
  *  // If needed, grab the SchwarzSieve for indexing
  *  std::shared_ptr<SchwarzSieve> sieve2 = aodf.sieve();
@@ -197,6 +215,16 @@ public:
      * @return the DF integrals as a DiskTensor
      **/
     ambit::Tensor compute_ao_task_disk(double power = -1.0/2.0) const;
+    /**!
+     * Compute the AO-basis fitted DF integrals with the striping Q x pq, where
+     * pq is sieved reduced triangular indexing (by shell pair) from the
+     * SchwarzSieve object
+     *
+     * Requires (3 nQ x nQ) memory, throws if not available
+     *
+     * @return the DF integrals as a DiskTensor
+     **/
+    ambit::Tensor compute_ao_task_distributed(double power = -1.0/2.0) const;
 
 protected:
 
@@ -206,14 +234,14 @@ protected:
  * Class MODFERI produces fitted 3-index DF integrals with orbital
  * transformations applied
  *
- * => Example Use Case <= 
+ * => Example Use Case <=
  *
  * Description:
  *  Get the hole-particle (i->a) DF integrals for use in computing the DF-MP2
  *  OPDM vv block
  *
  * Definitions:
- *  3-index integral target - b_ia^Q is striped [iaQ] (ni x na x nQ) 
+ *  3-index integral target - b_ia^Q is striped [iaQ] (ni x na x nQ)
  *  orbitals for center 1   - C1_p^i is striped [pi] (np x ni)
  *  orbitals for center 2   - C2_q^a is striped [qa] (np x na)
  *  i <= a (for performance example)
@@ -235,8 +263,8 @@ protected:
  *  Tensor biaQ = results["biaQ"];
  *  // Do stuff with the ambit
  *  ...
- * 
- * => Example Use Case <= 
+ *
+ * => Example Use Case <=
  *
  * Description:
  *  Get the hole-particle (i->a) *and* particle-hole (a->i) DF integrals for
@@ -247,8 +275,8 @@ protected:
  *  overhead for reasons discussed below
  *
  * Definitions:
- *  3-index integral target - b_ia^Q is striped [iaQ] (ni x na x nQ) 
- *  3-index integral target - b_ai^Q is striped [aiQ] (ni x na x nQ) 
+ *  3-index integral target - b_ia^Q is striped [iaQ] (ni x na x nQ)
+ *  3-index integral target - b_ai^Q is striped [aiQ] (ni x na x nQ)
  *  orbitals for center 1/2 - C1_p^i is striped [pi] (np x ni)
  *  orbitals for center 2/1 - C2_q^a is striped [qa] (np x na)
  *  i <= a (for performance example)
@@ -274,7 +302,7 @@ protected:
  *  Tensor baiQ = results["baiQ"];
  *  // Do stuff with the ambits
  *  ...
- * 
+ *
  * Notes:
  *  In this example the three-index integrals (A|pq) and inverse metric
  *  (Q|A)^{-1/2} are computed only once across both tasks. Moreover, the code
@@ -282,7 +310,7 @@ protected:
  *  checking the Tensor pointers), and only does one half-transformation to
  *  (A|iq). The second-half transform to (A|ia) and (A|ai) is where the paths
  *  diverge for the two tasks, as they have different permutations.* The metric
- *  application and disk permutation is also repeated twice. 
+ *  application and disk permutation is also repeated twice.
  *
  *  Note that the best performance is obtained when the smaller orbital space
  *  is used for C1. E.g., in the example above, the first-half transformation
@@ -302,7 +330,7 @@ protected:
 class MODFERI final : public DFERI {
 
 public:
-    
+
     // => Constructors <= //
 
     /**!
@@ -325,20 +353,20 @@ public:
      *
      * @param key - the key by which this task is known (also name of 3-index ambit)
      * @param Cl  - the first set of molecular orbitals, ordered np x nl
-     * @param Cr  - the second set of molecule orbitals, ordered np x nr 
-     * @param power - the power of metric to apply 
-     * @param striping - the desired striping of the result ambit, a
+     * @param Cr  - the second set of molecule orbitals, ordered np x nr
+     * @param power - the power of metric to apply
+     * @param striping - the desired striping of the result tensor, a
      *  permutation string with three characters (l,r, and Q), one of:
-     *  "lrQ", "rlQ", "Qlr", "Qrl". 
+     *  "lrQ", "rlQ", "Qlr", "Qrl".
      *  "lQr" and "rQl" are NOT allowed
      *
      * NOTE: For performance reasons, it is highly advised to put the smaller
      * orbital space as Cl, and then use the striping parameter to obtain the
      * desired permutation.
-     * 
+     *
      * NOTE: lrQ or rlQ stripings have the same cost, and are the fastest
      * stripings to produce. Qlr and Qrl stripings involve an additional
-     * permutation of the finished disk ambits.
+     * permutation of the finished disk tensor.
      *
      * NOTE: only references to Cl and Cr are kept - do not modify the data in
      * your copy of these ambits
@@ -349,7 +377,7 @@ public:
         const ambit::Tensor& Cr,
         double power = -1.0/2.0,
         const std::string& striping = "lrQ");
-        
+
     /**!
      * Compute all queued tasks in this MODFERI as kCore
      *
@@ -361,7 +389,7 @@ public:
      * ambits requested above
      **/
     std::map<std::string, ambit::Tensor> compute_mo_tasks_core() const;
-        
+
     /**!
      * Compute all queued tasks in this MODFERI as kDisk
      *
@@ -372,7 +400,7 @@ public:
      **/
     std::map<std::string, ambit::Tensor> compute_mo_tasks_disk() const;
 
-protected: 
+protected:
 
     std::vector<std::string> keys_;
     std::map<std::string, ambit::Tensor> Cls_;

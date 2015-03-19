@@ -41,18 +41,18 @@ void OneBody::compute_S(
         Sints.push_back(std::shared_ptr<OverlapInt2C>(new OverlapInt2C(basis1_,basis2_,0)));
     }
 
-    const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
+    const std::vector<std::pair<size_t,size_t>>& shell_pairs = sieve_->shell_pairs();
 
     double* Sp = S.data().data();
 
     #pragma omp parallel for schedule(dynamic)
     for (size_t ind = 0; ind < shell_pairs.size(); ind++) {
-        int P = shell_pairs[ind].first;
-        int Q = shell_pairs[ind].second;
-        int nP = basis1_->shell(P).nfunction();
-        int nQ = basis2_->shell(Q).nfunction();
-        int oP = basis1_->shell(P).function_index();
-        int oQ = basis2_->shell(Q).function_index();
+        size_t P = shell_pairs[ind].first;
+        size_t Q = shell_pairs[ind].second;
+        size_t nP = basis1_->shell(P).nfunction();
+        size_t nQ = basis2_->shell(Q).nfunction();
+        size_t oP = basis1_->shell(P).function_index();
+        size_t oQ = basis2_->shell(Q).function_index();
         #if defined(_OPENMP)
         int t = omp_get_thread_num();
         #else
@@ -62,8 +62,8 @@ void OneBody::compute_S(
         double* Sbuffer = Sints[t]->buffer();
         if (symm) {
             double Sperm = (P == Q ? 0.5 : 1.0) * scale;
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     Sp[(p + oP)*nbf2 + (q + oQ)] +=
                     Sperm * Sbuffer[p*nQ + q];
                     Sp[(q + oQ)*nbf2 + (p + oP)] +=
@@ -72,8 +72,8 @@ void OneBody::compute_S(
             }
         } else {
             double Sperm = scale;
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     Sp[(p + oP)*nbf2 + (q + oQ)] +=
                     Sperm * Sbuffer[p*nQ + q];
                 }
@@ -103,18 +103,18 @@ void OneBody::compute_T(
         Tints.push_back(std::shared_ptr<KineticInt2C>(new KineticInt2C(basis1_,basis2_,0)));
     }
 
-    const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
+    const std::vector<std::pair<size_t,size_t>>& shell_pairs = sieve_->shell_pairs();
 
     double* Tp = T.data().data();
 
     #pragma omp parallel for schedule(dynamic)
     for (size_t ind = 0; ind < shell_pairs.size(); ind++) {
-        int P = shell_pairs[ind].first;
-        int Q = shell_pairs[ind].second;
-        int nP = basis1_->shell(P).nfunction();
-        int nQ = basis2_->shell(Q).nfunction();
-        int oP = basis1_->shell(P).function_index();
-        int oQ = basis2_->shell(Q).function_index();
+        size_t P = shell_pairs[ind].first;
+        size_t Q = shell_pairs[ind].second;
+        size_t nP = basis1_->shell(P).nfunction();
+        size_t nQ = basis2_->shell(Q).nfunction();
+        size_t oP = basis1_->shell(P).function_index();
+        size_t oQ = basis2_->shell(Q).function_index();
         #if defined(_OPENMP)
         int t = omp_get_thread_num();
         #else
@@ -124,8 +124,8 @@ void OneBody::compute_T(
         double* Tbuffer = Tints[t]->buffer();
         if (symm) {
             double Tperm = (P == Q ? 0.5 : 1.0) * scale;
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     Tp[(p + oP)*nbf2 + (q + oQ)] +=
                     Tperm * Tbuffer[p*nQ + q];
                     Tp[(q + oQ)*nbf2 + (p + oP)] +=
@@ -133,9 +133,9 @@ void OneBody::compute_T(
                 }
             }
         } else {
-            for (int p = 0; p < nP; p++) {
+            for (size_t p = 0; p < nP; p++) {
                 double Tperm = scale;
-                for (int q = 0; q < nQ; q++) {
+                for (size_t q = 0; q < nQ; q++) {
                     Tp[(p + oP)*nbf2 + (q + oQ)] +=
                     Tperm * Tbuffer[p*nQ + q];
                 }
@@ -174,7 +174,7 @@ void OneBody::compute_X(
         Xints[t]->set_z(origin[2]);
     }
 
-    const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
+    const std::vector<std::pair<size_t,size_t>>& shell_pairs = sieve_->shell_pairs();
 
     double* Xp = X[0].data().data();
     double* Yp = X[1].data().data();
@@ -184,12 +184,12 @@ void OneBody::compute_X(
 
     #pragma omp parallel for schedule(dynamic)
     for (size_t ind = 0; ind < shell_pairs.size(); ind++) {
-        int P = shell_pairs[ind].first;
-        int Q = shell_pairs[ind].second;
-        int nP = basis1_->shell(P).nfunction();
-        int nQ = basis2_->shell(Q).nfunction();
-        int oP = basis1_->shell(P).function_index();
-        int oQ = basis2_->shell(Q).function_index();
+        size_t P = shell_pairs[ind].first;
+        size_t Q = shell_pairs[ind].second;
+        size_t nP = basis1_->shell(P).nfunction();
+        size_t nQ = basis2_->shell(Q).nfunction();
+        size_t oP = basis1_->shell(P).function_index();
+        size_t oQ = basis2_->shell(Q).function_index();
         #if defined(_OPENMP)
         int t = omp_get_thread_num();
         #else
@@ -201,8 +201,8 @@ void OneBody::compute_X(
         double* Zbuffer = Ybuffer + chunk_size;
         if (symm) {
             double Xperm = (P == Q ? 0.5 : 1.0) * scale[0];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     Xp[(p + oP)*nbf2 + (q + oQ)] +=
                     Xperm * Xbuffer[p*nQ + q];
                     Xp[(q + oQ)*nbf2 + (p + oP)] +=
@@ -210,8 +210,8 @@ void OneBody::compute_X(
                 }
             }
             double Yperm = (P == Q ? 0.5 : 1.0) * scale[1];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     Yp[(p + oP)*nbf2 + (q + oQ)] +=
                     Yperm * Ybuffer[p*nQ + q];
                     Yp[(q + oQ)*nbf2 + (p + oP)] +=
@@ -219,8 +219,8 @@ void OneBody::compute_X(
                 }
             }
             double Zperm = (P == Q ? 0.5 : 1.0) * scale[2];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     Zp[(p + oP)*nbf2 + (q + oQ)] +=
                     Zperm * Zbuffer[p*nQ + q];
                     Zp[(q + oQ)*nbf2 + (p + oP)] +=
@@ -229,22 +229,22 @@ void OneBody::compute_X(
             }
         } else {
             double Xperm = scale[0];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     Xp[(p + oP)*nbf2 + (q + oQ)] +=
                     Xperm * Xbuffer[p*nQ + q];
                 }
             }
             double Yperm = scale[1];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     Yp[(p + oP)*nbf2 + (q + oQ)] +=
                     Yperm * Ybuffer[p*nQ + q];
                 }
             }
             double Zperm = scale[2];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     Zp[(p + oP)*nbf2 + (q + oQ)] +=
                     Zperm * Zbuffer[p*nQ + q];
                 }
@@ -283,7 +283,7 @@ void OneBody::compute_Q(
         Qints[t]->set_z(origin[2]);
     }
 
-    const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
+    const std::vector<std::pair<size_t,size_t>>& shell_pairs = sieve_->shell_pairs();
 
     double* XXp = Q[0].data().data();
     double* XYp = Q[1].data().data();
@@ -296,12 +296,12 @@ void OneBody::compute_Q(
 
     #pragma omp parallel for schedule(dynamic)
     for (size_t ind = 0; ind < shell_pairs.size(); ind++) {
-        int P = shell_pairs[ind].first;
-        int Q = shell_pairs[ind].second;
-        int nP = basis1_->shell(P).nfunction();
-        int nQ = basis2_->shell(Q).nfunction();
-        int oP = basis1_->shell(P).function_index();
-        int oQ = basis2_->shell(Q).function_index();
+        size_t P = shell_pairs[ind].first;
+        size_t Q = shell_pairs[ind].second;
+        size_t nP = basis1_->shell(P).nfunction();
+        size_t nQ = basis2_->shell(Q).nfunction();
+        size_t oP = basis1_->shell(P).function_index();
+        size_t oQ = basis2_->shell(Q).function_index();
         #if defined(_OPENMP)
         int t = omp_get_thread_num();
         #else
@@ -316,8 +316,8 @@ void OneBody::compute_Q(
         double* ZZbuffer = XXbuffer + 5L * chunk_size;
         if (symm) {
             double XXperm = (P == Q ? 0.5 : 1.0) * scale[0];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     XXp[(p + oP)*nbf2 + (q + oQ)] +=
                     XXperm * XXbuffer[p*nQ + q];
                     XXp[(q + oQ)*nbf2 + (p + oP)] +=
@@ -325,8 +325,8 @@ void OneBody::compute_Q(
                 }
             }
             double XYperm = (P == Q ? 0.5 : 1.0) * scale[1];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     XYp[(p + oP)*nbf2 + (q + oQ)] +=
                     XYperm * XYbuffer[p*nQ + q];
                     XYp[(q + oQ)*nbf2 + (p + oP)] +=
@@ -334,8 +334,8 @@ void OneBody::compute_Q(
                 }
             }
             double XZperm = (P == Q ? 0.5 : 1.0) * scale[2];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     XZp[(p + oP)*nbf2 + (q + oQ)] +=
                     XZperm * XZbuffer[p*nQ + q];
                     XZp[(q + oQ)*nbf2 + (p + oP)] +=
@@ -343,8 +343,8 @@ void OneBody::compute_Q(
                 }
             }
             double YYperm = (P == Q ? 0.5 : 1.0) * scale[3];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     YYp[(p + oP)*nbf2 + (q + oQ)] +=
                     YYperm * YYbuffer[p*nQ + q];
                     YYp[(q + oQ)*nbf2 + (p + oP)] +=
@@ -352,8 +352,8 @@ void OneBody::compute_Q(
                 }
             }
             double YZperm = (P == Q ? 0.5 : 1.0) * scale[4];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     YZp[(p + oP)*nbf2 + (q + oQ)] +=
                     YZperm * YZbuffer[p*nQ + q];
                     YZp[(q + oQ)*nbf2 + (p + oP)] +=
@@ -361,8 +361,8 @@ void OneBody::compute_Q(
                 }
             }
             double ZZperm = (P == Q ? 0.5 : 1.0) * scale[5];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     ZZp[(p + oP)*nbf2 + (q + oQ)] +=
                     ZZperm * ZZbuffer[p*nQ + q];
                     ZZp[(q + oQ)*nbf2 + (p + oP)] +=
@@ -371,43 +371,43 @@ void OneBody::compute_Q(
             }
         } else {
             double XXperm = scale[0];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     XXp[(p + oP)*nbf2 + (q + oQ)] +=
                     XXperm * XXbuffer[p*nQ + q];
                 }
             }
             double XYperm = scale[1];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     XYp[(p + oP)*nbf2 + (q + oQ)] +=
                     XYperm * XYbuffer[p*nQ + q];
                 }
             }
             double XZperm = scale[2];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     XZp[(p + oP)*nbf2 + (q + oQ)] +=
                     XZperm * XZbuffer[p*nQ + q];
                 }
             }
             double YYperm = scale[3];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     YYp[(p + oP)*nbf2 + (q + oQ)] +=
                     YYperm * YYbuffer[p*nQ + q];
                 }
             }
             double YZperm = scale[4];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     YZp[(p + oP)*nbf2 + (q + oQ)] +=
                     YZperm * YZbuffer[p*nQ + q];
                 }
             }
             double ZZperm = scale[5];
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     ZZp[(p + oP)*nbf2 + (q + oQ)] +=
                     ZZperm * ZZbuffer[p*nQ + q];
                 }
@@ -452,18 +452,18 @@ void OneBody::compute_V(
         Vints[t]->Zs().insert(Vints[t]->Zs().begin(),Zs.begin(),Zs.end());
     }
 
-    const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
+    const std::vector<std::pair<size_t,size_t>>& shell_pairs = sieve_->shell_pairs();
 
     double* Vp = V.data().data();
 
     #pragma omp parallel for schedule(dynamic)
     for (size_t ind = 0; ind < shell_pairs.size(); ind++) {
-        int P = shell_pairs[ind].first;
-        int Q = shell_pairs[ind].second;
-        int nP = basis1_->shell(P).nfunction();
-        int nQ = basis2_->shell(Q).nfunction();
-        int oP = basis1_->shell(P).function_index();
-        int oQ = basis2_->shell(Q).function_index();
+        size_t P = shell_pairs[ind].first;
+        size_t Q = shell_pairs[ind].second;
+        size_t nP = basis1_->shell(P).nfunction();
+        size_t nQ = basis2_->shell(Q).nfunction();
+        size_t oP = basis1_->shell(P).function_index();
+        size_t oQ = basis2_->shell(Q).function_index();
         #if defined(_OPENMP)
         int t = omp_get_thread_num();
         #else
@@ -473,8 +473,8 @@ void OneBody::compute_V(
         double* Vbuffer = Vints[t]->buffer();
         if (symm) {
             double Vperm = (P == Q ? 0.5 : 1.0) * scale;
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     Vp[(p + oP)*nbf2 + (q + oQ)] +=
                     Vperm * Vbuffer[p*nQ + q];
                     Vp[(q + oQ)*nbf2 + (p + oP)] +=
@@ -483,8 +483,8 @@ void OneBody::compute_V(
             }
         } else {
             double Vperm = scale;
-            for (int p = 0; p < nP; p++) {
-                for (int q = 0; q < nQ; q++) {
+            for (size_t p = 0; p < nP; p++) {
+                for (size_t q = 0; q < nQ; q++) {
                     Vp[(p + oP)*nbf2 + (q + oQ)] +=
                     Vperm * Vbuffer[p*nQ + q];
                 }
@@ -547,20 +547,20 @@ void OneBody::compute_S1(
         Stemps.push_back(Tensor::build(kCore,"Stemp",{natom,3L}));
     }
 
-    const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
+    const std::vector<std::pair<size_t,size_t>>& shell_pairs = sieve_->shell_pairs();
 
     const double* Dp = D.data().data();
 
     #pragma omp parallel for schedule(dynamic)
     for (size_t ind = 0; ind < shell_pairs.size(); ind++) {
-        int P = shell_pairs[ind].first;
-        int Q = shell_pairs[ind].second;
-        int nP = basis1_->shell(P).nfunction();
-        int nQ = basis1_->shell(Q).nfunction();
-        int oP = basis1_->shell(P).function_index();
-        int oQ = basis1_->shell(Q).function_index();
-        int aP = basis1_->shell(P).atom_index();
-        int aQ = basis1_->shell(Q).atom_index();
+        size_t P = shell_pairs[ind].first;
+        size_t Q = shell_pairs[ind].second;
+        size_t nP = basis1_->shell(P).nfunction();
+        size_t nQ = basis1_->shell(Q).nfunction();
+        size_t oP = basis1_->shell(P).function_index();
+        size_t oQ = basis1_->shell(Q).function_index();
+        size_t aP = basis1_->shell(P).atom_index();
+        size_t aQ = basis1_->shell(Q).atom_index();
         #if defined(_OPENMP)
         int t = omp_get_thread_num();
         #else
@@ -580,8 +580,8 @@ void OneBody::compute_S1(
         double* Qybuf = Sbuffer + 4L * offset;
         double* Qzbuf = Sbuffer + 5L * offset;
 
-        for (int p = 0; p < nP; p++) {
-            for (int q = 0; q < nQ; q++) {
+        for (size_t p = 0; p < nP; p++) {
+            for (size_t q = 0; q < nQ; q++) {
                 double Dval = perm * 0.5 * (Dp[(p + oP)*nbf + (q + oQ)] + Dp[(q + oQ)*nbf + (p + oP)]);
                 Sp[aP*natom + 0] += perm * Dval * (*Pxbuf++);
                 Sp[aP*natom + 1] += perm * Dval * (*Pybuf++);
@@ -629,20 +629,20 @@ void OneBody::compute_T1(
         Ttemps.push_back(Tensor::build(kCore,"Ttemp",{natom,3L}));
     }
 
-    const std::vector<std::pair<int,int>>& shell_pairs = sieve_->shell_pairs();
+    const std::vector<std::pair<size_t,size_t>>& shell_pairs = sieve_->shell_pairs();
 
     const double* Dp = D.data().data();
 
     #pragma omp parallel for schedule(dynamic)
     for (size_t ind = 0; ind < shell_pairs.size(); ind++) {
-        int P = shell_pairs[ind].first;
-        int Q = shell_pairs[ind].second;
-        int nP = basis1_->shell(P).nfunction();
-        int nQ = basis1_->shell(Q).nfunction();
-        int oP = basis1_->shell(P).function_index();
-        int oQ = basis1_->shell(Q).function_index();
-        int aP = basis1_->shell(P).atom_index();
-        int aQ = basis1_->shell(Q).atom_index();
+        size_t P = shell_pairs[ind].first;
+        size_t Q = shell_pairs[ind].second;
+        size_t nP = basis1_->shell(P).nfunction();
+        size_t nQ = basis1_->shell(Q).nfunction();
+        size_t oP = basis1_->shell(P).function_index();
+        size_t oQ = basis1_->shell(Q).function_index();
+        size_t aP = basis1_->shell(P).atom_index();
+        size_t aQ = basis1_->shell(Q).atom_index();
         #if defined(_OPENMP)
         int t = omp_get_thread_num();
         #else
@@ -662,8 +662,8 @@ void OneBody::compute_T1(
         double* Qybuf = Tbuffer + 4L * offset;
         double* Qzbuf = Tbuffer + 5L * offset;
 
-        for (int p = 0; p < nP; p++) {
-            for (int q = 0; q < nQ; q++) {
+        for (size_t p = 0; p < nP; p++) {
+            for (size_t q = 0; q < nQ; q++) {
                 double Dval = perm * 0.5 * (Dp[(p + oP)*nbf + (q + oQ)] + Dp[(q + oQ)*nbf + (p + oP)]);
                 Tp[aP*natom + 0] += perm * Dval * (*Pxbuf++);
                 Tp[aP*natom + 1] += perm * Dval * (*Pybuf++);
