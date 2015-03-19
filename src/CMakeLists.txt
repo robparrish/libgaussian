@@ -43,12 +43,15 @@ set(LIGHTSPEED_SOURCES
 )
 
 # build static libray
-add_library(lightspeed STATIC ${LIGHTSPEED_SOURCES} ${LIGHTSPEED_HEADERS})
+add_library(lightspeed SHARED ${LIGHTSPEED_SOURCES} ${LIGHTSPEED_HEADERS})
 
-target_link_libraries(lightspeed ${LIBINT}/lib/libint2.a -L${LIBAMBIT}/lib -lambit)
+target_link_libraries(lightspeed ${LIBINT}/lib/libint2.a -L${LIBAMBIT}/lib -lambit ${Boost_LIBRARIES})
 
 #set_target_properties(lightspeed PROPERTIES COMPILE_FLAGS "${MPI_COMPILE_FLAGS}")
 #set_target_properties(lightspeed PROPERTIES LINK_FLAGS "${MPI_LINK_FLAGS}")
 
-install(TARGETS lightspeed ARCHIVE DESTINATION lib)
-install(FILES ${LIBLIGHTSPEED_HEADERS} DESTINATION include/lightspeed)
+install(TARGETS lightspeed LIBRARY DESTINATION lib)
+foreach(file ${LIGHTSPEED_HEADERS})
+    get_filename_component(dir ${file} DIRECTORY)
+    install(FILES ${file} DESTINATION include/lightspeed/${dir})
+endforeach()
