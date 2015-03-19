@@ -472,14 +472,14 @@ sad.printf()
 Csad = sad.compute_C()
 D.contract(Csad,Csad,build_indices(["p","q"]),build_indices(["p","i"]),build_indices(["q","i"]),1.0,0.0)
 
-#F.copy(H)
-#Ft1.contract(X,H,build_indices(["i","q"]),build_indices(["i","p"]),build_indices(["p","q"]),1.0,0.0)
-#Ft2.contract(Ft1,X,build_indices(["i","j"]),build_indices(["i","q"]),build_indices(["q","j"]),1.0,0.0)
-#data = Ft2.syev(EigenvalueOrder.kAscending)
-#F2 = data['eigenvectors']
-#C.contract(X,F2,build_indices(["p","i"]),build_indices(["p","j"]),build_indices(["i","j"]),1.0,0.0)
-#Cocc.slice(C,build_index_range([[0,nbf],[0,nocc]]),build_index_range([[0,nbf],[0,nocc]]),1.0,0.0)
-#D.contract(Cocc,Cocc,build_indices(["p","q"]),build_indices(["p","i"]),build_indices(["q","i"]),1.0,0.0)
+F.copy(H)
+Ft1.contract(X,H,build_indices(["i","q"]),build_indices(["i","p"]),build_indices(["p","q"]),1.0,0.0)
+Ft2.contract(Ft1,X,build_indices(["i","j"]),build_indices(["i","q"]),build_indices(["q","j"]),1.0,0.0)
+data = Ft2.syev(EigenvalueOrder.kAscending)
+F2 = data['eigenvectors']
+C.contract(X,F2,build_indices(["p","i"]),build_indices(["p","j"]),build_indices(["i","j"]),1.0,0.0)
+Cocc.slice(C,build_index_range([[0,nbf],[0,nocc]]),build_index_range([[0,nbf],[0,nocc]]),1.0,0.0)
+D.contract(Cocc,Cocc,build_indices(["p","q"]),build_indices(["p","i"]),build_indices(["q","i"]),1.0,0.0)
 
 #jk = DirectJK(schwarz)
 jk = DFJK(schwarz,saux)

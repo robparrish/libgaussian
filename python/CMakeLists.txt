@@ -4,7 +4,6 @@ set(LIBPYLIGHTSPEED_HEADERS
 set(LIBPYLIGHTSPEED_SOURCES
     python.cc
     export_collections.cc
-    export_tensor.cc
     export_core.cc
     export_mints.cc
     export_ob.cc

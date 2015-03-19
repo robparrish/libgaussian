@@ -352,8 +352,8 @@ class BasisSet:
             SShells.append(SGaussianShellVec())
             for ind in self.atoms_to_shell_inds[A]:
                 shell = self.shells[ind]
-                c2s = DoubleVec()
-                e2s = DoubleVec()
+                c2s = [] 
+                e2s = [] 
                 for k in range(shell.nprimitive()): 
                     c2s.append(shell.cs[k])
                     e2s.append(shell.es[k])
@@ -367,27 +367,27 @@ class BasisSet:
                         e2s))
         return SBasisSet(self.name, SShells)
 
-def build_dimension(vals):
-    dim = Size_tVec()
-    for val in vals:
-        dim.append(val)
-    return dim
-
-def build_indices(vals):
-    dim = StringVec()
-    for val in vals:
-        dim.append(val)
-    return dim
-
-def build_index_range(vals):
-    
-    ind = Size_tVecVec()
-    for val in vals:
-        iv = Size_tVec()
-        for v in val:
-            iv.append(v)
-        ind.append(iv)
-    return ind
+#def build_dimension(vals):
+#    dim = Size_tVec()
+#    for val in vals:
+#        dim.append(val)
+#    return dim
+#
+#def build_indices(vals):
+#    dim = StringVec()
+#    for val in vals:
+#        dim.append(val)
+#    return dim
+#
+#def build_index_range(vals):
+#    
+#    ind = Size_tVecVec()
+#    for val in vals:
+#        iv = Size_tVec()
+#        for v in val:
+#            iv.append(v)
+#        ind.append(iv)
+#    return ind
 
 tic = time.time()
 
@@ -479,8 +479,8 @@ Ft2["ij"] = H["iq"] * X["qj"]
 data = Ft2.tensor.syev(am.EigenvalueOrder.kAscending)
 F2 = am.Tensor(existing=data['eigenvectors'])
 C["pi"] = X["pj"] * F2["ij"]
-Cocc.slice(C,build_index_range([[0,nbf],[0,nocc]]),build_index_range([[0,nbf],[0,nocc]]),1.0,0.0)
-#Cocc["pq"] = C[:, :nocc] 
+Cocc.zero()
+Cocc[:, :] += C[:, :nocc] 
 D["pq"] = Cocc["pi"] * Cocc["qi"]
 
 #jk = DirectJK(schwarz)
@@ -495,19 +495,9 @@ jk.initialize()
 diis = DIIS(1,6,True)
 
 print '  Nuclear Repulsion Energy %18.10f\n' % smol.nuclear_repulsion_energy()
-#S.printf()
-#X.printf()
-#T.printf()
-#V.printf()
-#H.printf()
-#C.printf()
-#D.printf()
 
 converged = False
 Enuc = smol.nuclear_repulsion_energy();
-#E.contract(D,H,build_indices([]),build_indices(["p","q"]),build_indices(["p","q"]),1.0,0.0)
-#E.contract(D,F,build_indices([]),build_indices(["p","q"]),build_indices(["p","q"]),1.0,1.0)
-#Eelec = E.data()[0]
 Eold = 0.0;
 
 
@@ -550,14 +540,13 @@ for ind in range(0,50):
     Eold = Eelec
 
     # Orbital Gradient
-    Ft1.contract(F,D,build_indices(["p","s"]),build_indices(["p","q"]),build_indices(["q","s"]),1.0,0.0)
-    G.contract(Ft1,S,build_indices(["p","s"]),build_indices(["p","q"]),build_indices(["q","s"]),1.0,0.0)
-    Ft1.contract(S,D,build_indices(["p","s"]),build_indices(["p","q"]),build_indices(["q","s"]),1.0,0.0)
-    G.contract(Ft1,F,build_indices(["p","s"]),build_indices(["p","q"]),build_indices(["q","s"]),-1.0,1.0)
-    Ft1.contract(X,G,build_indices(["p","s"]),build_indices(["p","q"]),build_indices(["q","s"]),1.0,0.0)
-    G.contract(Ft1,X,build_indices(["p","s"]),build_indices(["p","q"]),build_indices(["q","s"]),1.0,0.0)
+    Ft1["ps"] = F["pq"] * D["qs"]
+    G["ps"] = Ft1["pq"] * S["qs"]
+    Ft1["ps"] = S["pq"] * D["qs"]
+    G["ps"] -= Ft1["pq"] * F["qs"]
+    Ft1["ps"] = X["pq"] * G["qs"]
+    G["ps"] = Ft1["pq"] * X["qs"]
 
-    #G2.slice(G,build_index_range([[0,nbf],[0,nbf]]),build_index_range([[0,nbf],[0,nbf]]),1.0,0.0)
 
     if (ind > 0):
         Fvec = TensorVec()
@@ -572,7 +561,8 @@ for ind in range(0,50):
     data = Ft2.tensor.syev(am.EigenvalueOrder.kAscending)
     F2 = am.Tensor(existing=data['eigenvectors'])
     C["pi"] = X["pj"] * F2["ij"]
-    Cocc.slice(C,build_index_range([[0,nbf],[0,nocc]]),build_index_range([[0,nbf],[0,nocc]]),1.0,0.0)
+    Cocc.zero()
+    Cocc[:, :] += C[:, :nocc] 
     D["pq"] = Cocc["pi"] * Cocc["qi"]
 
 print ''
