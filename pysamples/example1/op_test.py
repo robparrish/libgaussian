@@ -2,10 +2,9 @@
 import sys, os, re, copy, math, time
 
 # ambit package must be in the PYTHONPATH for this
-#import ambit as at
+import ambit as am
 # pylightspeed.so must be in the PYTHONPATH for this
 from pylightspeed import * 
-import ambit as am
 
 # PSI4's bohr to angstrom conversion
 pc_bohr2ang_ = 0.52917720859 
@@ -367,28 +366,6 @@ class BasisSet:
                         e2s))
         return SBasisSet(self.name, SShells)
 
-#def build_dimension(vals):
-#    dim = Size_tVec()
-#    for val in vals:
-#        dim.append(val)
-#    return dim
-#
-#def build_indices(vals):
-#    dim = StringVec()
-#    for val in vals:
-#        dim.append(val)
-#    return dim
-#
-#def build_index_range(vals):
-#    
-#    ind = Size_tVecVec()
-#    for val in vals:
-#        iv = Size_tVec()
-#        for v in val:
-#            iv.append(v)
-#        ind.append(iv)
-#    return ind
-
 tic = time.time()
 
 # TODO
@@ -423,48 +400,46 @@ schwarz.printf()
 
 ob = OneBody(schwarz)
 
-d = []
-d.append(sbas.nfunction())
-d.append(sbas.nfunction())
+d = [sbas.nfunction(), sbas.nfunction()]
 
 print '  Overlap'
-S = am.Tensor(am.TensorType.kCore, "S", d)
+S = am.Tensor("kCore", "S", d)
 ob.compute_S(S.tensor)
 #S.printf()
 
 #print '  Dipole'
-#X = TensorVec()
+#X = am.TensorVector()
 #X.append(Tensor.build(TensorType.kCore, "X", d))
 #X.append(Tensor.build(TensorType.kCore, "Y", d))
 #X.append(Tensor.build(TensorType.kCore, "Z", d))
 #ob.compute_X(X)
 
 print '  Kinetic'
-T = am.Tensor.build(am.TensorType.kCore, "T", d)
+T = am.Tensor.build("kCore", "T", d)
 ob.compute_T(T.tensor)
 #T.printf()
 
 print '  Potential'
-V = am.Tensor.build(am.TensorType.kCore, "V", d)
+V = am.Tensor.build("kCore", "V", d)
 ob.compute_V_nuclear(V.tensor, smol)
 #V.printf()
     
 print ''
 
-H = am.Tensor.build(am.TensorType.kCore, "H", d)
+H = am.Tensor.build("kCore", "H", d)
 H["i,j"] += T["i,j"]
 H["i,j"] += V["i,j"]
 
-F = am.Tensor(am.TensorType.kCore, "F", d)
-Ft1 = am.Tensor(am.TensorType.kCore, "Ft1", d)
-Ft2 = am.Tensor(am.TensorType.kCore, "Ft2", d)
-C = am.Tensor(am.TensorType.kCore, "C", d)
-D = am.Tensor(am.TensorType.kCore, "D", d)
-Cocc = am.Tensor(am.TensorType.kCore, "Cocc", [nbf,nocc])
-J = am.Tensor(am.TensorType.kCore, "D", d)
-K = am.Tensor(am.TensorType.kCore, "K", d)
-G = am.Tensor(am.TensorType.kCore, "G", d)
-E = am.Tensor(am.TensorType.kCore, "E", [])
+F = am.Tensor("kCore", "F", d)
+Ft1 = am.Tensor("kCore", "Ft1", d)
+Ft2 = am.Tensor("kCore", "Ft2", d)
+C = am.Tensor("kCore", "C", d)
+D = am.Tensor("kCore", "D", d)
+Cocc = am.Tensor("kCore", "Cocc", [nbf, nocc])
+J = am.Tensor("kCore", "D", d)
+K = am.Tensor("kCore", "K", d)
+G = am.Tensor("kCore", "G", d)
+E = am.Tensor("kCore", "E", [])
 
 X = S.power(-1.0/2.0, 1.0E-12)
 
@@ -476,11 +451,12 @@ D["pq"] = Csad["pi"] * Csad["qi"]
 F["ij"] = H["ij"]
 Ft1["iq"] = X["ip"] * H["pq"]
 Ft2["ij"] = H["iq"] * X["qj"]
-data = Ft2.tensor.syev(am.EigenvalueOrder.kAscending)
-F2 = am.Tensor(existing=data['eigenvectors'])
+data = Ft2.syev()
+F2 = data['eigenvectors']
 C["pi"] = X["pj"] * F2["ij"]
+print 'Cocc'
 Cocc.zero()
-Cocc[:, :] += C[:, :nocc] 
+Cocc["pq"] = C[:, :nocc] 
 D["pq"] = Cocc["pi"] * Cocc["qi"]
 
 #jk = DirectJK(schwarz)
@@ -492,7 +468,7 @@ jk.initialize()
 #jk2.set_compute_J(False)
 #jk.set_compute_K(False)
 
-diis = DIIS(1,6,True)
+diis = DIIS(1, 8, True)
 
 print '  Nuclear Repulsion Energy %18.10f\n' % smol.nuclear_repulsion_energy()
 
@@ -506,16 +482,16 @@ for ind in range(0,50):
     J.zero()
     K.zero()
 
-    Cvec = TensorVec()
+    Cvec = am.TensorVector()
     if (ind == 0):
         Cvec.append(Csad.tensor)
     else:
         Cvec.append(Cocc.tensor)
-    Dvec = TensorVec()
+    Dvec = am.TensorVector()
     Dvec.append(D.tensor)
-    Jvec = TensorVec()
+    Jvec = am.TensorVector()
     Jvec.append(J.tensor)
-    Kvec = TensorVec()
+    Kvec = am.TensorVector()
     Kvec.append(K.tensor)
 
     TrueVec = BoolVec()
@@ -524,8 +500,7 @@ for ind in range(0,50):
     jk.compute_JK_from_C(Cvec,Cvec,Jvec,Kvec)    
 
     F["ij"] = H["ij"]
-    F["ij"] += J["ij"]
-    F["ij"] += J["ij"]
+    F["ij"] += 2 * J["ij"]
     F["ij"] -= K["ij"]
 
     E[""] = D["pq"] * H["pq"]
@@ -544,22 +519,23 @@ for ind in range(0,50):
     G["ps"] = Ft1["pq"] * S["qs"]
     Ft1["ps"] = S["pq"] * D["qs"]
     G["ps"] -= Ft1["pq"] * F["qs"]
+
     Ft1["ps"] = X["pq"] * G["qs"]
     G["ps"] = Ft1["pq"] * X["qs"]
 
 
     if (ind > 0):
-        Fvec = TensorVec()
+        Fvec = am.TensorVector()
         Fvec.append(F.tensor)
-        Gvec = TensorVec()
+        Gvec = am.TensorVector()
         Gvec.append(G.tensor)
         diis.add_iteration(Fvec,Gvec)
         diis.extrapolate(Fvec)
 
     Ft1["iq"] = X["ip"] * F["pq"]
     Ft2["ij"] = Ft1["iq"] * X["qj"]
-    data = Ft2.tensor.syev(am.EigenvalueOrder.kAscending)
-    F2 = am.Tensor(existing=data['eigenvectors'])
+    data = Ft2.syev()
+    F2 = data['eigenvectors']
     C["pi"] = X["pj"] * F2["ij"]
     Cocc.zero()
     Cocc[:, :] += C[:, :nocc] 

@@ -47,13 +47,13 @@ void export_collections()
         .def(vector_indexing_suite<std::vector<bool>>())
         ;
 
-    class_<std::vector<ambit::Tensor>>("TensorVec")
-        .def(vector_indexing_suite<std::vector<ambit::Tensor>>())
-        ;
+    //class_<std::vector<ambit::Tensor>>("TensorVec")
+    //    .def(vector_indexing_suite<std::vector<ambit::Tensor>>())
+    //    ;
 
-    class_<std::map<std::string, ambit::Tensor>>("TensorMap")
-        .def(map_indexing_suite<std::map<std::string, ambit::Tensor>>())
-        ;
+    //class_<std::map<std::string, ambit::Tensor>>("TensorMap")
+    //    .def(map_indexing_suite<std::map<std::string, ambit::Tensor>>())
+    //    ;
 
     class_<std::vector<SAtom>>("SAtomVec")
         .def(vector_indexing_suite<std::vector<SAtom>>())
