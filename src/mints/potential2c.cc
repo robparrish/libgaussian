@@ -230,7 +230,7 @@ void PotentialInt2C::compute_pair1(
 
             // Loop over atoms of basis set 1 (only works if bs1_ and bs2_ are on the same
             // molecule)
-            for (int atom=0; atom<ncharge; ++atom) {
+            for (size_t atom=0; atom<ncharge; ++atom) {
                 double PC[3];
 
                 double Z = Zs_[atom];

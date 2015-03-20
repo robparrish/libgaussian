@@ -465,14 +465,14 @@ Tensor SAD::compute_atom(
     for (size_t Q2 = 0; Q2 < primary_shells.size(); Q2++) {
         size_t P = primary_shells[P2];
         size_t Q = primary_shells[Q2];
-        int nP = primary_->shell(P).nfunction();
-        int nQ = primary_->shell(Q).nfunction();
-        int oP = primary_->shell(P).function_index() - primary_->shell(primary_shells[0]).function_index();
-        int oQ = primary_->shell(Q).function_index() - primary_->shell(primary_shells[0]).function_index();
+        size_t nP = primary_->shell(P).nfunction();
+        size_t nQ = primary_->shell(Q).nfunction();
+        size_t oP = primary_->shell(P).function_index() - primary_->shell(primary_shells[0]).function_index();
+        size_t oQ = primary_->shell(Q).function_index() - primary_->shell(primary_shells[0]).function_index();
         S11int.compute_shell(P,Q);
         double* buffer = S11int.buffer();
-        for (int p = 0; p < nP; p++) {
-        for (int q = 0; q < nQ; q++) {
+        for (size_t p = 0; p < nP; p++) {
+        for (size_t q = 0; q < nQ; q++) {
             S11p[(p + oP) * nbf + (q + oQ)] = (*buffer++);
         }}
     }}
@@ -481,14 +481,14 @@ Tensor SAD::compute_atom(
     for (size_t Q2 = 0; Q2 < minao_shells.size(); Q2++) {
         size_t P = primary_shells[P2];
         size_t Q = minao_shells[Q2];
-        int nP = primary_->shell(P).nfunction();
-        int nQ = minao_->shell(Q).nfunction();
-        int oP = primary_->shell(P).function_index() - primary_->shell(primary_shells[0]).function_index();
-        int oQ = minao_->shell(Q).function_index() - minao_->shell(minao_shells[0]).function_index();
+        size_t nP = primary_->shell(P).nfunction();
+        size_t nQ = minao_->shell(Q).nfunction();
+        size_t oP = primary_->shell(P).function_index() - primary_->shell(primary_shells[0]).function_index();
+        size_t oQ = minao_->shell(Q).function_index() - minao_->shell(minao_shells[0]).function_index();
         S12int.compute_shell(P,Q);
         double* buffer = S12int.buffer();
-        for (int p = 0; p < nP; p++) {
-        for (int q = 0; q < nQ; q++) {
+        for (size_t p = 0; p < nP; p++) {
+        for (size_t q = 0; q < nQ; q++) {
             S12p[(p + oP) * nmin + (q + oQ)] = (*buffer++);
         }}
     }}
@@ -497,19 +497,19 @@ Tensor SAD::compute_atom(
     for (size_t Q2 = 0; Q2 < minao_shells.size(); Q2++) {
         size_t P = minao_shells[P2];
         size_t Q = minao_shells[Q2];
-        int nP = minao_->shell(P).nfunction();
-        int nQ = minao_->shell(Q).nfunction();
-        int oP = minao_->shell(P).function_index() - minao_->shell(minao_shells[0]).function_index();
-        int oQ = minao_->shell(Q).function_index() - minao_->shell(minao_shells[0]).function_index();
+        size_t nP = minao_->shell(P).nfunction();
+        size_t nQ = minao_->shell(Q).nfunction();
+        size_t oP = minao_->shell(P).function_index() - minao_->shell(minao_shells[0]).function_index();
+        size_t oQ = minao_->shell(Q).function_index() - minao_->shell(minao_shells[0]).function_index();
         S22int.compute_shell(P,Q);
         double* buffer = S22int.buffer();
-        for (int p = 0; p < nP; p++) {
-        for (int q = 0; q < nQ; q++) {
+        for (size_t p = 0; p < nP; p++) {
+        for (size_t q = 0; q < nQ; q++) {
             S22p[(p + oP) * nmin + (q + oQ)] = (*buffer++);
         }}
     }}
 
-    for (int p = 0; p < nmin; p++) {
+    for (size_t p = 0; p < nmin; p++) {
         S22p[p*nmin + p] -= 1.0;
     }
 

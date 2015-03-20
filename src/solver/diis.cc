@@ -18,15 +18,15 @@ DIIS::DIIS(
 }
 void DIIS::clear()
 {
-    state_vecs_.clear(); 
-    error_vecs_.clear(); 
+    state_vecs_.clear();
+    error_vecs_.clear();
 }
 void DIIS::add_iteration(
-    const std::vector<Tensor>& state_vec, 
+    const std::vector<Tensor>& state_vec,
     const std::vector<Tensor>& error_vec)
 {
     // => Data Copy <= //
-    
+
     std::vector<Tensor> state;
     for (size_t ind = 0; ind < state_vec.size(); ind++) {
         state.push_back(state_vec[ind].clone(use_disk() ? kDisk : state_vec[ind].type()));
@@ -64,7 +64,7 @@ void DIIS::add_iteration(
         // Needed for arbitrary-rank dot (avert your eyes)
         std::stringstream ss;
         std::vector<std::string> inds = {"i","j","k","l","m","n","o","p","q","r","s","t","u","v"};
-        for (int r = 0; r < T.rank(); r++) {
+        for (size_t r = 0; r < T.rank(); r++) {
             ss << inds[r];
         }
         std::string cinds = ss.str();
@@ -75,18 +75,18 @@ void DIIS::add_iteration(
     }
     double* Ep = E_.data().data();
     for (size_t ind = 0; ind < cur_vectors(); ind++) {
-        Ep[ind * max_vectors_ + index] = 
-        Ep[index * max_vectors_ + ind] = 
+        Ep[ind * max_vectors_ + index] =
+        Ep[index * max_vectors_ + ind] =
         Econt[ind];
     }
 }
-bool DIIS::extrapolate( 
+bool DIIS::extrapolate(
     std::vector<Tensor>& state_vec)
 {
     if (cur_vectors() < min_vectors()) return false;
 
     // => Raw B Matrix <= //
-    
+
     size_t cur = cur_vectors();
     Tensor B = Tensor::build(kCore,"B",{cur+1,cur+1});
     double* Bp = B.data().data();
@@ -95,8 +95,8 @@ bool DIIS::extrapolate(
         for (size_t j = 0; j < cur; j++) {
             Bp[i * (cur + 1) + j] = Ep[i * max_vectors() + j];
         }
-        Bp[i * (cur + 1) + cur] = 
-        Bp[cur * (cur + 1) + i] = 
+        Bp[i * (cur + 1) + cur] =
+        Bp[cur * (cur + 1) + i] =
         1.0;
     }
 
@@ -106,16 +106,16 @@ bool DIIS::extrapolate(
 
     Tensor c = Tensor::build(kCore,"c",{cur+1});
     double* cp = c.data().data();
-    
+
     // => Balancing Registers <= //
 
     Tensor d = Tensor::build(kCore,"d",{cur+1});
     double* dp = d.data().data();
-    
+
     Tensor s = Tensor::build(kCore,"s",{cur+1});
     double* sp = s.data().data();
 
-    // => Zero/Negative Trapping <= // 
+    // => Zero/Negative Trapping <= //
 
     bool is_zero = false;
     for (size_t i = 0; i < cur; i++) {
@@ -123,9 +123,9 @@ bool DIIS::extrapolate(
             is_zero = true;
         }
     }
-    
+
     // => Balancing <= //
-    
+
     for (size_t i = 0; i < cur; i++) {
         sp[i] = (is_zero ? 1.0 : pow(Bp[i * (cur + 1) + i],-1.0/2.0));
     }
@@ -151,19 +151,19 @@ bool DIIS::extrapolate(
         // Needed for arbitrary-rank dot (avert your eyes)
         std::stringstream ss;
         std::vector<std::string> inds = {"i","j","k","l","m","n","o","p","q","r","s","t","u","v"};
-        for (int r = 0; r < T.rank(); r++) {
+        for (size_t r = 0; r < T.rank(); r++) {
             ss << inds[r];
         }
         std::string cinds = ss.str();
         for (size_t i = 0; i < cur; i++) {
             Tensor U = (state_vecs_[i][t].type() == kDisk ? state_vecs_[i][t].clone(kCore) : state_vecs_[i][t]);
-            T(cinds) += dp[i] * U(cinds);    
+            T(cinds) += dp[i] * U(cinds);
         }
         if (state_vec[t].type() == kDisk) {
             state_vec[t]() = T();
         }
     }
-    
+
     return true;
 }
 

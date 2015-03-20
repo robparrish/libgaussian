@@ -170,7 +170,7 @@ Tensor AODFERI::compute_ao_task_disk(double power) const
 
     std::vector<size_t> PQtasks;
     PQtasks.push_back(0);
-    for (size_t ind = 0, pqoff = 0; ind < shell_pairs.size(); ind++) {
+    for (size_t ind = 0; ind < shell_pairs.size(); ind++) {
         size_t pqstart = pqstarts[PQtasks.back()];
         size_t pqstop = pqstarts[ind];
         if (pqstop - pqstart > maxpq) {
@@ -318,9 +318,9 @@ Tensor AODFERI::compute_ao_task_distributed(double power) const
             Bint.compute_shell(A, 0, P, Q);
             double *Bbuffer = Bint.buffer();
 
-            for (int a = 0; a < nA; a++) {
-                for (int p = 0; p < nP; p++) {
-                    for (int q = 0; q < nQ; q++) {
+            for (size_t a = 0; a < nA; a++) {
+                for (size_t p = 0; p < nP; p++) {
+                    for (size_t q = 0; q < nQ; q++) {
                         Bp[a * nbas * nbas + p * nbas + q] = *Bbuffer++;
                     }
                 }
@@ -330,9 +330,9 @@ Tensor AODFERI::compute_ao_task_distributed(double power) const
 
             Bbuffer = Bint.buffer();
 
-            for (int a = 0; a < nA; a++) {
-                for (int p = 0; p < nP; p++) {
-                    for (int q = 0; q < nQ; q++) {
+            for (size_t a = 0; a < nA; a++) {
+                for (size_t p = 0; p < nP; p++) {
+                    for (size_t q = 0; q < nQ; q++) {
                         Bp[a * nbas * nbas + q * nbas + p] = *Bbuffer++;
                     }
                 }

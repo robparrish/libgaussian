@@ -8,8 +8,8 @@ using namespace ambit;
 namespace lightspeed {
 
 JK::JK(const std::shared_ptr<SchwarzSieve>& sieve) :
-    sieve_(sieve),
-    primary_(sieve->basis1())
+    primary_(sieve->basis1()),
+    sieve_(sieve)
 {
     if (!sieve_->is_symmetric()) throw std::runtime_error("JK sieve must be symmetric.");
 }

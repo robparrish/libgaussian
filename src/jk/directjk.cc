@@ -86,10 +86,10 @@ void DirectJK::compute_JK_from_D(
 
     const std::vector<std::vector<size_t>>& atoms_to_shells = primary_->atoms_to_shell_inds();
     size_t max_nbf = 0;
-    for (int A = 0; A < natom; A++) {
+    for (size_t A = 0; A < natom; A++) {
         const std::vector<size_t>& Ainds = atoms_to_shells[A];
         size_t this_nbf = 0;
-        for (int P = 0; P < Ainds.size(); P++) {
+        for (size_t P = 0; P < Ainds.size(); P++) {
             this_nbf += primary_->shell(Ainds[P]).nfunction();
         }
         max_nbf = std::max(this_nbf, max_nbf);
@@ -98,14 +98,14 @@ void DirectJK::compute_JK_from_D(
 
     // => Significant Atom Pairs <= //
 
-    std::vector<std::pair<int,int>> atom_pairs;
-    for (int A = 0; A < natom; A++) {
-        for (int B = 0; B <= A; B++) {
+    std::vector<std::pair<size_t,size_t>> atom_pairs;
+    for (size_t A = 0; A < natom; A++) {
+        for (size_t B = 0; B <= A; B++) {
             const std::vector<size_t>& Ainds = atoms_to_shells[A];
             const std::vector<size_t>& Binds = atoms_to_shells[B];
             bool found = false;
-            for (int P = 0; P < Ainds.size(); P++) {
-                for (int Q = 0; Q < Binds.size(); Q++) {
+            for (size_t P = 0; P < Ainds.size(); P++) {
+                for (size_t Q = 0; Q < Binds.size(); Q++) {
                     if (sieve_->shell_estimate_PQPQ(Ainds[P], Binds[Q]) * sieve_->max_PQRS() >= sieve_->cutoff()) {
                         found = true;
                     }
@@ -134,14 +134,14 @@ void DirectJK::compute_JK_from_D(
     double* DSp = DS.data().data();
     for (size_t P = 0; P < nshell; P++) {
         for (size_t Q = 0; Q < nshell; Q++) {
-            int nP = primary_->shell(P).nfunction();
-            int nQ = primary_->shell(Q).nfunction();
-            int oP = primary_->shell(P).function_index();
-            int oQ = primary_->shell(Q).function_index();
+            size_t nP = primary_->shell(P).nfunction();
+            size_t nQ = primary_->shell(Q).nfunction();
+            size_t oP = primary_->shell(P).function_index();
+            size_t oQ = primary_->shell(Q).function_index();
             double val = 0.0;
             for (size_t ind = 0; ind < Ds.size(); ind++) {
-                for (int p = 0; p < nP; p++) {
-                    for (int q = 0; q < nQ; q++) {
+                for (size_t p = 0; p < nP; p++) {
+                    for (size_t q = 0; q < nQ; q++) {
                         val = std::max(val,Dsp[ind][(p + oP) * nbf + (q + oQ)]);
                     }
                 }
@@ -153,7 +153,7 @@ void DirectJK::compute_JK_from_D(
     // => Integrals <= //
 
     std::vector<std::shared_ptr<PotentialInt4C>> ints;
-    for (int t = 0; t < nthread; t++) {
+    for (size_t t = 0; t < nthread; t++) {
         ints.push_back(std::shared_ptr<PotentialInt4C>(new PotentialInt4C(
             primary_,primary_,primary_,primary_,0,a_,b_,w_)));
     }
@@ -162,9 +162,9 @@ void DirectJK::compute_JK_from_D(
 
     size_t ntemp = (JK_symm ? 6 : 10); // 2 J, 4 K, 4 K'
     std::vector<std::vector<double*> > JKT;
-    for (int t = 0; t < nthread; t++) {
+    for (size_t t = 0; t < nthread; t++) {
         JKT.push_back(std::vector<double*>(Ds.size()));
-        for (int ind = 0; ind < Ds.size(); ind++) {
+        for (size_t ind = 0; ind < Ds.size(); ind++) {
             JKT[t][ind] = new double[ntemp * max_nbf2];
         }
     }
@@ -268,20 +268,20 @@ void DirectJK::compute_JK_from_D(
                 (R == S ? 0.5 : 1.0) *
                 (P == R && Q == S ? 0.5 : 1.0);
 
-            int Psize = primary_->shell(P).nfunction();
-            int Qsize = primary_->shell(Q).nfunction();
-            int Rsize = primary_->shell(R).nfunction();
-            int Ssize = primary_->shell(S).nfunction();
+            size_t Psize = primary_->shell(P).nfunction();
+            size_t Qsize = primary_->shell(Q).nfunction();
+            size_t Rsize = primary_->shell(R).nfunction();
+            size_t Ssize = primary_->shell(S).nfunction();
 
-            int Poff = primary_->shell(P).function_index();
-            int Qoff = primary_->shell(Q).function_index();
-            int Roff = primary_->shell(R).function_index();
-            int Soff = primary_->shell(S).function_index();
+            size_t Poff = primary_->shell(P).function_index();
+            size_t Qoff = primary_->shell(Q).function_index();
+            size_t Roff = primary_->shell(R).function_index();
+            size_t Soff = primary_->shell(S).function_index();
 
-            int Poff2 = Poff - P2start;
-            int Qoff2 = Qoff - Q2start;
-            int Soff2 = Soff - S2start;
-            int Roff2 = Roff - R2start;
+            size_t Poff2 = Poff - P2start;
+            size_t Qoff2 = Qoff - Q2start;
+            size_t Soff2 = Soff - S2start;
+            size_t Roff2 = Roff - R2start;
 
             for (size_t ind = 0; ind < Ds.size(); ind++) {
                 const double* Dp = Dsp[ind];
@@ -317,10 +317,10 @@ void DirectJK::compute_JK_from_D(
                     K7p = &JKTp[8L * max_nbf2];
                     K8p = &JKTp[9L * max_nbf2];
                 }
-                for (int p = 0; p < Psize; p++) {
-                for (int q = 0; q < Qsize; q++) {
-                for (int r = 0; r < Rsize; r++) {
-                for (int s = 0; s < Ssize; s++) {
+                for (size_t p = 0; p < Psize; p++) {
+                for (size_t q = 0; q < Qsize; q++) {
+                for (size_t r = 0; r < Rsize; r++) {
+                for (size_t s = 0; s < Ssize; s++) {
                     J1p[(p + Poff2) * dQsize + (q + Qoff2)] += prefactor * (Dp[(r + Roff) * nbf + (s + Soff)] + Dp[(s + Soff) * nbf + (r + Roff)]) * (*buffer2);
                     J2p[(r + Roff2) * dSsize + (s + Soff2)] += prefactor * (Dp[(p + Poff) * nbf + (q + Qoff)] + Dp[(q + Qoff) * nbf + (p + Poff)]) * (*buffer2);
                     K1p[(p + Poff2) * dRsize + (r + Roff2)] += prefactor * Dp[(q + Qoff) * nbf + (s + Soff)] * (*buffer2);
@@ -343,7 +343,7 @@ void DirectJK::compute_JK_from_D(
 
         // => Stripe out <= //
 
-        for (int ind = 0; ind < Ds.size(); ind++) {
+        for (size_t ind = 0; ind < Ds.size(); ind++) {
             double* JKTp = JKT[t][ind];
             double* Jp = Jsp[ind];
             double* Kp = Ksp[ind];
@@ -369,18 +369,18 @@ void DirectJK::compute_JK_from_D(
 
                 // > J_PQ < //
 
-                for (int P2 = 0; P2 < nPtask; P2++) {
-                for (int Q2 = 0; Q2 < nQtask; Q2++) {
-                    int P = Pinds[P2];
-                    int Q = Qinds[Q2];
-                    int Psize = primary_->shell(P).nfunction();
-                    int Qsize = primary_->shell(Q).nfunction();
-                    int Poff =  primary_->shell(P).function_index();
-                    int Qoff =  primary_->shell(Q).function_index();
-                    int Poff2 = Poff - P2start;
-                    int Qoff2 = Qoff - Q2start;
-                    for (int p = 0; p < Psize; p++) {
-                    for (int q = 0; q < Qsize; q++) {
+                for (size_t P2 = 0; P2 < nPtask; P2++) {
+                for (size_t Q2 = 0; Q2 < nQtask; Q2++) {
+                    size_t P = Pinds[P2];
+                    size_t Q = Qinds[Q2];
+                    size_t Psize = primary_->shell(P).nfunction();
+                    size_t Qsize = primary_->shell(Q).nfunction();
+                    size_t Poff =  primary_->shell(P).function_index();
+                    size_t Qoff =  primary_->shell(Q).function_index();
+                    size_t Poff2 = Poff - P2start;
+                    size_t Qoff2 = Qoff - Q2start;
+                    for (size_t p = 0; p < Psize; p++) {
+                    for (size_t q = 0; q < Qsize; q++) {
                         #pragma omp atomic
                         Jp[(p + Poff) * nbf + q + Qoff] += J1p[(p + Poff2) * dQsize + q + Qoff2];
                     }}
@@ -388,18 +388,18 @@ void DirectJK::compute_JK_from_D(
 
                 // > J_RS < //
 
-                for (int R2 = 0; R2 < nRtask; R2++) {
-                for (int S2 = 0; S2 < nStask; S2++) {
-                    int R = Rinds[R2];
-                    int S = Sinds[S2];
-                    int Rsize = primary_->shell(R).nfunction();
-                    int Ssize = primary_->shell(S).nfunction();
-                    int Roff =  primary_->shell(R).function_index();
-                    int Soff =  primary_->shell(S).function_index();
-                    int Roff2 = Roff - R2start;
-                    int Soff2 = Soff - S2start;
-                    for (int r = 0; r < Rsize; r++) {
-                    for (int s = 0; s < Ssize; s++) {
+                for (size_t R2 = 0; R2 < nRtask; R2++) {
+                for (size_t S2 = 0; S2 < nStask; S2++) {
+                    size_t R = Rinds[R2];
+                    size_t S = Sinds[S2];
+                    size_t Rsize = primary_->shell(R).nfunction();
+                    size_t Ssize = primary_->shell(S).nfunction();
+                    size_t Roff =  primary_->shell(R).function_index();
+                    size_t Soff =  primary_->shell(S).function_index();
+                    size_t Roff2 = Roff - R2start;
+                    size_t Soff2 = Soff - S2start;
+                    for (size_t r = 0; r < Rsize; r++) {
+                    for (size_t s = 0; s < Ssize; s++) {
                         #pragma omp atomic
                         Jp[(r + Roff) * nbf + s + Soff] += J2p[(r + Roff2) * dSsize + s + Soff2];
                     }}
@@ -411,18 +411,18 @@ void DirectJK::compute_JK_from_D(
 
                 // > K_PR < //
 
-                for (int P2 = 0; P2 < nPtask; P2++) {
-                for (int R2 = 0; R2 < nRtask; R2++) {
-                    int P = Pinds[P2];
-                    int R = Rinds[R2];
-                    int Psize = primary_->shell(P).nfunction();
-                    int Rsize = primary_->shell(R).nfunction();
-                    int Poff =  primary_->shell(P).function_index();
-                    int Roff =  primary_->shell(R).function_index();
-                    int Poff2 = Poff - P2start;
-                    int Roff2 = Roff - R2start;
-                    for (int p = 0; p < Psize; p++) {
-                    for (int r = 0; r < Rsize; r++) {
+                for (size_t P2 = 0; P2 < nPtask; P2++) {
+                for (size_t R2 = 0; R2 < nRtask; R2++) {
+                    size_t P = Pinds[P2];
+                    size_t R = Rinds[R2];
+                    size_t Psize = primary_->shell(P).nfunction();
+                    size_t Rsize = primary_->shell(R).nfunction();
+                    size_t Poff =  primary_->shell(P).function_index();
+                    size_t Roff =  primary_->shell(R).function_index();
+                    size_t Poff2 = Poff - P2start;
+                    size_t Roff2 = Roff - R2start;
+                    for (size_t p = 0; p < Psize; p++) {
+                    for (size_t r = 0; r < Rsize; r++) {
                         #pragma omp atomic
                         Kp[(p + Poff) * nbf + r + Roff] += K1p[(p + Poff2) * dRsize + r + Roff2];
                         if (!JK_symm) {
@@ -434,18 +434,18 @@ void DirectJK::compute_JK_from_D(
 
                 // > K_PS < //
 
-                for (int P2 = 0; P2 < nPtask; P2++) {
-                for (int S2 = 0; S2 < nStask; S2++) {
-                    int P = Pinds[P2];
-                    int S = Sinds[S2];
-                    int Psize = primary_->shell(P).nfunction();
-                    int Ssize = primary_->shell(S).nfunction();
-                    int Poff =  primary_->shell(P).function_index();
-                    int Soff =  primary_->shell(S).function_index();
-                    int Poff2 = Poff - P2start;
-                    int Soff2 = Soff - S2start;
-                    for (int p = 0; p < Psize; p++) {
-                    for (int s = 0; s < Ssize; s++) {
+                for (size_t P2 = 0; P2 < nPtask; P2++) {
+                for (size_t S2 = 0; S2 < nStask; S2++) {
+                    size_t P = Pinds[P2];
+                    size_t S = Sinds[S2];
+                    size_t Psize = primary_->shell(P).nfunction();
+                    size_t Ssize = primary_->shell(S).nfunction();
+                    size_t Poff =  primary_->shell(P).function_index();
+                    size_t Soff =  primary_->shell(S).function_index();
+                    size_t Poff2 = Poff - P2start;
+                    size_t Soff2 = Soff - S2start;
+                    for (size_t p = 0; p < Psize; p++) {
+                    for (size_t s = 0; s < Ssize; s++) {
                         #pragma omp atomic
                         Kp[(p + Poff) * nbf + s + Soff] += K2p[(p + Poff2) * dSsize + s + Soff2];
                         if (!JK_symm) {
@@ -457,18 +457,18 @@ void DirectJK::compute_JK_from_D(
 
                 // > K_QR < //
 
-                for (int Q2 = 0; Q2 < nQtask; Q2++) {
-                for (int R2 = 0; R2 < nRtask; R2++) {
-                    int Q = Qinds[Q2];
-                    int R = Rinds[R2];
-                    int Qsize = primary_->shell(Q).nfunction();
-                    int Rsize = primary_->shell(R).nfunction();
-                    int Qoff =  primary_->shell(Q).function_index();
-                    int Roff =  primary_->shell(R).function_index();
-                    int Qoff2 = Qoff - Q2start;
-                    int Roff2 = Roff - R2start;
-                    for (int q = 0; q < Qsize; q++) {
-                    for (int r = 0; r < Rsize; r++) {
+                for (size_t Q2 = 0; Q2 < nQtask; Q2++) {
+                for (size_t R2 = 0; R2 < nRtask; R2++) {
+                    size_t Q = Qinds[Q2];
+                    size_t R = Rinds[R2];
+                    size_t Qsize = primary_->shell(Q).nfunction();
+                    size_t Rsize = primary_->shell(R).nfunction();
+                    size_t Qoff =  primary_->shell(Q).function_index();
+                    size_t Roff =  primary_->shell(R).function_index();
+                    size_t Qoff2 = Qoff - Q2start;
+                    size_t Roff2 = Roff - R2start;
+                    for (size_t q = 0; q < Qsize; q++) {
+                    for (size_t r = 0; r < Rsize; r++) {
                         #pragma omp atomic
                         Kp[(q + Qoff) * nbf + r + Roff] += K3p[(q + Qoff2) * dRsize + r + Roff2];
                         if (!JK_symm) {
@@ -480,18 +480,18 @@ void DirectJK::compute_JK_from_D(
 
                 // > K_QS < //
 
-                for (int Q2 = 0; Q2 < nQtask; Q2++) {
-                for (int S2 = 0; S2 < nStask; S2++) {
-                    int Q = Qinds[Q2];
-                    int S = Sinds[S2];
-                    int Qsize = primary_->shell(Q).nfunction();
-                    int Ssize = primary_->shell(S).nfunction();
-                    int Qoff =  primary_->shell(Q).function_index();
-                    int Soff =  primary_->shell(S).function_index();
-                    int Qoff2 = Qoff - Q2start;
-                    int Soff2 = Soff - S2start;
-                    for (int q = 0; q < Qsize; q++) {
-                    for (int s = 0; s < Ssize; s++) {
+                for (size_t Q2 = 0; Q2 < nQtask; Q2++) {
+                for (size_t S2 = 0; S2 < nStask; S2++) {
+                    size_t Q = Qinds[Q2];
+                    size_t S = Sinds[S2];
+                    size_t Qsize = primary_->shell(Q).nfunction();
+                    size_t Ssize = primary_->shell(S).nfunction();
+                    size_t Qoff =  primary_->shell(Q).function_index();
+                    size_t Soff =  primary_->shell(S).function_index();
+                    size_t Qoff2 = Qoff - Q2start;
+                    size_t Soff2 = Soff - S2start;
+                    for (size_t q = 0; q < Qsize; q++) {
+                    for (size_t s = 0; s < Ssize; s++) {
                         #pragma omp atomic
                         Kp[(q + Qoff) * nbf + s + Soff] += K4p[(q + Qoff2) * dSsize + s + Soff2];
                         if (!JK_symm) {
@@ -508,8 +508,8 @@ void DirectJK::compute_JK_from_D(
 
     // => Free Buffers <= //
 
-    for (int t = 0; t < nthread; t++) {
-        for (int ind = 0; ind < Ds.size(); ind++) {
+    for (size_t t = 0; t < nthread; t++) {
+        for (size_t ind = 0; ind < Ds.size(); ind++) {
             delete[] JKT[t][ind];
         }
     }
@@ -519,8 +519,8 @@ void DirectJK::compute_JK_from_D(
     if (do_J) {
         for (size_t ind = 0; ind < Ds.size(); ind++) {
             double* J2p = Jsp[ind];
-            for (int p = 0; p < nbf; p++) {
-                for (int q = 0; q <= p; q++) {
+            for (size_t p = 0; p < nbf; p++) {
+                for (size_t q = 0; q <= p; q++) {
                     J2p[p*nbf+q] = J2p[q*nbf+p] =
                     J2p[p*nbf+q] + J2p[q*nbf+p];
                 }
@@ -532,8 +532,8 @@ void DirectJK::compute_JK_from_D(
     if (do_K && JK_symm) {
         for (size_t ind = 0; ind < Ds.size(); ind++) {
             double* K2p = Ksp[ind];
-            for (int p = 0; p < nbf; p++) {
-                for (int q = 0; q <= p; q++) {
+            for (size_t p = 0; p < nbf; p++) {
+                for (size_t q = 0; q <= p; q++) {
                     K2p[p*nbf+q] = K2p[q*nbf+p] =
                     K2p[p*nbf+q] + K2p[q*nbf+p];
                 }

@@ -347,10 +347,10 @@ void PotentialInt4C::compute_quartet(
     const std::vector<double>&c4s = s4->cs();
 
     // Old version - without ShellPair - STILL USED BY RI CODES
-    for (int p1 = 0; p1 < nprim1; ++p1) {
+    for (size_t p1 = 0; p1 < nprim1; ++p1) {
         double a1 = a1s[p1];
         double c1 = c1s[p1];
-        for (int p2 = 0; p2 < nprim2; ++p2) {
+        for (size_t p2 = 0; p2 < nprim2; ++p2) {
             double a2 = a2s[p2];
             double c2 = c2s[p2];
             double zeta = a1 + a2;
@@ -372,10 +372,10 @@ void PotentialInt4C::compute_quartet(
 
             double Sab = pow(M_PI * ooz, 3.0 / 2.0) * exp(-a1 * a2 * ooz * AB2) * c1 * c2;
 
-            for (int p3 = 0; p3 < nprim3; ++p3) {
+            for (size_t p3 = 0; p3 < nprim3; ++p3) {
                 double a3 = a3s[p3];
                 double c3 = c3s[p3];
-                for (int p4 = 0; p4 < nprim4; ++p4) {
+                for (size_t p4 = 0; p4 < nprim4; ++p4) {
                     double a4 = a4s[p4];
                     double c4 = c4s[p4];
                     double nu = a3 + a4;
