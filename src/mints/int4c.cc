@@ -4,6 +4,177 @@
 
 namespace lightspeed {
 
+namespace {
+
+void permute_1234_to_1243(double *s, double *t, size_t nbf1, size_t nbf2, size_t nbf3, size_t nbf4)
+{
+    size_t f1 = nbf1;
+    size_t f2 = nbf2;
+    size_t f3 = nbf4;
+    size_t f4 = nbf3;
+    for (size_t bf1 = 0; bf1 < f1; bf1++) {
+        for (size_t bf2 = 0; bf2 < f2; bf2++) {
+            for (size_t bf4 = 0; bf4 < f4; bf4++) {
+                for (size_t bf3 = 0; bf3 < f3; bf3++) {
+                    double *t_ptr = t + ((bf1 * f2 + bf2) * f3 + bf3) * f4 + bf4;
+                    *(t_ptr) = *(s++);
+                }
+            }
+        }
+    }
+}
+
+void permute_1234_to_2134(double *s, double *t, size_t nbf1, size_t nbf2, size_t nbf3, size_t nbf4)
+{
+    size_t f1 = nbf2;
+    size_t f2 = nbf1;
+    size_t f3 = nbf3;
+    size_t f4 = nbf4;
+    for (size_t bf2 = 0; bf2 < f2; bf2++) {
+        for (size_t bf1 = 0; bf1 < f1; bf1++) {
+            for (size_t bf3 = 0; bf3 < f3; bf3++) {
+                for (size_t bf4 = 0; bf4 < f4; bf4++) {
+                    double *t_ptr = t + ((bf1 * f2 + bf2) * f3 + bf3) * f4 + bf4;
+                    *(t_ptr) = *(s++);
+                }
+            }
+        }
+    }
+}
+
+void permute_1234_to_2143(double *s, double *t, size_t nbf1, size_t nbf2, size_t nbf3, size_t nbf4)
+{
+    size_t f1 = nbf2;
+    size_t f2 = nbf1;
+    size_t f3 = nbf4;
+    size_t f4 = nbf3;
+    for (size_t bf2 = 0; bf2 < f2; bf2++) {
+        for (size_t bf1 = 0; bf1 < f1; bf1++) {
+            for (size_t bf4 = 0; bf4 < f4; bf4++) {
+                for (size_t bf3 = 0; bf3 < f3; bf3++) {
+                    double *t_ptr = t + ((bf1 * f2 + bf2) * f3 + bf3) * f4 + bf4;
+                    *(t_ptr) = *(s++);
+                }
+            }
+        }
+    }
+}
+
+void permute_1234_to_3412(double *s, double *t, size_t nbf1, size_t nbf2, size_t nbf3, size_t nbf4)
+{
+    size_t f1 = nbf3;
+    size_t f2 = nbf4;
+    size_t f3 = nbf1;
+    size_t f4 = nbf2;
+    for (size_t bf3 = 0; bf3 < f3; bf3++) {
+        for (size_t bf4 = 0; bf4 < f4; bf4++) {
+            for (size_t bf1 = 0; bf1 < f1; bf1++) {
+                for (size_t bf2 = 0; bf2 < f2; bf2++) {
+                    double *t_ptr = t + ((bf1 * f2 + bf2) * f3 + bf3) * f4 + bf4;
+                    *(t_ptr) = *(s++);
+                }
+            }
+        }
+    }
+}
+
+void permute_1234_to_4312(double *s, double *t, size_t nbf1, size_t nbf2, size_t nbf3, size_t nbf4)
+{
+    size_t f1 = nbf4;
+    size_t f2 = nbf3;
+    size_t f3 = nbf1;
+    size_t f4 = nbf2;
+    for (size_t bf3 = 0; bf3 < f3; bf3++) {
+        for (size_t bf4 = 0; bf4 < f4; bf4++) {
+            for (size_t bf2 = 0; bf2 < f2; bf2++) {
+                for (size_t bf1 = 0; bf1 < f1; bf1++) {
+                    double *t_ptr = t + ((bf1 * f2 + bf2) * f3 + bf3) * f4 + bf4;
+                    *(t_ptr) = *(s++);
+                }
+            }
+        }
+    }
+}
+
+void permute_1234_to_3421(double *s, double *t, size_t nbf1, size_t nbf2, size_t nbf3, size_t nbf4)
+{
+    size_t f1 = nbf3;
+    size_t f2 = nbf4;
+    size_t f3 = nbf2;
+    size_t f4 = nbf1;
+    for (size_t bf4 = 0; bf4 < f4; bf4++) {
+        for (size_t bf3 = 0; bf3 < f3; bf3++) {
+            for (size_t bf1 = 0; bf1 < f1; bf1++) {
+                for (size_t bf2 = 0; bf2 < f2; bf2++) {
+                    double *t_ptr = t + ((bf1 * f2 + bf2) * f3 + bf3) * f4 + bf4;
+                    *(t_ptr) = *(s++);
+                }
+            }
+        }
+    }
+}
+
+void permute_1234_to_4321(double *s, double *t, size_t nbf1, size_t nbf2, size_t nbf3, size_t nbf4)
+{
+    size_t f1 = nbf4;
+    size_t f2 = nbf3;
+    size_t f3 = nbf2;
+    size_t f4 = nbf1;
+    for (size_t bf4 = 0; bf4 < f4; bf4++) {
+        for (size_t bf3 = 0; bf3 < f3; bf3++) {
+            for (size_t bf2 = 0; bf2 < f2; bf2++) {
+                for (size_t bf1 = 0; bf1 < f1; bf1++) {
+                    double *t_ptr = t + ((bf1 * f2 + bf2) * f3 + bf3) * f4 + bf4;
+                    *(t_ptr) = *(s++);
+                }
+            }
+        }
+    }
+}
+
+} // namespace anonymous
+
+void permute_target(double *s, double *t,
+                    const SGaussianShell *s1,
+                    const SGaussianShell *s2,
+                    const SGaussianShell *s3,
+                    const SGaussianShell *s4,
+                    bool p12, bool p34, bool p13p24)
+{
+    size_t nbf1, nbf2, nbf3, nbf4;
+
+    nbf1 = s1->nfunction();
+    nbf2 = s2->nfunction();
+    nbf3 = s3->nfunction();
+    nbf4 = s4->nfunction();
+
+    if (!p13p24) {
+        if (p12) {
+            if (p34) {
+                permute_1234_to_2143(s, t, nbf1, nbf2, nbf3, nbf4);
+            } else {
+                permute_1234_to_2134(s, t, nbf1, nbf2, nbf3, nbf4);
+            }
+        } else {
+            permute_1234_to_1243(s, t, nbf1, nbf2, nbf3, nbf4);
+        }
+    } else {
+        if (p12) {
+            if (p34) {
+                permute_1234_to_4321(s, t, nbf1, nbf2, nbf3, nbf4);
+            } else {
+                permute_1234_to_4312(s, t, nbf1, nbf2, nbf3, nbf4);
+            }
+        } else {
+            if (p34) {
+                permute_1234_to_3421(s, t, nbf1, nbf2, nbf3, nbf4);
+            } else {
+                permute_1234_to_3412(s, t, nbf1, nbf2, nbf3, nbf4);
+            }
+        }
+    }
+}
+
 Int4C::Int4C(
     const std::shared_ptr<SBasisSet>& basis1,
     const std::shared_ptr<SBasisSet>& basis2,

@@ -7,6 +7,13 @@
 
 namespace lightspeed {
 
+void permute_target(double *s, double *t,
+                   const SGaussianShell *s1,
+                   const SGaussianShell *s2,
+                   const SGaussianShell *s3,
+                   const SGaussianShell *s4,
+                   bool p12, bool p34, bool p13p24);
+
 /**!
  * Class Int4C provides a common interface for the low-level computation of
  * four-center Gaussian integrals, including ERIs. Integral derivatives are
@@ -250,6 +257,10 @@ protected:
     Impl* impl_;
 
 };
+
+/**!
+ * Class
+ */
 
 } // namespace lightspeed
 
