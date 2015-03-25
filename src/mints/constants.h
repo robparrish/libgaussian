@@ -7,11 +7,14 @@ namespace lightspeed {
 
 namespace constants {
 
-extern const int max_df__;
+constexpr int max_df__ = 300;
 extern const double df__[];
 
-extern const int max_fac__;
+constexpr int max_fac__ = 50;
 extern const double fac__[];
+
+constexpr int max_bc__ = 20;
+extern const double bc__[max_bc__][max_bc__];
 
 constexpr size_t ncartesian(size_t am)
 {

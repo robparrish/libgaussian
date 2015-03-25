@@ -15,7 +15,7 @@ struct PotentialInt4C::Impl
          const std::shared_ptr<SBasisSet> &basis2,
          const std::shared_ptr<SBasisSet> &basis3,
          const std::shared_ptr<SBasisSet> &basis4) :
-            fjt_(new FJT(basis1->max_am()+ basis2->max_am()+ basis3->max_am()+ basis4->max_am())),
+            fjt_(new fundamentals::FJT(basis1->max_am()+ basis2->max_am()+ basis3->max_am()+ basis4->max_am())),
             libint_(basis1->max_nprimitive()*basis2->max_nprimitive()*basis3->max_nprimitive()*basis4->max_nprimitive())
     {
         libint2_static_init();
@@ -34,7 +34,7 @@ struct PotentialInt4C::Impl
         libint2_cleanup_eri(&libint_[0]);
         libint2_static_cleanup();
     }
-    std::unique_ptr<Fjt> fjt_;
+    std::unique_ptr<fundamentals::base::Fjt> fjt_;
     std::vector<Libint_t> libint_;
 };
 
@@ -175,7 +175,8 @@ void PotentialInt4C::compute_quartet(
     const std::vector<double>&c3s = s3->cs();
     const std::vector<double>&c4s = s4->cs();
 
-    // Old version - without ShellPair - STILL USED BY RI CODES
+    const std::vector<double>& F = impl_->fjt_->values();
+
     for (size_t p1 = 0; p1 < nprim1; ++p1) {
         double a1 = a1s[p1];
         double c1 = c1s[p1];
@@ -277,7 +278,7 @@ void PotentialInt4C::compute_quartet(
 
                     double T = rho * PQ2;
                     impl_->fjt_->set_rho(rho);
-                    double * F = impl_->fjt_->values(am, T);
+                    impl_->fjt_->compute(am, T);
 
                     // Modify F to include overlap of ab and cd, eqs 14, 15, 16 of libint manual
                     double Scd = pow(M_PI * oon, 3.0 / 2.0) * exp(-a3 * a4 * oon * CD2) * c3 * c4;
