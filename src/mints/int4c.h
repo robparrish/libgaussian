@@ -4,8 +4,14 @@
 #include <cstddef>
 #include <memory>
 #include <core/basisset.h>
+#include "fjt.h"
 
 namespace lightspeed {
+
+// => Forward declarations <=
+namespace fundamentals { namespace base {
+class Fjt;
+}}
 
 void permute_target(double *s, double *t,
                    const SGaussianShell *s1,
@@ -13,6 +19,8 @@ void permute_target(double *s, double *t,
                    const SGaussianShell *s3,
                    const SGaussianShell *s4,
                    bool p12, bool p34, bool p13p24);
+
+namespace base {
 
 /**!
  * Class Int4C provides a common interface for the low-level computation of
@@ -45,7 +53,8 @@ void permute_target(double *s, double *t,
  *
  * - Rob Parrish, 17 February, 2015
  **/
-class Int4C {
+class Int4C
+{
 
 public:
 
@@ -55,89 +64,119 @@ public:
      * Verbatim constructor, copies fields below
      **/
     Int4C(
-        const std::shared_ptr<SBasisSet>& basis1,
-        const std::shared_ptr<SBasisSet>& basis2,
-        const std::shared_ptr<SBasisSet>& basis3,
-        const std::shared_ptr<SBasisSet>& basis4,
-        int deriv = 0);
+            const std::shared_ptr<SBasisSet> &basis1,
+            const std::shared_ptr<SBasisSet> &basis2,
+            const std::shared_ptr<SBasisSet> &basis3,
+            const std::shared_ptr<SBasisSet> &basis4,
+            int deriv = 0);
 
-    //Int4C();
-
-    /// Virtual destructor
-    virtual ~Int4C();
+    virtual ~Int4C() = default;
 
     // => Accessors <= //
 
     /// Basis set for center 1
-    const std::shared_ptr<SBasisSet>& basis1() const { return basis1_; }
+    const std::shared_ptr<SBasisSet> &basis1() const
+    {
+        return basis1_;
+    }
     /// Basis set for center 2
-    const std::shared_ptr<SBasisSet>& basis2() const { return basis2_; }
+    const std::shared_ptr<SBasisSet> &basis2() const
+    {
+        return basis2_;
+    }
     /// Basis set for center 3
-    const std::shared_ptr<SBasisSet>& basis3() const { return basis3_; }
+    const std::shared_ptr<SBasisSet> &basis3() const
+    {
+        return basis3_;
+    }
     /// Basis set for center 4
-    const std::shared_ptr<SBasisSet>& basis4() const { return basis4_; }
+    const std::shared_ptr<SBasisSet> &basis4() const
+    {
+        return basis4_;
+    }
     /// Maximum derivative level enabled
-    int deriv() const { return deriv_; }
+    int deriv() const
+    {
+        return deriv_;
+    }
 
     /// Buffer of output integrals or integral derivatives
-    const std::vector<double>& data() const { return data1_; }
+    const std::vector<double> &data() const
+    {
+        return data1_;
+    }
     /// Buffer of output integrals or integral derivatives (you do not own this)
-    double* buffer() const { return buffer1_; }
+    double *buffer() const
+    {
+        return buffer1_;
+    }
 
     /// Should this object apply spherical transformations if present in the basis sets (defaults to true)
-    bool is_spherical() const { return is_spherical_; }
+    bool is_spherical() const
+    {
+        return is_spherical_;
+    }
 
 
     /// Single maximum angular momentum present across the basis sets
     int max_am() const;
+
     /// Total maximum angular momentum across the basis sets
     int total_am() const;
+
     /// Return the chunk size (max_ncart1 x max_ncart2 x max_ncart3 x max_ncart4)
     size_t chunk_size() const;
 
     // => Setters <= //
 
-    void set_is_spherical(bool is_spherical) { is_spherical_ = is_spherical; }
+    void set_is_spherical(bool is_spherical)
+    {
+        is_spherical_ = is_spherical;
+    }
 
     // => Low-Level Computers <= //
 
     /// Compute the integrals (throws if not implemented)
     void compute_shell(
-        size_t shell1,
-        size_t shell2,
-        size_t shell3,
-        size_t shell4);
+            size_t shell1,
+            size_t shell2,
+            size_t shell3,
+            size_t shell4);
+
     /// Compute the integral derivatives (throws if not implemented)
     void compute_shell1(
-        size_t shell1,
-        size_t shell2,
-        size_t shell3,
-        size_t shell4);
+            size_t shell1,
+            size_t shell2,
+            size_t shell3,
+            size_t shell4);
+
     /// Compute the integral second derivatives (throws if not implemented)
     void compute_shell2(
-        size_t shell1,
-        size_t shell2,
-        size_t shell3,
-        size_t shell4);
+            size_t shell1,
+            size_t shell2,
+            size_t shell3,
+            size_t shell4);
 
     /// Compute the integrals (throws if not implemented)
     virtual void compute_quartet(
-        const SGaussianShell& sh1,
-        const SGaussianShell& sh2,
-        const SGaussianShell& sh3,
-        const SGaussianShell& sh4);
+            const SGaussianShell &sh1,
+            const SGaussianShell &sh2,
+            const SGaussianShell &sh3,
+            const SGaussianShell &sh4);
+
     /// Compute the first derivatives (throws if not implemented)
     virtual void compute_quartet1(
-        const SGaussianShell& sh1,
-        const SGaussianShell& sh2,
-        const SGaussianShell& sh3,
-        const SGaussianShell& sh4);
+            const SGaussianShell &sh1,
+            const SGaussianShell &sh2,
+            const SGaussianShell &sh3,
+            const SGaussianShell &sh4);
+
     /// Compute the  second derivatives (throws if not implemented)
     virtual void compute_quartet2(
-        const SGaussianShell& sh1,
-        const SGaussianShell& sh2,
-        const SGaussianShell& sh3,
-        const SGaussianShell& sh4);
+            const SGaussianShell &sh1,
+            const SGaussianShell &sh2,
+            const SGaussianShell &sh3,
+            const SGaussianShell &sh4);
 
 protected:
 
@@ -149,8 +188,8 @@ protected:
 
     std::vector<double> data1_;
     std::vector<double> data2_;
-    double* buffer1_;
-    double* buffer2_;
+    double *buffer1_;
+    double *buffer2_;
 
     bool is_spherical_;
     /// Internal CO->SO transformation information
@@ -178,17 +217,118 @@ protected:
      * @result target is updated with the transformed integrals
      **/
     void apply_spherical(
-        int L1,
-        int L2,
-        int L3,
-        int L4,
-        bool S1,
-        bool S2,
-        bool S3,
-        bool S4,
-        double* target,
-        double* scratch);
+            int L1,
+            int L2,
+            int L3,
+            int L4,
+            bool S1,
+            bool S2,
+            bool S3,
+            bool S4,
+            double *target,
+            double *scratch);
 
+};
+
+}
+
+/**!
+ * Class Int4C computes two-electron integrals uses the provided fundamental.
+ */
+class GeneralInt4C : public base::Int4C
+{
+public:
+
+    GeneralInt4C(const std::shared_ptr<SBasisSet>& basis1,
+          const std::shared_ptr<SBasisSet>& basis2,
+          const std::shared_ptr<SBasisSet>& basis3,
+          const std::shared_ptr<SBasisSet>& basis4,
+          const std::shared_ptr<fundamentals::base::Fjt>& fundamental,
+          int deriv=0);
+
+    virtual ~GeneralInt4C();
+
+    void compute_quartet(
+            const SGaussianShell& sh1,
+            const SGaussianShell& sh2,
+            const SGaussianShell& sh3,
+            const SGaussianShell& sh4) override;
+    void compute_quartet1(
+            const SGaussianShell& sh1,
+            const SGaussianShell& sh2,
+            const SGaussianShell& sh3,
+            const SGaussianShell& sh4) override;
+    void compute_quartet2(
+            const SGaussianShell& sh1,
+            const SGaussianShell& sh2,
+            const SGaussianShell& sh3,
+            const SGaussianShell& sh4) override;
+
+protected:
+
+    struct Impl;
+    Impl* impl_;
+
+};
+
+class F12Int4C final : public GeneralInt4C
+{
+public:
+    F12Int4C(
+            const std::shared_ptr<SBasisSet> &basis1,
+            const std::shared_ptr<SBasisSet> &basis2,
+            const std::shared_ptr<SBasisSet> &basis3,
+            const std::shared_ptr<SBasisSet> &basis4,
+            const fundamentals::parameters::CorrelationFactor &cf,
+            int deriv = 0);
+};
+
+class F12ScaledInt4C final : public GeneralInt4C
+{
+public:
+    F12ScaledInt4C(
+            const std::shared_ptr<SBasisSet> &basis1,
+            const std::shared_ptr<SBasisSet> &basis2,
+            const std::shared_ptr<SBasisSet> &basis3,
+            const std::shared_ptr<SBasisSet> &basis4,
+            const fundamentals::parameters::CorrelationFactor &cf,
+            int deriv = 0);
+};
+
+class F12SquaredInt4C final : public GeneralInt4C
+{
+public:
+    F12SquaredInt4C(
+            const std::shared_ptr<SBasisSet> &basis1,
+            const std::shared_ptr<SBasisSet> &basis2,
+            const std::shared_ptr<SBasisSet> &basis3,
+            const std::shared_ptr<SBasisSet> &basis4,
+            const fundamentals::parameters::CorrelationFactor &cf,
+            int deriv = 0);
+};
+
+class F12G12Int4C final : public GeneralInt4C
+{
+public:
+    F12G12Int4C(
+            const std::shared_ptr<SBasisSet> &basis1,
+            const std::shared_ptr<SBasisSet> &basis2,
+            const std::shared_ptr<SBasisSet> &basis3,
+            const std::shared_ptr<SBasisSet> &basis4,
+            const fundamentals::parameters::CorrelationFactor &cf,
+            int deriv = 0);
+};
+
+class F12DoubleCommutatorInt4C final : public GeneralInt4C
+{
+public:
+    F12DoubleCommutatorInt4C(
+            const std::shared_ptr<SBasisSet> &basis1,
+            const std::shared_ptr<SBasisSet> &basis2,
+            const std::shared_ptr<SBasisSet> &basis3,
+            const std::shared_ptr<SBasisSet> &basis4,
+            const fundamentals::parameters::CorrelationFactor &cf,
+            int deriv = 0);
 };
 
 /**!
@@ -210,7 +350,7 @@ protected:
  * LRC-type objects are used in an identical manner as standard types.
  * The default behavior is the usual o(r_12) = 1 / r_12
  **/
-class PotentialInt4C final : public Int4C {
+class PotentialInt4C final : public base::Int4C {
 
 public:
     PotentialInt4C(
@@ -222,8 +362,6 @@ public:
         double a = 1.0,
         double b = 0.0,
         double w = 0.0);
-
-    //PotentialInt4C() {}
 
     virtual ~PotentialInt4C();
 

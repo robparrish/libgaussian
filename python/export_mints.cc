@@ -13,6 +13,15 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(schwarz_print_overloads, SchwarzSieve::pr
 
 void export_mints()
 {
+    class_<fundamentals::parameters::CorrelationFactor>("CorrelationFactor")
+        .def(init<const std::vector<double>&, const std::vector<double>&>())
+        .def("slater_exponent", &fundamentals::parameters::CorrelationFactor::slater_exponent)
+        .def("set_params", &fundamentals::parameters::CorrelationFactor::set_params)
+        .def("exponent", &fundamentals::parameters::CorrelationFactor::exponent, return_value_policy<reference_existing_object>())
+        .def("coeff", &fundamentals::parameters::CorrelationFactor::coeff, return_value_policy<reference_existing_object>());
+
+    class_<fundamentals::parameters::FittedSlaterCorrelationFactor, bases<fundamentals::parameters::CorrelationFactor>>("FittedSlaterCorrelationFactor", init<const double&>());
+
     class_<Int2C, std::shared_ptr<Int2C>>("Int2C", init<
         const std::shared_ptr<SBasisSet>&,
         const std::shared_ptr<SBasisSet>&,
@@ -90,10 +99,10 @@ void export_mints()
         .def("ys", &PotentialInt2C::ys, return_value_policy<reference_existing_object>())
         .def("zs", &PotentialInt2C::zs, return_value_policy<reference_existing_object>())
         .def("Zs", &PotentialInt2C::Zs, return_value_policy<reference_existing_object>())
-        .def("set_nuclear_potential", &PotentialInt2C::set_nuclear_potential,potential2c_nuc_overloads()) 
+        .def("set_nuclear_potential", &PotentialInt2C::set_nuclear_potential,potential2c_nuc_overloads())
         ;
 
-    class_<Int4C, std::shared_ptr<Int4C>>("Int4C", init<
+    class_<base::Int4C, std::shared_ptr<base::Int4C>>("Int4C", init<
         const std::shared_ptr<SBasisSet>&,
         const std::shared_ptr<SBasisSet>&,
         const std::shared_ptr<SBasisSet>&,
@@ -101,26 +110,63 @@ void export_mints()
         optional<
         int
         >>())
-        .def("basis1", &Int4C::basis1, return_value_policy<reference_existing_object>())
-        .def("basis2", &Int4C::basis2, return_value_policy<reference_existing_object>())
-        .def("basis3", &Int4C::basis3, return_value_policy<reference_existing_object>())
-        .def("basis4", &Int4C::basis4, return_value_policy<reference_existing_object>())
-        .def("deriv", &Int4C::deriv)
-        .def("data", &Int4C::data, return_value_policy<reference_existing_object>())
-        .def("is_spherical", &Int4C::is_spherical)
-        .def("max_am", &Int4C::max_am)
-        .def("total_am", &Int4C::total_am)
-        .def("chunk_size", &Int4C::chunk_size)
-        .def("set_is_spherical", &Int4C::set_is_spherical)
-        .def("compute_shell", &Int4C::compute_shell)
-        .def("compute_shell1", &Int4C::compute_shell1)
-        .def("compute_shell2", &Int4C::compute_shell2)
-        .def("compute_quartet", &Int4C::compute_quartet)
-        .def("compute_quartet1", &Int4C::compute_quartet1)
-        .def("compute_quartet2", &Int4C::compute_quartet2)
+        .def("basis1", &base::Int4C::basis1, return_value_policy<reference_existing_object>())
+        .def("basis2", &base::Int4C::basis2, return_value_policy<reference_existing_object>())
+        .def("basis3", &base::Int4C::basis3, return_value_policy<reference_existing_object>())
+        .def("basis4", &base::Int4C::basis4, return_value_policy<reference_existing_object>())
+        .def("deriv", &base::Int4C::deriv)
+        .def("data", &base::Int4C::data, return_value_policy<reference_existing_object>())
+        .def("is_spherical", &base::Int4C::is_spherical)
+        .def("max_am", &base::Int4C::max_am)
+        .def("total_am", &base::Int4C::total_am)
+        .def("chunk_size", &base::Int4C::chunk_size)
+        .def("set_is_spherical", &base::Int4C::set_is_spherical)
+        .def("compute_shell", &base::Int4C::compute_shell)
+        .def("compute_shell1", &base::Int4C::compute_shell1)
+        .def("compute_shell2", &base::Int4C::compute_shell2)
+        .def("compute_quartet", &base::Int4C::compute_quartet)
+        .def("compute_quartet1", &base::Int4C::compute_quartet1)
+        .def("compute_quartet2", &base::Int4C::compute_quartet2)
         ;
 
-    class_<PotentialInt4C, std::shared_ptr<PotentialInt4C>, bases<Int4C>>("PotentialInt4C", init<
+    class_<GeneralInt4C, bases<base::Int4C>>("GeneralInt4C", no_init);
+
+    class_<F12Int4C, bases<GeneralInt4C>>("F12Int4C", init<const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const fundamentals::parameters::CorrelationFactor&,
+                                                           optional<int>>());
+
+    class_<F12ScaledInt4C, bases<GeneralInt4C>>("F12ScaledInt4C", init<const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const fundamentals::parameters::CorrelationFactor&,
+                                                           optional<int>>());
+
+    class_<F12SquaredInt4C, bases<GeneralInt4C>>("F12SquaredInt4C", init<const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const fundamentals::parameters::CorrelationFactor&,
+                                                           optional<int>>());
+
+    class_<F12G12Int4C, bases<GeneralInt4C>>("F12G12Int4C", init<const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const fundamentals::parameters::CorrelationFactor&,
+                                                           optional<int>>());
+
+    class_<F12DoubleCommutatorInt4C, bases<GeneralInt4C>>("F12DoubleCommutatorInt4C", init<const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const std::shared_ptr<SBasisSet>&,
+                                                           const fundamentals::parameters::CorrelationFactor&,
+                                                           optional<int>>());
+
+    class_<PotentialInt4C, std::shared_ptr<PotentialInt4C>, bases<base::Int4C>>("PotentialInt4C", init<
         const std::shared_ptr<SBasisSet>&,
         const std::shared_ptr<SBasisSet>&,
         const std::shared_ptr<SBasisSet>&,

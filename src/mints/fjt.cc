@@ -603,12 +603,12 @@ GaussianFundamental::GaussianFundamental(const parameters::CorrelationFactor &cf
 {
 }
 
-F12Fundamental::F12Fundamental(const parameters::CorrelationFactor &cf, size_t max)
+F12::F12(const parameters::CorrelationFactor &cf, size_t max)
     : GaussianFundamental(cf, max)
 {
 }
 
-void F12Fundamental::compute(size_t J, double T)
+void F12::compute(size_t J, double T)
 {
     const double *e = cf_.exponent().data();
     const double *c = cf_.coeff().data();
@@ -632,12 +632,12 @@ void F12Fundamental::compute(size_t J, double T)
     }
 }
 
-F12ScaledFundamental::F12ScaledFundamental(const parameters::CorrelationFactor &cf, size_t max)
+F12Scaled::F12Scaled(const parameters::CorrelationFactor &cf, size_t max)
     : GaussianFundamental(cf, max)
 {
 }
 
-void F12ScaledFundamental::compute(size_t J, double T)
+void F12Scaled::compute(size_t J, double T)
 {
     const double *e = cf_.exponent().data();
     const double *c = cf_.coeff().data();
@@ -662,12 +662,12 @@ void F12ScaledFundamental::compute(size_t J, double T)
     }
 }
 
-F12SquaredFundamental::F12SquaredFundamental(const parameters::CorrelationFactor &cf, size_t max)
+F12Squared::F12Squared(const parameters::CorrelationFactor &cf, size_t max)
     : GaussianFundamental(cf, max)
 {
 }
 
-void F12SquaredFundamental::compute(size_t J, double T)
+void F12Squared::compute(size_t J, double T)
 {
     const double *e = cf_.exponent().data();
     const double *c = cf_.coeff().data();
@@ -694,12 +694,12 @@ void F12SquaredFundamental::compute(size_t J, double T)
     }
 }
 
-F12G12Fundamental::F12G12Fundamental(const parameters::CorrelationFactor &cf, size_t max)
+F12G12::F12G12(const parameters::CorrelationFactor &cf, size_t max)
     : GaussianFundamental(cf, max), Fm_(max)
 {
 }
 
-void F12G12Fundamental::compute(size_t J, double T)
+void F12G12::compute(size_t J, double T)
 {
     const std::vector<double>& Fvals = Fm_.values();
 
@@ -739,12 +739,12 @@ void F12G12Fundamental::compute(size_t J, double T)
     }
 }
 
-F12DoubleCommutatorFundamental::F12DoubleCommutatorFundamental(const parameters::CorrelationFactor &cf, size_t max)
+F12DoubleCommutator::F12DoubleCommutator(const parameters::CorrelationFactor &cf, size_t max)
     : GaussianFundamental(cf, max)
 {
 }
 
-void F12DoubleCommutatorFundamental::compute(size_t J, double T)
+void F12DoubleCommutator::compute(size_t J, double T)
 {
     const double *e = cf_.exponent().data();
     const double *c = cf_.coeff().data();

@@ -21,6 +21,7 @@ set(LIGHTSPEED_SOURCES
     core/am.cc
     mints/constants.cc
     mints/fjt.cc
+    mints/general4c.cc
     mints/int2c.cc
     mints/overlap2c.cc
     mints/dipole2c.cc

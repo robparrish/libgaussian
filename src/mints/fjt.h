@@ -54,10 +54,10 @@ public:
 
     FittedSlaterCorrelationFactor(const double& exponent);
 
-    double exponent()
-    {
-        return slater_exponent_;
-    }
+//    double exponent()
+//    {
+//        return slater_exponent_;
+//    }
 };
 
 } // namespace parameters
@@ -91,6 +91,8 @@ public:
     {
         rho_ = rho;
     }
+
+    virtual void set_omega(double) {}
 };
 
 }
@@ -175,10 +177,10 @@ public:
 /**
  *  Solves \scp -\gamma r_{12}
  */
-class F12Fundamental : public GaussianFundamental
+class F12 : public GaussianFundamental
 {
 public:
-    F12Fundamental(const parameters::CorrelationFactor& cf, size_t max);
+    F12(const parameters::CorrelationFactor& cf, size_t max);
 
     void compute(size_t J, double T);
 };
@@ -186,36 +188,36 @@ public:
 /**
  *  Solves \frac{\exp -\gamma r_{12}}{\gamma}.
  */
-class F12ScaledFundamental : public GaussianFundamental
+class F12Scaled : public GaussianFundamental
 {
 public:
-    F12ScaledFundamental(const parameters::CorrelationFactor& cf, size_t max);
+    F12Scaled(const parameters::CorrelationFactor& cf, size_t max);
 
     void compute(size_t J, double T);
 };
 
-class F12SquaredFundamental : public GaussianFundamental
+class F12Squared : public GaussianFundamental
 {
 public:
-    F12SquaredFundamental(const parameters::CorrelationFactor& cf, size_t max);
+    F12Squared(const parameters::CorrelationFactor& cf, size_t max);
 
     void compute(size_t J, double T);
 };
 
-class F12G12Fundamental : public GaussianFundamental
+class F12G12 : public GaussianFundamental
 {
 private:
     FJT Fm_;
 public:
-    F12G12Fundamental(const parameters::CorrelationFactor& cf, size_t max);
+    F12G12(const parameters::CorrelationFactor& cf, size_t max);
 
     void compute(size_t J, double T);
 };
 
-class F12DoubleCommutatorFundamental : public GaussianFundamental
+class F12DoubleCommutator : public GaussianFundamental
 {
 public:
-    F12DoubleCommutatorFundamental(const parameters::CorrelationFactor& cf, size_t max);
+    F12DoubleCommutator(const parameters::CorrelationFactor& cf, size_t max);
 
     void compute(size_t J, double T);
 };

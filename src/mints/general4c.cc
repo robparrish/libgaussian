@@ -9,14 +9,16 @@
 
 namespace lightspeed {
 
-struct PotentialInt4C::Impl
+struct GeneralInt4C::Impl
 {
     Impl(const std::shared_ptr<SBasisSet> &basis1,
          const std::shared_ptr<SBasisSet> &basis2,
          const std::shared_ptr<SBasisSet> &basis3,
-         const std::shared_ptr<SBasisSet> &basis4) :
-            fjt_(new fundamentals::FJT(basis1->max_am()+ basis2->max_am()+ basis3->max_am()+ basis4->max_am())),
-            libint_(basis1->max_nprimitive()*basis2->max_nprimitive()*basis3->max_nprimitive()*basis4->max_nprimitive())
+         const std::shared_ptr<SBasisSet> &basis4,
+         const std::shared_ptr<fundamentals::base::Fjt> &fjt) :
+            fjt_shared_(fjt),
+            fjt_(fjt.get()),
+            libint_(basis1->max_nprimitive() * basis2->max_nprimitive() * basis3->max_nprimitive() * basis4->max_nprimitive())
     {
         libint2_static_init();
         libint2_init_eri(&libint_[0],
@@ -30,37 +32,31 @@ struct PotentialInt4C::Impl
                                  )
                          ), 0);
     }
-    virtual ~Impl() {
+    virtual ~Impl()
+    {
         libint2_cleanup_eri(&libint_[0]);
         libint2_static_cleanup();
     }
-    std::unique_ptr<fundamentals::base::Fjt> fjt_;
+    std::shared_ptr<fundamentals::base::Fjt> fjt_shared_;
+    fundamentals::base::Fjt *fjt_;
     std::vector<Libint_t> libint_;
 };
 
-PotentialInt4C::PotentialInt4C(
+GeneralInt4C::GeneralInt4C(
         const std::shared_ptr<SBasisSet> &basis1,
         const std::shared_ptr<SBasisSet> &basis2,
         const std::shared_ptr<SBasisSet> &basis3,
         const std::shared_ptr<SBasisSet> &basis4,
-        int deriv,
-        double a,
-        double b,
-        double w) :
+        const std::shared_ptr<fundamentals::base::Fjt> &fundamental,
+        int deriv) :
         Int4C(basis1, basis2, basis3, basis4, deriv),
-        a_(a),
-        b_(b),
-        w_(w),
-        impl_(new Impl(basis1, basis2, basis3, basis4))
+        impl_(new Impl(basis1, basis2, basis3, basis4, fundamental))
 {
-    if (a != 1.0 || b != 0.0 || w != 0.0)
-        throw std::logic_error("Only standard repulsion integrals are supported.");
-
     size_t size;
     if (deriv_ == 0) {
         size = 1L * chunk_size();
     } else {
-        throw std::runtime_error("PotentialInt4C: deriv too high");
+        throw std::runtime_error("GeneralInt4C: deriv too high");
     }
     data1_.resize(size);
     data2_.resize(size);
@@ -68,13 +64,13 @@ PotentialInt4C::PotentialInt4C(
     buffer2_ = data2_.data();
 }
 
-PotentialInt4C::~PotentialInt4C()
+GeneralInt4C::~GeneralInt4C()
 {
     delete impl_;
     impl_ = nullptr;
 }
 
-void PotentialInt4C::compute_quartet(
+void GeneralInt4C::compute_quartet(
         const SGaussianShell &sh1,
         const SGaussianShell &sh2,
         const SGaussianShell &sh3,
@@ -168,16 +164,16 @@ void PotentialInt4C::compute_quartet(
     // Prepare all the data needed by libint
     size_t nprim = 0;
 
-    const std::vector<double>&a1s = s1->es();
-    const std::vector<double>&a2s = s2->es();
-    const std::vector<double>&a3s = s3->es();
-    const std::vector<double>&a4s = s4->es();
-    const std::vector<double>&c1s = s1->cs();
-    const std::vector<double>&c2s = s2->cs();
-    const std::vector<double>&c3s = s3->cs();
-    const std::vector<double>&c4s = s4->cs();
+    const std::vector<double> &a1s = s1->es();
+    const std::vector<double> &a2s = s2->es();
+    const std::vector<double> &a3s = s3->es();
+    const std::vector<double> &a4s = s4->es();
+    const std::vector<double> &c1s = s1->cs();
+    const std::vector<double> &c2s = s2->cs();
+    const std::vector<double> &c3s = s3->cs();
+    const std::vector<double> &c4s = s4->cs();
 
-    const std::vector<double>& F = impl_->fjt_->values();
+    const std::vector<double> &F = impl_->fjt_->values();
 
     for (size_t p1 = 0; p1 < nprim1; ++p1) {
         double a1 = a1s[p1];
@@ -219,7 +215,7 @@ void PotentialInt4C::compute_quartet(
                     double QD[3], PQ[3];
                     double Q[3], W[3], a3C[3], a4D[3];
 
-                    Libint_t& eri = impl_->libint_[nprim];
+                    Libint_t &eri = impl_->libint_[nprim];
 
                     eri.AB_x[0] = A[0] - B[0];
                     eri.AB_y[0] = A[1] - B[1];
@@ -316,7 +312,7 @@ void PotentialInt4C::compute_quartet(
     bool t2 = s2->is_spherical();
     bool t3 = s3->is_spherical();
     bool t4 = s4->is_spherical();
-    if (is_spherical_) apply_spherical(am1,am2,am3,am4,t1,t2,t3,t4,buffer2_,buffer1_);
+    if (is_spherical_) apply_spherical(am1, am2, am3, am4, t1, t2, t3, t4, buffer2_, buffer1_);
 
     // Permute integrals back, if needed
     if (p12_ || p34_ || p13p24_) {
@@ -328,7 +324,7 @@ void PotentialInt4C::compute_quartet(
     }
 }
 
-void PotentialInt4C::compute_quartet1(
+void GeneralInt4C::compute_quartet1(
         const SGaussianShell &sh1,
         const SGaussianShell &sh2,
         const SGaussianShell &sh3,
@@ -336,7 +332,7 @@ void PotentialInt4C::compute_quartet1(
 {
     throw std::runtime_error("Not Implemented");
 }
-void PotentialInt4C::compute_quartet2(
+void GeneralInt4C::compute_quartet2(
         const SGaussianShell &sh1,
         const SGaussianShell &sh2,
         const SGaussianShell &sh3,
@@ -345,5 +341,92 @@ void PotentialInt4C::compute_quartet2(
     throw std::runtime_error("Not Implemented");
 }
 
+F12Int4C::F12Int4C(const std::shared_ptr<SBasisSet> &basis1, const std::shared_ptr<SBasisSet> &basis2,
+                   const std::shared_ptr<SBasisSet> &basis3, const std::shared_ptr<SBasisSet> &basis4,
+                   const fundamentals::parameters::CorrelationFactor &cf, int deriv)
+        : GeneralInt4C(basis1,
+                       basis2,
+                       basis3,
+                       basis4,
+                       std::make_shared<fundamentals::F12>(cf,
+                                                           basis1->max_am() +
+                                                                   basis2->max_am() +
+                                                                   basis3->max_am() +
+                                                                   basis4->max_am() +
+                                                                   deriv + 1),
+                       deriv)
+{
+}
 
-} // namespace lightspeed
+F12ScaledInt4C::F12ScaledInt4C(const std::shared_ptr<SBasisSet> &basis1, const std::shared_ptr<SBasisSet> &basis2,
+                               const std::shared_ptr<SBasisSet> &basis3, const std::shared_ptr<SBasisSet> &basis4,
+                               const fundamentals::parameters::CorrelationFactor &cf, int deriv)
+        : GeneralInt4C(basis1,
+                       basis2,
+                       basis3,
+                       basis4,
+                       std::make_shared<fundamentals::F12Scaled>(cf,
+                                                                 basis1->max_am() +
+                                                                         basis2->max_am() +
+                                                                         basis3->max_am() +
+                                                                         basis4->max_am() +
+                                                                         deriv + 1),
+                       deriv)
+{
+}
+
+F12SquaredInt4C::F12SquaredInt4C(const std::shared_ptr<SBasisSet> &basis1, const std::shared_ptr<SBasisSet> &basis2,
+                                 const std::shared_ptr<SBasisSet> &basis3, const std::shared_ptr<SBasisSet> &basis4,
+                                 const fundamentals::parameters::CorrelationFactor &cf, int deriv)
+        : GeneralInt4C(basis1,
+                       basis2,
+                       basis3,
+                       basis4,
+                       std::make_shared<fundamentals::F12Squared>(cf,
+                                                                  basis1->max_am() +
+                                                                          basis2->max_am() +
+                                                                          basis3->max_am() +
+                                                                          basis4->max_am() +
+                                                                          deriv + 1),
+                       deriv)
+{
+}
+
+F12G12Int4C::F12G12Int4C(const std::shared_ptr<SBasisSet> &basis1, const std::shared_ptr<SBasisSet> &basis2,
+                         const std::shared_ptr<SBasisSet> &basis3, const std::shared_ptr<SBasisSet> &basis4,
+                         const fundamentals::parameters::CorrelationFactor &cf, int deriv)
+        : GeneralInt4C(basis1,
+                       basis2,
+                       basis3,
+                       basis4,
+                       std::make_shared<fundamentals::F12G12>(cf,
+                                                              basis1->max_am() +
+                                                                      basis2->max_am() +
+                                                                      basis3->max_am() +
+                                                                      basis4->max_am() +
+                                                                      deriv + 1),
+                       deriv)
+{
+}
+
+F12DoubleCommutatorInt4C::F12DoubleCommutatorInt4C(const std::shared_ptr<SBasisSet> &basis1,
+                                                   const std::shared_ptr<SBasisSet> &basis2,
+                                                   const std::shared_ptr<SBasisSet> &basis3,
+                                                   const std::shared_ptr<SBasisSet> &basis4,
+                                                   const fundamentals::parameters::CorrelationFactor &cf, int deriv)
+        : GeneralInt4C(basis1,
+                       basis2,
+                       basis3,
+                       basis4,
+                       std::make_shared<fundamentals::F12DoubleCommutator>(cf,
+                                                                           basis1->max_am() +
+                                                                                   basis2->max_am() +
+                                                                                   basis3->max_am() +
+                                                                                   basis4->max_am() +
+                                                                                   deriv + 1),
+                       deriv)
+{
+}
+
+
+}
