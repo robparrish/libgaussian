@@ -2,10 +2,13 @@ set(LIGHTSPEED_HEADERS
     core/molecule.h
     core/basisset.h
     core/am.h
+    mints/interaction.h
     mints/int2c.h
     mints/int4c.h
+    mints/int4c2.h
     mints/schwarz.h
     mints/constants.h
+    mints/boys.h
     mints/fjt.h
     mints/osrecur.h
     ob/ob.h
@@ -21,8 +24,10 @@ set(LIGHTSPEED_SOURCES
     core/basisset.cc
     core/am.cc
     mints/constants.cc
+    mints/boys.cc
     mints/fjt.cc
     mints/general4c.cc
+    mints/interaction.cc
     mints/int2c.cc
     mints/overlap2c.cc
     mints/dipole2c.cc
@@ -30,6 +35,7 @@ set(LIGHTSPEED_SOURCES
     mints/kinetic2c.cc
     mints/potential2c.cc
     mints/int4c.cc
+    mints/int4c2.cc
     mints/potential4c.cc
     mints/osrecur.cc
     mints/schwarz.cc

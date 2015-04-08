@@ -2,6 +2,7 @@
 #define INT4C_H
 
 #include <cstddef>
+#include <vector>
 #include <memory>
 #include <core/basisset.h>
 #include "fjt.h"
