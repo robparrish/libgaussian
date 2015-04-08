@@ -266,15 +266,6 @@ def translate_cmake(s):
 
 def gen_cmake_command(args):
 
-    # do some checks
-    if args.cyclops and not args.mpi:
-        print("Error: cyclops requested but MPI was not.")
-        sys.exit(1)
-
-    if args.cyclops and not args.elemental:
-        print("Error: cyclops feature requires elemental.");
-        sys.exit(1)
-
     # create cmake command from flags
 
     command = ''
@@ -288,72 +279,11 @@ def gen_cmake_command(args):
 
     command = ' %s ' % args.cmake + command
 
-    command += ' -DENABLE_MPI=%s'            % translate_cmake(args.mpi)
-    command += ' -DENABLE_SGI_MPT=%s'        % translate_cmake(args.sgi_mpt)
     command += ' -DENABLE_OMP=%s'            % translate_cmake(args.omp)
     command += ' -DENABLE_VECTORIZATION=%s'  % translate_cmake(args.vectorization)
-    command += ' -DENABLE_CYCLOPS=%s'        % translate_cmake(args.cyclops)
-    command += ' -DENABLE_ELEMENTAL=%s'      % translate_cmake(args.elemental)
-    #command += ' -DENABLE_CSR=%s'            % translate_cmake(args.csr)
-    command += ' -DENABLE_SCALAPACK=%s'      % translate_cmake(args.scalapack)
-    #command += ' -DENABLE_SCALASCA=%s'       % translate_cmake(args.scalasca)
     command += ' -DENABLE_UNIT_TESTS=%s'     % translate_cmake(args.unit_tests)
     command += ' -DENABLE_STATIC_LINKING=%s' % translate_cmake(args.static)
     command += ' -DENABLE_CXX11_SUPPORT=%s'  % translate_cmake(args.cxx11)
-
-    if args.blas == 'builtin':
-        command += ' -DENABLE_BUILTIN_BLAS=ON'
-        command += ' -DENABLE_AUTO_BLAS=OFF'
-    elif args.blas == 'auto':
-        if (args.mkl != 'none') and not args.cray:
-            command += ' -DENABLE_AUTO_BLAS=ON'
-    elif args.blas == 'none':
-        command += ' -DENABLE_AUTO_BLAS=OFF'
-    else:
-        if not os.path.isfile(args.blas):
-            print('--blas=%s does not exist' % args.blas)
-            sys.exit(1)
-        command += ' -DEXPLICIT_BLAS_LIB=%s' % args.blas
-        command += ' -DENABLE_AUTO_BLAS=OFF'
-
-    if args.lapack == 'builtin':
-        command += ' -DENABLE_BUILTIN_LAPACK=ON'
-        command += ' -DENABLE_AUTO_LAPACK=OFF'
-    elif args.lapack == 'auto':
-        if (args.mkl != 'none') and not args.cray:
-            command += ' -DENABLE_AUTO_LAPACK=ON'
-    elif args.lapack == 'none':
-        command += ' -DENABLE_AUTO_LAPACK=OFF'
-    else:
-        if not os.path.isfile(args.lapack):
-            print('--lapack=%s does not exist' % args.lapack)
-            sys.exit(1)
-        command += ' -DEXPLICIT_LAPACK_LIB=%s' % args.lapack
-        command += ' -DENABLE_AUTO_LAPACK=OFF'
-
-    if args.accelerate:
-        command += ' -DENABLE_ACCELERATE=ON'
-        command += ' -DENABLE_AUTO_BLAS=OFF'
-        command += ' -DENABLE_AUTO_LAPACK=OFF'
-
-    if args.cray:
-        command += ' -DENABLE_CRAY_WRAPPERS=ON'
-        command += ' -DENABLE_AUTO_BLAS=OFF'
-        command += ' -DENABLE_AUTO_LAPACK=OFF'
-
-    if args.mkl != 'none':
-        if args.mkl == None:
-            print('you have to choose between --mkl=[{sequential,parallel,cluster}]')
-            sys.exit(1)
-        command += ' -DMKL_FLAG="-mkl=%s"' % args.mkl
-        command += ' -DMKL_FLAG_SET=ON'
-        command += ' -DENABLE_AUTO_BLAS=OFF'
-        command += ' -DENABLE_AUTO_LAPACK=OFF'
-
-    if args.explicit_libs:
-        # remove leading and trailing whitespace
-        # otherwise CMake complains
-        command += ' -DEXPLICIT_LIBS="%s"' % args.explicit_libs.strip()
 
     if args.boost_incdir:
         command += ' -DBOOST_INCLUDEDIR={0}'.format(args.boost_incdir)
@@ -363,12 +293,6 @@ def gen_cmake_command(args):
 
     if args.python:
         command += ' -DPYTHON_INTERPRETER={0}'.format(args.python)
-
-    if args.cyclops:
-        command += ' -DCYCLOPS={0}'.format(args.cyclops)
-    if args.elemental:
-        command += ' -DELEMENTAL={0}'.format(args.elemental)
-
     if args.libint:
         command += ' -DLIBINT={0}'.format(args.libint)
 
