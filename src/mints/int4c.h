@@ -8,17 +8,12 @@
 
 namespace lightspeed {
 
-// => Forward declarations <=
-namespace fundamentals { namespace base {
-class Fjt;
-}}
-
 void permute_target(double *s, double *t,
-                   const SGaussianShell *s1,
-                   const SGaussianShell *s2,
-                   const SGaussianShell *s3,
-                   const SGaussianShell *s4,
-                   bool p12, bool p34, bool p13p24);
+                    const SGaussianShell *s1,
+                    const SGaussianShell *s2,
+                    const SGaussianShell *s3,
+                    const SGaussianShell *s4,
+                    bool p12, bool p34, bool p13p24);
 
 namespace base {
 
@@ -239,35 +234,49 @@ class GeneralInt4C : public base::Int4C
 {
 public:
 
-    GeneralInt4C(const std::shared_ptr<SBasisSet>& basis1,
-          const std::shared_ptr<SBasisSet>& basis2,
-          const std::shared_ptr<SBasisSet>& basis3,
-          const std::shared_ptr<SBasisSet>& basis4,
-          const std::shared_ptr<fundamentals::base::Fjt>& fundamental,
-          int deriv=0);
+    GeneralInt4C(const std::shared_ptr<SBasisSet> &basis1,
+                 const std::shared_ptr<SBasisSet> &basis2,
+                 const std::shared_ptr<SBasisSet> &basis3,
+                 const std::shared_ptr<SBasisSet> &basis4,
+                 const std::shared_ptr<fundamentals::base::Fjt> &fundamental,
+                 int deriv = 0);
 
     virtual ~GeneralInt4C();
 
     void compute_quartet(
-            const SGaussianShell& sh1,
-            const SGaussianShell& sh2,
-            const SGaussianShell& sh3,
-            const SGaussianShell& sh4) override;
+            const SGaussianShell &sh1,
+            const SGaussianShell &sh2,
+            const SGaussianShell &sh3,
+            const SGaussianShell &sh4) override;
+
     void compute_quartet1(
-            const SGaussianShell& sh1,
-            const SGaussianShell& sh2,
-            const SGaussianShell& sh3,
-            const SGaussianShell& sh4) override;
+            const SGaussianShell &sh1,
+            const SGaussianShell &sh2,
+            const SGaussianShell &sh3,
+            const SGaussianShell &sh4) override;
+
     void compute_quartet2(
-            const SGaussianShell& sh1,
-            const SGaussianShell& sh2,
-            const SGaussianShell& sh3,
-            const SGaussianShell& sh4) override;
+            const SGaussianShell &sh1,
+            const SGaussianShell &sh2,
+            const SGaussianShell &sh3,
+            const SGaussianShell &sh4) override;
 
 protected:
 
     struct Impl;
-    Impl* impl_;
+    Impl *impl_;
+
+};
+
+class ERIInt4C final : public GeneralInt4C
+{
+public:
+    ERIInt4C(
+            const std::shared_ptr<SBasisSet> &basis1,
+            const std::shared_ptr<SBasisSet> &basis2,
+            const std::shared_ptr<SBasisSet> &basis3,
+            const std::shared_ptr<SBasisSet> &basis4,
+            int deriv = 0);
 
 };
 
@@ -350,40 +359,46 @@ public:
  * LRC-type objects are used in an identical manner as standard types.
  * The default behavior is the usual o(r_12) = 1 / r_12
  **/
-class PotentialInt4C final : public base::Int4C {
+class PotentialInt4C final : public base::Int4C
+{
 
 public:
     PotentialInt4C(
-        const std::shared_ptr<SBasisSet>& basis1,
-        const std::shared_ptr<SBasisSet>& basis2,
-        const std::shared_ptr<SBasisSet>& basis3,
-        const std::shared_ptr<SBasisSet>& basis4,
-        int deriv = 0,
-        double a = 1.0,
-        double b = 0.0,
-        double w = 0.0);
+            const std::shared_ptr<SBasisSet> &basis1,
+            const std::shared_ptr<SBasisSet> &basis2,
+            const std::shared_ptr<SBasisSet> &basis3,
+            const std::shared_ptr<SBasisSet> &basis4,
+            int deriv = 0,
+            double a = 1.0,
+            double b = 0.0,
+            double w = 0.0);
 
     virtual ~PotentialInt4C();
 
-    double a() const { return a_; }
-    double b() const { return b_; }
-    double w() const { return w_; }
+    double a() const
+    { return a_; }
+    double b() const
+    { return b_; }
+    double w() const
+    { return w_; }
 
     void compute_quartet(
-        const SGaussianShell& sh1,
-        const SGaussianShell& sh2,
-        const SGaussianShell& sh3,
-        const SGaussianShell& sh4) override;
+            const SGaussianShell &sh1,
+            const SGaussianShell &sh2,
+            const SGaussianShell &sh3,
+            const SGaussianShell &sh4) override;
+
     void compute_quartet1(
-        const SGaussianShell& sh1,
-        const SGaussianShell& sh2,
-        const SGaussianShell& sh3,
-        const SGaussianShell& sh4) override;
+            const SGaussianShell &sh1,
+            const SGaussianShell &sh2,
+            const SGaussianShell &sh3,
+            const SGaussianShell &sh4) override;
+
     void compute_quartet2(
-        const SGaussianShell& sh1,
-        const SGaussianShell& sh2,
-        const SGaussianShell& sh3,
-        const SGaussianShell& sh4) override;
+            const SGaussianShell &sh1,
+            const SGaussianShell &sh2,
+            const SGaussianShell &sh3,
+            const SGaussianShell &sh4) override;
 
 protected:
 
@@ -392,7 +407,7 @@ protected:
     double w_;
 
     struct Impl;
-    Impl* impl_;
+    Impl *impl_;
 
 };
 

@@ -74,7 +74,7 @@ def parse_input():
     group.add_argument('--prefix',
             action='store',
             type=str,
-            default='/usr/local/psi4',
+            default='/usr/local/lightspeed',
             help='set the install path for make install [default: %(default)s]',
             metavar='PATH')
     # Show CMake command
@@ -110,27 +110,10 @@ def parse_input():
             default=None,
             help="""The Python interpreter (development version) to use.  CMake will detect one automatically, if omitted.""")
 
-    group = parser.add_argument_group('Parallelization')
-    group.add_argument('--mpi',
-            action='store_true',
-            default=False,
-            help='enable MPI [default: %(default)s]')
-    group.add_argument('--sgi-mpt',
-            action='store_true',
-            default=False,
-            help='enable SGI MPT [default: %(default)s]')
     group.add_argument('--omp',
             action='store_true',
             default=True,
             help='enable OpenMP [default: %(default)s]')
-    group.add_argument('--cyclops',
-            action='store',
-            default=None,
-            help="""Path to the location of Cyclops. This location should have include and lib in it.""")
-    group.add_argument('--elemental',
-            action='store',
-            default=None,
-            help="""Path to the location of Elemental. This location should have include and libEl.a in it.""")
 
     group = parser.add_argument_group('LibInt')
     group.add_argument('--libint',
@@ -138,54 +121,11 @@ def parse_input():
             default=None,
             help="""Path to the location of LibInt. This location should have include and lib in it.""")
 
-    group = parser.add_argument_group('LibTensor')
+    group = parser.add_argument_group('LibAmbit')
     group.add_argument('--libambit',
             action='store',
             default=None,
             help="""Path to the location of LibTensor. This location should have include and lib in it.""")
-
-    group = parser.add_argument_group('Math libraries')
-    group.add_argument('--mkl',
-            nargs='?',
-            action='store',
-            choices=('sequential', 'parallel', 'cluster'),
-            default='none',
-            help='pass -mkl=STRING flag to the compiler and linker [default: None]')
-    group.add_argument('--blas',
-            action='store',
-            default='auto',
-            help='specify BLAS library; possible choices are "auto", "builtin", "none", or full path [default: %(default)s]',
-            metavar='[{auto,builtin,none,/full/path/lib.a}]')
-    group.add_argument('--lapack',
-            action='store',
-            default='auto',
-            help='specify LAPACK library; possible choices are "auto", "builtin", "none", or full path [default: %(default)s]',
-            metavar='[{auto,builtin,none,/full/path/lib.a}]')
-    group.add_argument('--explicit-libs',
-            action='store',
-            default=None,
-            help='explicit linker specification for extra libraries; passed directly to the linker',
-            metavar='STRING')
-    group.add_argument('--accelerate',
-            action='store_true',
-            default=False,
-            help='build using Mac OS X Accelerate Framework [default: %(default)s]')
-    group.add_argument('--cray',
-            action='store_true',
-            default=False,
-            help='use cray wrappers for BLAS/LAPACK and MPI which disables math detection and builtin math implementation [default: %(default)s]')
-    group.add_argument('--csr',
-            action='store_true',
-            default=False,
-            help='build using MKL compressed sparse row [default: %(default)s]')
-    group.add_argument('--scalapack',
-            action='store_true',
-            default=False,
-            help='build using SCALAPACK [default: %(default)s]')
-    group.add_argument('--scalasca',
-            action='store_true',
-            default=False,
-            help='build using SCALASCA profiler mode [default: %(default)s]')
 
     # Advanced options
     group = parser.add_argument_group('Advanced options')

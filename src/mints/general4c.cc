@@ -18,7 +18,8 @@ struct GeneralInt4C::Impl
          const std::shared_ptr<fundamentals::base::Fjt> &fjt) :
             fjt_shared_(fjt),
             fjt_(fjt.get()),
-            libint_(basis1->max_nprimitive() * basis2->max_nprimitive() * basis3->max_nprimitive() * basis4->max_nprimitive())
+            libint_(basis1->max_nprimitive() * basis2->max_nprimitive() * basis3->max_nprimitive() *
+                    basis4->max_nprimitive())
     {
         libint2_static_init();
         libint2_init_eri(&libint_[0],
@@ -341,6 +342,18 @@ void GeneralInt4C::compute_quartet2(
     throw std::runtime_error("Not Implemented");
 }
 
+ERIInt4C::ERIInt4C(const std::shared_ptr<SBasisSet> &basis1, const std::shared_ptr<SBasisSet> &basis2,
+                   const std::shared_ptr<SBasisSet> &basis3, const std::shared_ptr<SBasisSet> &basis4, int deriv)
+        : GeneralInt4C(basis1,
+                       basis2,
+                       basis3,
+                       basis4,
+                       std::make_shared<fundamentals::FJT>(
+                               basis1->max_am() + basis2->max_am() + basis3->max_am() + basis4->max_am()),
+                       deriv)
+{
+}
+
 F12Int4C::F12Int4C(const std::shared_ptr<SBasisSet> &basis1, const std::shared_ptr<SBasisSet> &basis2,
                    const std::shared_ptr<SBasisSet> &basis3, const std::shared_ptr<SBasisSet> &basis4,
                    const fundamentals::parameters::CorrelationFactor &cf, int deriv)
@@ -350,10 +363,10 @@ F12Int4C::F12Int4C(const std::shared_ptr<SBasisSet> &basis1, const std::shared_p
                        basis4,
                        std::make_shared<fundamentals::F12>(cf,
                                                            basis1->max_am() +
-                                                                   basis2->max_am() +
-                                                                   basis3->max_am() +
-                                                                   basis4->max_am() +
-                                                                   deriv + 1),
+                                                           basis2->max_am() +
+                                                           basis3->max_am() +
+                                                           basis4->max_am() +
+                                                           deriv + 1),
                        deriv)
 {
 }
@@ -367,10 +380,10 @@ F12ScaledInt4C::F12ScaledInt4C(const std::shared_ptr<SBasisSet> &basis1, const s
                        basis4,
                        std::make_shared<fundamentals::F12Scaled>(cf,
                                                                  basis1->max_am() +
-                                                                         basis2->max_am() +
-                                                                         basis3->max_am() +
-                                                                         basis4->max_am() +
-                                                                         deriv + 1),
+                                                                 basis2->max_am() +
+                                                                 basis3->max_am() +
+                                                                 basis4->max_am() +
+                                                                 deriv + 1),
                        deriv)
 {
 }
@@ -384,10 +397,10 @@ F12SquaredInt4C::F12SquaredInt4C(const std::shared_ptr<SBasisSet> &basis1, const
                        basis4,
                        std::make_shared<fundamentals::F12Squared>(cf,
                                                                   basis1->max_am() +
-                                                                          basis2->max_am() +
-                                                                          basis3->max_am() +
-                                                                          basis4->max_am() +
-                                                                          deriv + 1),
+                                                                  basis2->max_am() +
+                                                                  basis3->max_am() +
+                                                                  basis4->max_am() +
+                                                                  deriv + 1),
                        deriv)
 {
 }
@@ -401,10 +414,10 @@ F12G12Int4C::F12G12Int4C(const std::shared_ptr<SBasisSet> &basis1, const std::sh
                        basis4,
                        std::make_shared<fundamentals::F12G12>(cf,
                                                               basis1->max_am() +
-                                                                      basis2->max_am() +
-                                                                      basis3->max_am() +
-                                                                      basis4->max_am() +
-                                                                      deriv + 1),
+                                                              basis2->max_am() +
+                                                              basis3->max_am() +
+                                                              basis4->max_am() +
+                                                              deriv + 1),
                        deriv)
 {
 }
@@ -420,10 +433,10 @@ F12DoubleCommutatorInt4C::F12DoubleCommutatorInt4C(const std::shared_ptr<SBasisS
                        basis4,
                        std::make_shared<fundamentals::F12DoubleCommutator>(cf,
                                                                            basis1->max_am() +
-                                                                                   basis2->max_am() +
-                                                                                   basis3->max_am() +
-                                                                                   basis4->max_am() +
-                                                                                   deriv + 1),
+                                                                           basis2->max_am() +
+                                                                           basis3->max_am() +
+                                                                           basis4->max_am() +
+                                                                           deriv + 1),
                        deriv)
 {
 }

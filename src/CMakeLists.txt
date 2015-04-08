@@ -13,6 +13,7 @@ set(LIGHTSPEED_HEADERS
     jk/jk.h
     solver/diis.h
     sad/sad.h
+    tb/tb.h
 )
 
 set(LIGHTSPEED_SOURCES
@@ -41,6 +42,7 @@ set(LIGHTSPEED_SOURCES
     jk/dfjk.cc
     solver/diis.cc
     sad/sad.cc
+    tb/tb.cc
 )
 
 # build static libray
