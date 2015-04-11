@@ -202,7 +202,7 @@ std::shared_ptr<Int4C2> Int4C2::coulomb(
     const std::shared_ptr<SBasisSet> &basis3,
     const std::shared_ptr<SBasisSet> &basis4,
     int deriv,
-    const std::string& type) 
+    const std::string& type)
 {
     return std::shared_ptr<Int4C2>(new Int4C2(basis1,basis2,basis3,basis4,Interaction::coulomb(),deriv));
 }
@@ -215,11 +215,16 @@ std::shared_ptr<Int4C2> Int4C2::ewald(
     double a,
     double b,
     double w,
-    const std::string& type) 
+    const std::string& type)
 {
     return std::shared_ptr<Int4C2>(new Int4C2(basis1,basis2,basis3,basis4,Interaction::ewald(a,b,w),deriv));
 }
-
+std::shared_ptr<Int4C2> Int4C2::f12(const std::shared_ptr<SBasisSet>& basis1, const std::shared_ptr<SBasisSet>& basis2,
+                                    const std::shared_ptr<SBasisSet>& basis3, const std::shared_ptr<SBasisSet>& basis4,
+                                    int deriv, double slater_exponent, std::string const& type)
+{
+    return std::shared_ptr<Int4C2>(new Int4C2(basis1,basis2,basis3,basis4,Interaction::f12(slater_exponent),deriv));
+}
 int Int4C2::max_am() const
 {
     return std::max(

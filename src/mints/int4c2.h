@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <core/basisset.h>
 
 namespace lightspeed {
 
@@ -53,7 +54,7 @@ public:
     virtual ~Int4C2() = default;
 
     // => Factory Constructors <= //
-    
+
     static std::shared_ptr<Int4C2> coulomb(
         const std::shared_ptr<SBasisSet> &basis1,
         const std::shared_ptr<SBasisSet> &basis2,
@@ -72,6 +73,15 @@ public:
         double b,
         double w,
         const std::string& type = "LIBINT2");
+
+    static std::shared_ptr<Int4C2> f12(
+            const std::shared_ptr<SBasisSet>& basis1,
+            const std::shared_ptr<SBasisSet>& basis2,
+            const std::shared_ptr<SBasisSet>& basis3,
+            const std::shared_ptr<SBasisSet>& basis4,
+            int deriv,
+            double slater_exponent,
+            const std::string& type = "LIBINT2");
 
     // => Accessors <= //
 
@@ -98,7 +108,7 @@ public:
     /// The interaction operator for this Int4C2
     const std::shared_ptr<Interaction>& interaction() const
     {
-        return interaction_; 
+        return interaction_;
     }
     /// Maximum derivative level enabled
     int deriv() const
@@ -243,7 +253,7 @@ protected:
         const std::shared_ptr<SBasisSet> &basis2,
         const std::shared_ptr<SBasisSet> &basis3,
         const std::shared_ptr<SBasisSet> &basis4,
-        const std::shared_ptr<Interaction> &interaction, 
+        const std::shared_ptr<Interaction> &interaction,
         int deriv);
 };
 

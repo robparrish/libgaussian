@@ -349,7 +349,7 @@ ERIInt4C::ERIInt4C(const std::shared_ptr<SBasisSet> &basis1, const std::shared_p
                        basis3,
                        basis4,
                        std::make_shared<fundamentals::FJT>(
-                               basis1->max_am() + basis2->max_am() + basis3->max_am() + basis4->max_am()),
+                               basis1->max_am() + basis2->max_am() + basis3->max_am() + basis4->max_am() + deriv),
                        deriv)
 {
 }
