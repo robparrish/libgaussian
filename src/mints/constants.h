@@ -18,11 +18,11 @@ extern const double bc__[max_bc__][max_bc__];
 
 constexpr size_t ncartesian(size_t am)
 {
-    return (am > 0) ? ((((am) + 2) * ((am) + 1)) >> 1) : 0;
+    return (am + 1) * (am + 2) / 2;
 }
 constexpr size_t nspherical(size_t am)
 {
-    return (am > 0) ? (2 * am + 1) : 0;
+    return 2 * am + 1;
 }
 
 }
